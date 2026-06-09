@@ -1,0 +1,147 @@
+{
+  "_comment": "ET360 / INTLDLDAT team registry for sArthI. Used by sar-inbox to personalise context. LDAPs verified via ServiceNow sys_user.",
+  "_version": "1.1.0",
+  "members": [
+    {
+      "name": "Achalla Ravi Kiran",
+      "email": "Achallaravi.Kiran@walmart.com",
+      "ldap": "akiran",
+      "role": "Senior Manager, Data Engineering",
+      "market_focus": ["ca", "mx", "ww"],
+      "jira_user_id": "akiran",
+      "teams_upn": "Achallaravi.Kiran@walmart.com",
+      "timezone": "America/Chicago"
+    },
+    {
+      "name": "Amrit Narayan Nayak",
+      "email": "amrit.narayan.nayak@walmart.com",
+      "ldap": "a0n02yf",
+      "role": "Senior Data Engineer",
+      "market_focus": ["ca", "mx"],
+      "jira_user_id": "a0n02yf",
+      "teams_upn": "amrit.narayan.nayak@walmart.com",
+      "timezone": "America/Chicago"
+    },
+    {
+      "name": "Aravind Kumar H N",
+      "email": "aravind.kumar.h.n@walmart.com",
+      "ldap": "a0h0ch6",
+      "role": "Senior Data Engineer",
+      "market_focus": ["ca", "mx"],
+      "jira_user_id": "a0h0ch6",
+      "teams_upn": "aravind.kumar.h.n@walmart.com",
+      "timezone": "America/Chicago"
+    },
+    {
+      "name": "Arijit Roy",
+      "email": "arijit.roy@walmart.com",
+      "ldap": "a0r08vw",
+      "role": "Staff Data Engineer",
+      "market_focus": ["ca", "mx", "ww"],
+      "jira_user_id": "a0r08vw",
+      "teams_upn": "arijit.roy@walmart.com",
+      "timezone": "America/Chicago"
+    },
+    {
+      "name": "Kanika Seth",
+      "email": "kanika.seth@walmart.com",
+      "ldap": "k0s099g",
+      "role": "Staff Data Engineer",
+      "market_focus": ["ca"],
+      "jira_user_id": "k0s099g",
+      "teams_upn": "kanika.seth@walmart.com",
+      "timezone": "America/Chicago"
+    },
+    {
+      "name": "Kola Madhu Sri",
+      "email": "Kola.Madhu.Sri@walmart.com",
+      "ldap": "m0k0f3u",
+      "role": "Grad Intern",
+      "market_focus": ["ca", "mx"],
+      "jira_user_id": "m0k0f3u",
+      "teams_upn": "Kola.Madhu.Sri@walmart.com",
+      "timezone": "America/Chicago"
+    },
+    {
+      "name": "Nitya Keshari",
+      "email": "Nitya.Keshari@walmart.com",
+      "ldap": "n0k04jp",
+      "role": "Software Engineer III",
+      "market_focus": ["ca", "mx"],
+      "jira_user_id": "n0k04jp",
+      "teams_upn": "Nitya.Keshari@walmart.com",
+      "timezone": "America/Chicago"
+    },
+    {
+      "name": "Nivetha Ramesh",
+      "email": "Nivetha.R@walmart.com",
+      "ldap": "n0r0ah9",
+      "role": "Software Engineer III",
+      "market_focus": ["ca", "mx"],
+      "jira_user_id": "n0r0ah9",
+      "teams_upn": "Nivetha.R@walmart.com",
+      "timezone": "America/Chicago"
+    },
+    {
+      "name": "Potnuru Saikumar",
+      "email": "Potnuru.Saikumar@walmart.com",
+      "ldap": "p0s087x",
+      "role": "Data Engineer III",
+      "market_focus": ["ca", "mx"],
+      "jira_user_id": "p0s087x",
+      "teams_upn": "Potnuru.Saikumar@walmart.com",
+      "timezone": "America/Chicago"
+    },
+    {
+      "name": "Salla Tony Preeth",
+      "email": "SALLA.TONY.PREETH@walmart.com",
+      "ldap": "s0t0ezg",
+      "role": "Data Engineer II",
+      "market_focus": ["ca", "mx"],
+      "jira_user_id": "s0t0ezg",
+      "teams_upn": "SALLA.TONY.PREETH@walmart.com",
+      "timezone": "America/Chicago"
+    },
+    {
+      "name": "Sourit Dutta",
+      "email": "Sourit.Dutta0@walmart.com",
+      "ldap": "s0d0gak",
+      "role": "Senior Data Engineer",
+      "market_focus": ["ca", "mx"],
+      "jira_user_id": "s0d0gak",
+      "teams_upn": "Sourit.Dutta0@walmart.com",
+      "timezone": "America/Chicago"
+    },
+    {
+      "name": "Suhas R",
+      "email": "suhas.ramesh@walmart.com",
+      "ldap": "s0r07ro",
+      "role": "Staff Data Engineer",
+      "market_focus": ["ca", "mx"],
+      "jira_user_id": "s0r07ro",
+      "teams_upn": "suhas.ramesh@walmart.com",
+      "timezone": "America/Chicago"
+    },
+    {
+      "name": "Utsav Harsh",
+      "email": "utsav.harsh@walmart.com",
+      "ldap": "u0h000k",
+      "role": "Senior Data Engineer",
+      "market_focus": ["ca", "mx"],
+      "jira_user_id": "u0h000k",
+      "teams_upn": "utsav.harsh@walmart.com",
+      "timezone": "America/Chicago"
+    },
+    {
+      "name": "Vishwank Vikram Singh",
+      "email": "VISHWANKVIKRAM.SINGH@walmart.com",
+      "ldap": "v0s06qr",
+      "role": "Data Engineer II",
+      "market_focus": ["ca", "mx"],
+      "jira_user_id": "v0s06qr",
+      "teams_upn": "VISHWANKVIKRAM.SINGH@walmart.com",
+      "timezone": "America/Chicago"
+    }
+  ],
+  "_add_members": "Copy a member block above, update fields, and add to the members array. Run /sarthi sync to share with the team."
+}

@@ -1,0 +1,140 @@
+{
+  "_comment": "sArthI MCP server registry — single source of truth. setup.sh iterates this via inject-mcp.py. Add new servers here; no hardcoding elsewhere. Variables: ${HOME}, ${SARTHI_ROOT}.",
+  "_merge_key": "mcpServers",
+  "mcpServers": {
+    "mcp-jira": {
+      "_comment": "Jira MCP — already registered by Wibey. Listed here for reference only.",
+      "_skip_if_exists": true
+    },
+    "sarthi-airflow-read": {
+      "_comment": "sArthI local stdio Airflow MCP server. 5 read-only tools: list_dags, get_dag_runs, get_task_instances, get_task_log, get_dag_topology.",
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${SARTHI_ROOT}/mcp/sarthi-airflow-read/server.py"],
+      "env": {
+        "AIRFLOW_MCP_CONFIG": "${HOME}/.wibey/sarthi/config.yaml"
+      }
+    },
+    "sarthi-airflow-auth": {
+      "_comment": "sArthI Airflow session refresh. Single tool: refresh_session. Headless Playwright ~84s.",
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${SARTHI_ROOT}/mcp/sarthi-airflow-auth/server.py"],
+      "env": {
+        "AIRFLOW_MCP_CONFIG": "${HOME}/.wibey/sarthi/config.yaml"
+      }
+    },
+    "sarthi-airflow-ops": {
+      "_comment": "sArthI Airflow mutation server. 6 tools: clear_task, clear_task_with_deps, set_dag_run_state, trigger_dag_run, get_dag_run_state, poll_task. Requires ops_allowed:true per env.",
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${SARTHI_ROOT}/mcp/sarthi-airflow-ops/server.py"],
+      "env": {
+        "AIRFLOW_MCP_CONFIG": "${HOME}/.wibey/sarthi/config.yaml"
+      }
+    },
+    "sarthi-snow": {
+      "_comment": "sArthI ServiceNow MCP. 3 tools: get_crq, parse_crq_file, create_crq_draft. Draft-only — never auto-submits.",
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${SARTHI_ROOT}/mcp/sarthi-snow/server.py"]
+    },
+    "sarthi-snow-auth": {
+      "_comment": "sArthI ServiceNow session refresh. Single tool: refresh_session (~30s, PingFed SSO).",
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${SARTHI_ROOT}/mcp/sarthi-snow-auth/server.py"]
+    },
+    "sarthi-gcp": {
+      "_comment": "sArthI GCP read-only MCP. 7 tools: gcs_ls, gcs_stat, gcs_cat, dataproc_list, dataproc_describe, dataproc_fetch_driver_log, hudi_timeline. Auth: gcloud ADC.",
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${SARTHI_ROOT}/mcp/sarthi-gcp/server.py"]
+    },
+    "sarthi-msgraph": {
+      "_comment": "sArthI Microsoft Graph MCP. 10 tools. Auth: msgraph_tokens.json. MSGRAPH_SEND_ALLOWED=true required for send tools. Never calls auth.ts login — cron-safe.",
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${SARTHI_ROOT}/mcp/sarthi-msgraph/server.py"],
+      "env": {
+        "MSGRAPH_SEND_ALLOWED": "true"
+      }
+    },
+    "sarthi-bq": {
+      "_comment": "sArthI BigQuery MCP. 5 tools. Wraps bigquery-explorer skill. Auth: gcloud ADC. 1GB cost cap. SELECT-only. Cron-safe.",
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${SARTHI_ROOT}/mcp/sarthi-bq/server.py"],
+      "env": {
+        "BQ_MAX_BYTES_BILLED": "1073741824"
+      }
+    },
+    "sarthi-git": {
+      "_comment": "sArthI GitHub/GEC Git MCP. 7 tools: git_get_file, git_list_dir, git_search_code, git_get_pr, git_list_prs, git_create_pr, git_get_commit. Auth: gh CLI keyring.",
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${SARTHI_ROOT}/mcp/sarthi-git/server.py"],
+      "_requires_binaries": [
+        {
+          "binary": "gh",
+          "check_cmd": "gh --version",
+          "install_hint": "gh CLI: install via Walmart Artifactory — ask your team for the internal Artifactory path. Do NOT use brew or public install methods on Walmart network. After install run: gh auth login --hostname gecgithub01.walmart.com"
+        }
+      ]
+    },
+    "sarthi-wcnp": {
+      "_comment": "sArthI WCNP/Kubernetes MCP. Read + ops tools for kubectl via sledge-authenticated clusters. Config: ~/.wibey/sarthi/wcnp-clusters.yaml. Auth: run 'sledge connect <cluster>' once manually.",
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${SARTHI_ROOT}/mcp/sarthi-wcnp/server.py"],
+      "env": {
+        "WCNP_CONFIG": "${HOME}/.wibey/sarthi/wcnp-clusters.yaml",
+        "PATH": "${HOME}/.sledge/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+      },
+      "_requires_binaries": [
+        {
+          "binary": "kubectl",
+          "check_cmd": "kubectl version --client --short",
+          "install_hint": "Run: bash ~/sarthi/setup.sh (auto-installs). Manual: KUBECTL_VERSION=$(curl -sf https://generic.ci.artifacts.walmart.com/artifactory/dl-k8s-io-generic-release-remote/release/stable.txt) && curl -LO https://generic.ci.artifacts.walmart.com/artifactory/dl-k8s-io-generic-release-remote/release/${KUBECTL_VERSION}/bin/darwin/amd64/kubectl && chmod +x kubectl && mv kubectl ~/.local/bin/"
+        },
+        {
+          "binary": "sledge",
+          "check_cmd": "sledge --version",
+          "install_hint": "Run: bash ~/sarthi/setup.sh (auto-installs). Manual: curl -sL http://wmlink.wal-mart.com/getSledgeCore | sh -  (must be on Walmart network/VPN). After install: sledge connect <cluster-name>."
+        }
+      ],
+      "_auth_steps": [
+        "sledge connect uscentral1-dev-gke01",
+        "sledge connect uswest1-prod-gke03"
+      ],
+      "_config_file": "${HOME}/.wibey/sarthi/wcnp-clusters.yaml",
+      "_doctor_tool": "wcnp_doctor"
+    },
+    "sarthi-slack": {
+      "_comment": "sArthI Slack MCP. 6 tools wrapping the slack-api Wibey skill. Auth: Playwright SSO bootstrap from Slack desktop session (xoxc token + fingerprint, ~2h cache). SLACK_SEND_ALLOWED=true required for post_message.",
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${SARTHI_ROOT}/mcp/sarthi-slack/server.py"],
+      "env": {
+        "SLACK_SEND_ALLOWED": "false"
+      },
+      "_requires_binaries": [],
+      "_auth_steps": [
+        "In Wibey: /skill-installer slack-api",
+        "npm config set registry https://npm.ci.artifacts.walmart.com/artifactory/api/npm/npme-npm && cd ~/.wibey/skills/slack-api && npm install && node_modules/.bin/playwright install chromium",
+        "cd ~/.wibey/skills/slack-api && node scripts/reauth.js   (browser opens — complete Walmart SSO)"
+      ],
+      "_install_note": "Wraps slack-api Wibey skill. No extra Python packages needed. Node.js 18+ required."
+    },
+    "sarthi-gsuite": {
+      "_comment": "sArthI GSuite/AD group MCP. 2 tools: gsuite_get_principal_groups (user/SA/processID → groups), gsuite_get_group_members (group → all members). Auth: gcloud ADC (no session file — token fetched fresh per call). Bypasses corporate proxy for cloud-services.wal-mart.com.",
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${SARTHI_ROOT}/mcp/sarthi-gsuite/server.py"],
+      "_auth_steps": [
+        "gcloud auth login",
+        "gcloud auth application-default login"
+      ]
+    }
+  }
+}

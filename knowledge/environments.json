@@ -1,0 +1,40 @@
+{
+  "_comment": "AFaaS / Airflow environment registry for sArthI. Used by sar-inbox (entity extraction), sar-monitor, sar-resolve.",
+  "_version": "1.0.0",
+  "airflow": {
+    "prod": {
+      "base_url": "REPLACE_WITH_AFAAS_PROD_URL",
+      "api_path": "/api/v1",
+      "cookies_file": "~/.wibey/prod-monitor/cookies.txt",
+      "notes": "Main production environment. Cookie auth via headless-refresh.py."
+    },
+    "staging": {
+      "base_url": "REPLACE_WITH_AFAAS_STAGING_URL",
+      "api_path": "/api/v1",
+      "cookies_file": "~/.wibey/prod-monitor/staging-cookies.txt",
+      "notes": "Staging / UAT environment."
+    },
+    "dev": {
+      "base_url": "REPLACE_WITH_AFAAS_DEV_URL",
+      "api_path": "/api/v1",
+      "cookies_file": null,
+      "notes": "Dev environment. No cookie auth needed."
+    }
+  },
+  "bigquery": {
+    "prod_project": "REPLACE_WITH_BQ_PROD_PROJECT",
+    "staging_project": "REPLACE_WITH_BQ_STAGING_PROJECT",
+    "billing_project": "REPLACE_WITH_BQ_BILLING_PROJECT"
+  },
+  "servicenow": {
+    "instance": "walmart.service-now.com",
+    "auth": "wibey-core-mcp (PingFed SSO)",
+    "notes": "Use snow_client.py vendored in ~/sarthi/scripts/crq/ — no MCP needed."
+  },
+  "github": {
+    "org": "WITDnA",
+    "repo": "sarthi",
+    "base_url": "gecgithub01.walmart.com",
+    "auth": "~/.gitconfig PAT token"
+  }
+}

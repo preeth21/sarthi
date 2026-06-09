@@ -1,0 +1,104 @@
+{
+  "_comment": "sArthI known issues and troubleshooting FAQ. Queried by sar-answer for setup/auth/integration questions.",
+  "_last_updated": "2026-06-02",
+  "issues": [
+    {
+      "id": "ISSUE-001",
+      "title": "msgraph skill asks for login every Wibey session",
+      "symptoms": [
+        "Microsoft browser login prompt appears on every new Wibey session",
+        "auth.ts status shows token_expired: true",
+        "mail.ts returns: Token refresh failed. Run: bun auth.ts login",
+        "~/.wibey/msgraph_tokens.json is missing"
+      ],
+      "root_cause": "auth.ts stores tokens in ~/.wibey/msgraph_tokens.json but the Wibey platform saves the initial OAuth token to ~/.wibey/.oauth_access_token.json (different file, different format — no expires_at field). When msgraph_tokens.json is absent, auth.ts treats the session as unauthenticated.",
+      "fix": [
+        "Run sar-setup — Step 3 now auto-migrates .oauth_access_token.json → msgraph_tokens.json",
+        "Or manually: python3 -c \"import json,datetime; old=json.load(open('/Users/akiran/.wibey/.oauth_access_token.json')); json.dump({'access_token':old['access_token'],'refresh_token':old['refresh_token'],'expires_at':(datetime.datetime.now(datetime.timezone.utc)+datetime.timedelta(hours=1)).isoformat()}, open('/Users/akiran/.wibey/msgraph_tokens.json','w'), indent=2)\""
+      ],
+      "permanent_fix": "sar-setup Step 3 handles migration automatically on every run",
+      "tags": ["msgraph", "auth", "login", "microsoft", "email", "teams"]
+    },
+    {
+      "id": "ISSUE-002",
+      "title": "ServiceNow session expired / 401 on CRQ operations",
+      "symptoms": [
+        "sarthi-snow MCP returns: {\"error\": \"session_expired\"}",
+        "snow_client.py returns 401 Unauthorized",
+        "~/.wibey/snow-session.json is missing or older than 8h"
+      ],
+      "root_cause": "ServiceNow cookies expire after ~8 hours. The session file must be refreshed via Playwright browser automation (Walmart AD SSO).",
+      "fix": [
+        "Automatic: sarthi-snow-auth MCP tool refresh_session handles this — called automatically by sar-crq on 401",
+        "Manual: python3 ~/.wibey/crq/extract_snow_session.py (opens browser, ~30s)"
+      ],
+      "permanent_fix": "sarthi-snow-auth MCP auto-refreshes on next tool call after session_expired",
+      "tags": ["servicenow", "snow", "crq", "session", "auth", "401"]
+    },
+    {
+      "id": "ISSUE-003",
+      "title": "Airflow MCP returns session_expired",
+      "symptoms": [
+        "sarthi-airflow-read or sarthi-airflow-ops returns: {\"error\": \"session_expired\"}",
+        "Airflow cookie auth failing"
+      ],
+      "root_cause": "Airflow session cookies expire. sarthi-airflow-auth handles refresh via headless Playwright.",
+      "fix": [
+        "Call mcp__sarthi-airflow-auth__refresh_session then retry the failed tool"
+      ],
+      "permanent_fix": "sar-investigate and sar-resolve skills call refresh_session automatically on session_expired",
+      "tags": ["airflow", "session", "auth", "expired", "mcp"]
+    },
+    {
+      "id": "ISSUE-004",
+      "title": "sarthi MCP servers missing from mcp.json",
+      "symptoms": [
+        "mcp__sarthi-airflow-read__ tools not available",
+        "sarthi-snow / sarthi-gcp tools missing",
+        "sar-setup Step 8 shows MISSING servers"
+      ],
+      "root_cause": "setup.sh not run, or mcp.json was reset by a Wibey update.",
+      "fix": [
+        "Run: bash ~/sarthi/setup.sh",
+        "Then restart Wibey to reload MCP servers"
+      ],
+      "permanent_fix": "setup.sh is idempotent — safe to re-run anytime",
+      "tags": ["mcp", "setup", "airflow", "snow", "gcp", "missing"]
+    },
+    {
+      "id": "ISSUE-005",
+      "title": "bigquery-explorer skill missing or SDK not installed",
+      "symptoms": [
+        "sar-setup Step 2 shows bigquery-explorer MISSING",
+        "BQ queries fail with skill not found",
+        "SDK check: node_modules/@google-cloud/bigquery missing"
+      ],
+      "root_cause": "bigquery-explorer is not bundled by default — must be installed via skill-installer. SDK must also be installed separately via install-bigquery.sh.",
+      "fix": [
+        "In Wibey: /skill-installer bigquery-explorer",
+        "Then: bash ~/.wibey/skills/bigquery-explorer/scripts/install-bigquery.sh",
+        "Or run sar-setup — Steps 2 handles both automatically"
+      ],
+      "permanent_fix": "sar-setup Step 2 auto-installs skill and SDK on every run",
+      "tags": ["bigquery", "bq", "skill", "sdk", "missing", "install"]
+    },
+    {
+      "id": "ISSUE-006",
+      "title": "msgraph browser login blocks cron / non-interactive sarthi runs",
+      "symptoms": [
+        "sarthi scheduled job hangs indefinitely",
+        "cron invocation of wibey --prompt freezes waiting for browser input",
+        "auth.ts login opens a Playwright browser window that never closes in headless environment",
+        "sarthi-msgraph MCP returns: {\"error\": \"auth_expired\"} in scheduled runs"
+      ],
+      "root_cause": "The msgraph Wibey skill's auth.ts login command opens a browser via Playwright for Microsoft OAuth. In cron or non-interactive environments there is no display/user to complete the login flow — the process hangs forever. The old sar-inbox STEP 2 called auth.ts login on token expiry, which caused this hang.",
+      "fix": [
+        "Run /msgraph login ONCE interactively in a Wibey session to generate ~/.wibey/msgraph_tokens.json",
+        "The sarthi-msgraph MCP (server.py) auto-refreshes tokens via the Microsoft refresh_token endpoint — no browser needed after first login",
+        "If sarthi-msgraph returns auth_expired in a cron run, it means the refresh token itself has expired (90-day Microsoft limit). Log in once interactively to reset."
+      ],
+      "permanent_fix": "sarthi-msgraph MCP never calls auth.ts login. On auth failure it returns {\"error\": \"auth_expired\"} and exits cleanly. Skills check for this error and surface it without blocking.",
+      "tags": ["msgraph", "auth", "cron", "non-interactive", "browser", "login", "hang", "scheduled", "email", "teams"]
+    }
+  ]
+}

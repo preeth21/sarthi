@@ -1,0 +1,60 @@
+{
+  "_role": "FUNCTIONAL",
+  "_description": "INTL-ET360 team field values. Copy these verbatim into every new CRQ payload.",
+  "_do_not_mix_with": "quality-CHG3943471-structure.json — that file is STRUCTURE ONLY",
+  "_source_crqs": ["CHG3978198", "CHG4008143"],
+  "_source_crq": "CHG3978198",
+  "_additional_ref_crq": "CHG4008143",
+  "_verified_date": "2026-05-11",
+
+  "fields": {
+    "assignment_group": "INTL-ET360",
+    "u_primary_escalation_group": "INTL-ET360",
+    "u_secondary_escalation_group": "INTL-ET360",
+    "u_change_manager_group": "Change Managers - US",
+    "type": "normal",
+    "category": "application",
+    "impact": "3",
+    "u_market": "Home Office",
+    "cmdb_ci": "International Datalake",
+    "u_affected_application": "International Datalake",
+    "u_ci_class_name": "Business Application",
+    "u_change_classification": "software",
+    "u_reason_for_install": "enhancement",
+    "u_testing_completed": "yes",
+    "u_type_of_testing_completed": "technical_testing,functional_testing",
+    "cab_required": "false",
+    "state": "-5"
+  },
+
+  "_planned_dates": {
+    "_note": "Auto-computed by snow_client.py: next calendar day 3:00 PM CDT (20:00 UTC), end = day after at same time",
+    "start_date": "DD-MM-YYYY 20:00:00 (UTC = 3PM CDT)",
+    "end_date": "DD+1-MM-YYYY 20:00:00 (UTC = 3PM CDT)"
+  },
+
+  "_auto_derived_by_servicenow": [
+    "risk",
+    "u_vp_approval"
+  ],
+  "_note": "Do NOT set risk or u_vp_approval — ServiceNow derives them from assignment_group and ML model. impact=3 is set explicitly (Moderate, verified from CHG3978198).",
+
+  "_manual_approver": {
+    "_note": "After CRQ creation, POST to sysapproval_approver table to add Swaroop YS as manual approver. Verified from CHG3978198 work_notes: 'Swaroop YS (s0s07p0) was added as a manual approver'. This is NOT a column on change_request — it is a separate table record.",
+    "_mechanism": "POST /api/now/table/sysapproval_approver with {sysapproval: <crq_sys_id>, approver: <user_sys_id>, source_table: 'change_request'}",
+    "default_approver_user_name": "s0s07p0",
+    "default_approver_display_name": "Swaroop YS (s0s07p0)",
+    "default_approver_sys_id": "54daa76ddb54cc50ba9f3c9d7c96191d",
+    "_verified_date": "2026-05-11"
+  },
+
+  "_geo_mapping": {
+    "CA": "CA",
+    "MX": "MX",
+    "CA + MX": "CA + MX"
+  },
+  "_geo_field": "u_affected_geos",
+
+  "_summary_format": "CA ET360 | <Topic> | <brief description>",
+  "_summary_example": "CA ET360 | COIM | LMD filter fix and YFS BQ-to-Hive WCP history copy DAG"
+}

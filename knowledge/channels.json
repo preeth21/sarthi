@@ -1,0 +1,31 @@
+{
+  "_comment": "Channel registry for sar-inbox and sar-reply. Maps logical names to channel IDs for Teams, Slack, email lists.",
+  "_version": "1.0.0",
+  "teams": {
+    "_how_to_find": "In Teams, go to the channel → ... → Get link to channel. The URL contains team_id and channel_id.",
+    "et360-alerts": {
+      "team_id": "REPLACE_WITH_TEAM_ID",
+      "channel_id": "REPLACE_WITH_CHANNEL_ID",
+      "display_name": "ET360 Alerts",
+      "use_for": ["incident-notifications", "monitor-reports"]
+    },
+    "et360-general": {
+      "team_id": "REPLACE_WITH_TEAM_ID",
+      "channel_id": "REPLACE_WITH_CHANNEL_ID",
+      "display_name": "ET360 General",
+      "use_for": ["team-updates", "feature-announcements"]
+    }
+  },
+  "slack": {
+    "_status": "NOT YET CONNECTED — Slack MCP not registered in ~/.wibey/mcp.json",
+    "_todo": "Register Slack MCP when available. See SLACK-TODO markers in sar-inbox/SKILL.md and sar-reply/SKILL.md.",
+    "et360-incidents": {
+      "channel_id": "REPLACE_WHEN_SLACK_MCP_AVAILABLE",
+      "use_for": ["incident-notifications"]
+    }
+  },
+  "email_lists": {
+    "et360-team": "REPLACE_WITH_DL_EMAIL",
+    "et360-oncall": "REPLACE_WITH_ONCALL_EMAIL"
+  }
+}

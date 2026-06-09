@@ -1,0 +1,29 @@
+# ── Auth sessions / secrets — NEVER commit ──────────────────
+# These are machine-specific session files generated at runtime.
+# They are stored in ~/.wibey/ (outside the repo), not here.
+# The .auth-complete sentinel is also in ~/.wibey/sarthi/.
+scripts/crq/chrome_profile/
+scripts/crq/*.bak*
+scripts/crq/__pycache__/
+
+# ── Python cache ─────────────────────────────────────────────
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+*.pyc
+
+# ── macOS ────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V*
+.Trashes
+
+# ── Editor ───────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── Node (only if node_modules ever appears in repo) ─────────
+node_modules/

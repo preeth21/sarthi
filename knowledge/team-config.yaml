@@ -1,0 +1,67 @@
+# sArthI Team Configuration
+# This file is the single source of truth for team-specific settings.
+# It is read by MCP servers and skills at runtime — no restarts needed after editing.
+# Seeded with your current ET360/INTLDLDAT settings — update for your team.
+#
+# To onboard a new team: copy this file, fill in your values, and run /sar-setup.
+
+# ── Team identity ─────────────────────────────────────────────────────────────
+team:
+  name: "INTLDLDAT ET360"
+  ldap: "akiran"
+  email: "achallaravi.kiran@walmart.com"
+  jira_project: "ET360"
+  slack_channel: ""          # fill in when Slack MCP is configured
+  teams_channel: ""          # fill in for Teams alerts
+
+# ── ServiceNow / CRQ defaults ─────────────────────────────────────────────────
+# These are used by sarthi-snow create_crq_draft.
+# Without this file, tools return an error asking you to fill it in.
+servicenow:
+  assignment_group: "INTL-ET360"
+  primary_escalation_group: "INTL-ET360"
+  secondary_escalation_group: "INTL-ET360"
+  change_manager_group: "Change Managers - US"
+  cmdb_ci: "International Datalake"
+  affected_application: "International Datalake"
+  market: "Home Office"
+
+# ── Jira defaults ─────────────────────────────────────────────────────────────
+jira:
+  project_key: "ET360"
+  default_assignee: "akiran"
+
+# ── Infrastructure registry ───────────────────────────────────────────────────
+# Drives sar-monitor and sar-health scans. Add/remove infra types as needed.
+infrastructure:
+  airflow: true          # sarthi-airflow-* MCP servers
+  bigquery: true         # sarthi-bq MCP server
+  gcs: true              # sarthi-gcp MCP server
+  hudi: true             # sarthi-gcp hudi_timeline tool
+  dataproc: true         # sarthi-gcp dataproc_* tools
+  wcnp: false            # sarthi-wcnp — set true when cluster routing is confirmed
+  kafka: false           # future
+  slack: false           # future — set true when Slack MCP is configured
+
+# ── Health check SLAs ────────────────────────────────────────────────────────
+# Used by sar-monitor to classify delays as SLA breaches.
+health:
+  airflow_sla_minutes: 90          # DAG runs longer than this → sla_breach
+  bq_job_timeout_hours: 6          # BQ jobs approaching this → warn
+  hudi_stale_commit_hours: 26      # Hudi last commit older than this → warn
+  consecutive_failure_threshold: 3 # N consecutive failures → escalate
+
+# ── Common known problems (team-specific pattern library) ────────────────────
+# Add entries here as you discover recurring issues.
+# sar-investigate reads this to match log patterns before escalating.
+known_patterns:
+  - id: "LOCAL-001"
+    pattern: "SSLEOFError"
+    classification: "transient"
+    action: "clear_task_with_deps"
+    note: "SSL EOF on BQ polling — transient network blip. Safe to retry."
+  - id: "LOCAL-002"
+    pattern: "Operation timed out after 6.0 hours"
+    classification: "code_or_data_error"
+    action: "manual_review"
+    note: "BQ query hit 6h limit. Needs query optimization."

@@ -1,0 +1,63 @@
+{
+  "_role": "QUALITY_STRUCTURE_ONLY",
+  "_description": "Structural patterns from a score-90 CRQ. Use ONLY as section/format template. NEVER copy field values.",
+  "_source_crq": "CHG3943471",
+  "_verified_date": "2026-05-04",
+  "_score": 90,
+
+  "_WARNING": "DIFFERENT TEAM. DO NOT copy: assignment_group, u_affected_application, u_primary_escalation_group, u_secondary_escalation_group, cmdb_ci, u_business_unit. Load functional-CHG3978198-INTL-ET360.json for all team/group fields.",
+
+  "_do_not_copy": [
+    "assignment_group",
+    "u_affected_application",
+    "u_primary_escalation_group",
+    "u_secondary_escalation_group",
+    "cmdb_ci",
+    "u_business_unit",
+    "u_market"
+  ],
+
+  "structure_patterns": {
+    "description_section": {
+      "opening": "What is the change? [1-2 sentences summarizing both changes]",
+      "components_header": "Components to be Deployed:",
+      "components_format": "  Airflow DAGs: <dag_id_1>, <dag_id_2>",
+      "bullet_what": "• What?\n  1. <file or component> — <specific change made>\n  2. <file or component> — <specific change made>",
+      "bullet_why": "• Why?\n  <root cause sentence>. <downstream impact / consumer sentence>.",
+      "criticality": "Reason for Criticality: <system> is the source of truth for <business purpose> used by <teams>.",
+      "numbered_risk_questions": [
+        "1. Describe how testing has reduced risk: <method + env + validation done>",
+        "2. Describe how deployment minimizes risk and blast radius: <scope + additive vs destructive + blast radius>",
+        "3. Describe production validation: Post-deploy — <action 1>, <validate row counts / confirm data>",
+        "4. Describe rollback steps (L2 executable): <revert mechanism + redeploy + re-run>"
+      ]
+    },
+
+    "implementation_section": {
+      "header": "1. Code Deployment:",
+      "body": "   Merge the PR below. After merge, changes are deployed via automated\n   Concord deployment pipeline.\n   <PR URL>\n\n   Alerting/Monitoring: Automated. Monitor Concord deployment status in\n   the <repo-name> pipeline.",
+      "step2": "2. DAG Triggering:\n   Trigger the following Airflow DAG in AFaaS prod and monitor the run:\n   <dag_id>",
+      "step3": "3. Post-deploy validation:\n   Run QA job in prod env to check syntax and confirm row counts (see\n   Validation Plan below)."
+    },
+
+    "validation_section": {
+      "numbered_checks": [
+        "1. DAG Run Validation:\n   Confirm <dag_id> completes successfully in AFaaS prod with no task failures.",
+        "2. <Change 1> Validation:\n   Query <table_name>\n   and confirm <specific assertion — row counts, column values, filter match>.\n   Verify row counts are consistent with expected <metric>.",
+        "3. <Change 2> Validation:\n   Validate that <target> is correctly populated with <data>. Check row counts match source."
+      ]
+    },
+
+    "backout_section": {
+      "criteria_header": "Criteria for backout:",
+      "criteria": [
+        "1. Concord deployment pipeline failure for PR #<number>.",
+        "2. <dag_id> fails in production after triggering.",
+        "3. Data validation not met — row counts in <table> do not reflect expected <metric>."
+      ],
+      "steps_header": "Describe the steps to take to roll back (L2 executable):",
+      "code_backout": "1. Code Backout:\n   a) Go to PR #<number> on gecgithub01.walmart.com, click \"Revert\" in the\n      Conversation tab. This creates a new Revert PR.\n   b) Verify the Revert PR performs the exact opposite of the merged PR.\n      Get it reviewed and merged.\n   <PR URL>",
+      "rerun": "2. Re-run impacted DAG:\n   After revert is deployed, re-trigger the affected <DAG name>\n   to restore the prior state of <table>."
+    }
+  }
+}
