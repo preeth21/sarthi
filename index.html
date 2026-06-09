@@ -3,22 +3,21 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>sArthI — Self-healing Autonomous Runtime Troubleshooting & Health Intelligence</title>
-  <meta name="description" content="sArthI is an AI-powered ops assistant for Walmart INTLDLDAT engineers. Monitor DAGs, investigate incidents, manage ServiceNow, and automate routine ops — all from natural language." />
+  <title>sArthI — Self-healing Autonomous Runtime Troubleshooting &amp; Health Intelligence</title>
+  <meta name="description" content="sArthI is a self-healing AI ops assistant for Walmart INTLDLDAT engineers. Talk to your systems like a living entity — investigate, fix, and automate from natural language inside Wibey." />
 
-  <!-- Google Fonts: Nunito (matches sarthi logo rounded sans-serif) -->
+  <!-- Nunito — rounded, matches sarthi logo wordmark -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&family=Nunito+Sans:wght@300;400;600&display=swap" rel="stylesheet" />
 
   <style>
-    /* ─── Reset & Base ─────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      /* ── Brand colours — edit here to retheme ── */
-      --navy:   #1a2a5e;   /* sarthi logo navy */
-      --orange: #f47c20;   /* sarthi logo orange */
+      /* ── Brand — edit to retheme ── */
+      --navy:   #1a2a5e;
+      --orange: #f47c20;
       --black:  #0f0f0f;
       --muted:  #6b7280;
       --bg:     #ffffff;
@@ -26,15 +25,13 @@
       --border: #e5e7eb;
       --code-bg:#f3f4f6;
 
-      /* ── Typography ── */
       --font-head: 'Nunito', system-ui, sans-serif;
       --font-body: 'Nunito Sans', system-ui, sans-serif;
       --font-mono: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
 
-      /* ── Layout ── */
-      --max-w: 760px;
+      --max-w:      760px;
       --max-w-wide: 1100px;
-      --section-gap: 7rem;
+      --gap:        7rem;
     }
 
     html { font-size: 16px; }
@@ -46,395 +43,259 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ─── Utility ───────────────────────────────────────────────── */
-    .container       { max-width: var(--max-w); margin: 0 auto; padding: 0 1.5rem; }
-    .container-wide  { max-width: var(--max-w-wide); margin: 0 auto; padding: 0 1.5rem; }
-    .text-muted      { color: var(--muted); }
-    .text-orange     { color: var(--orange); }
-    .text-navy       { color: var(--navy); }
+    /* ── Util ── */
+    .container      { max-width: var(--max-w); margin: 0 auto; padding: 0 1.5rem; }
+    .container-wide { max-width: var(--max-w-wide); margin: 0 auto; padding: 0 1.5rem; }
+    .hidden         { display: none !important; }
 
-    /* ─── Nav ───────────────────────────────────────────────────── */
+    /* ── Nav ── */
     nav {
-      position: sticky;
-      top: 0;
-      z-index: 50;
+      position: sticky; top: 0; z-index: 50;
       background: rgba(255,255,255,0.92);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
       padding: 0.75rem 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
     }
     .nav-logo { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; }
     .nav-logo img { height: 32px; }
     .nav-links { display: flex; align-items: center; gap: 2rem; }
     .nav-links a {
-      font-family: var(--font-head);
-      font-weight: 600;
-      font-size: 0.95rem;
-      color: var(--black);
-      text-decoration: none;
-      transition: color 0.15s;
+      font-family: var(--font-head); font-weight: 600; font-size: 0.95rem;
+      color: var(--black); text-decoration: none; transition: color 0.15s;
     }
     .nav-links a:hover { color: var(--orange); }
     .nav-cta {
-      background: var(--navy);
-      color: #fff !important;
-      padding: 0.45rem 1.1rem;
-      border-radius: 999px;
-      font-size: 0.875rem !important;
+      background: var(--navy); color: #fff !important;
+      padding: 0.45rem 1.1rem; border-radius: 999px; font-size: 0.875rem !important;
     }
-    .nav-cta:hover { background: var(--orange) !important; color: #fff !important; }
+    .nav-cta:hover { background: var(--orange) !important; }
 
-    /* ─── Hero ──────────────────────────────────────────────────── */
-    #hero {
-      padding: 6rem 1.5rem 5rem;
-      text-align: center;
+    /* ── Hero ── */
+    #hero { padding: 6rem 1.5rem 5rem; text-align: center; }
+    #hero img.hero-logo { height: 84px; margin: 0 auto 1.5rem; display: block; }
+    #hero .full-form {
+      font-family: var(--font-head); font-size: 0.8rem; font-weight: 600;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 1.75rem;
     }
-    #hero img.hero-logo {
-      height: 80px;
-      margin: 0 auto 2rem;
-      display: block;
-    }
+    #hero .full-form span { color: var(--orange); }
     #hero h1 {
-      font-family: var(--font-head);
-      font-size: clamp(2rem, 5vw, 3rem);
-      font-weight: 800;
-      line-height: 1.2;
-      letter-spacing: -0.02em;
-      color: var(--black);
+      font-family: var(--font-head); font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800; line-height: 1.2; letter-spacing: -0.02em;
       margin-bottom: 1.25rem;
     }
-    #hero h1 span { color: var(--orange); }
+    #hero h1 em { font-style: normal; color: var(--orange); }
     #hero p.tagline {
-      font-size: 1.15rem;
-      color: var(--muted);
-      max-width: 540px;
-      margin: 0 auto 2.5rem;
+      font-size: 1.15rem; color: var(--muted);
+      max-width: 540px; margin: 0 auto 2.5rem;
     }
     .install-box {
-      display: inline-flex;
-      align-items: center;
-      gap: 0;
-      background: var(--code-bg);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      font-family: var(--font-mono);
-      font-size: 0.875rem;
-      color: var(--black);
-      overflow: hidden;
+      display: inline-flex; align-items: center;
+      background: var(--code-bg); border: 1px solid var(--border);
+      border-radius: 14px; font-family: var(--font-mono);
+      font-size: 0.875rem; color: var(--black); overflow: hidden;
     }
-    .install-box code {
-      padding: 0.75rem 1.25rem;
-      user-select: all;
-    }
+    .install-box code { padding: 0.75rem 1.25rem; user-select: all; }
     .copy-btn {
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      padding: 0.75rem 1rem;
-      color: var(--muted);
-      border-left: 1px solid var(--border);
-      transition: color 0.15s;
-      display: flex;
-      align-items: center;
+      border: none; background: transparent; cursor: pointer;
+      padding: 0.75rem 1rem; color: var(--muted);
+      border-left: 1px solid var(--border); transition: color 0.15s;
+      display: flex; align-items: center; flex-shrink: 0;
     }
     .copy-btn:hover { color: var(--black); }
     .copy-btn svg { width: 16px; height: 16px; }
-    .install-hint {
-      margin-top: 0.85rem;
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
+    .install-hint { margin-top: 0.85rem; font-size: 0.85rem; color: var(--muted); }
     .install-hint a { color: var(--navy); text-decoration: underline; text-underline-offset: 3px; }
 
-    /* ─── Section headings ──────────────────────────────────────── */
-    .section { padding: var(--section-gap) 0; }
-    .section + .section { border-top: 1px solid var(--border); }
-    .section-label {
-      font-family: var(--font-head);
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--orange);
-      margin-bottom: 0.75rem;
+    /* ── Entry point callout ── */
+    .entry-callout {
+      margin-top: 2rem;
+      display: inline-flex; align-items: center; gap: 0.75rem;
+      background: rgba(26,42,94,0.05); border: 1px solid rgba(26,42,94,0.12);
+      border-radius: 12px; padding: 0.75rem 1.25rem;
+      font-family: var(--font-head); font-size: 0.9rem; color: var(--navy);
     }
-    .section h2 {
-      font-family: var(--font-head);
-      font-size: clamp(1.75rem, 3.5vw, 2.5rem);
-      font-weight: 800;
-      line-height: 1.2;
-      letter-spacing: -0.02em;
-      margin-bottom: 1rem;
-    }
-    .section p.lead {
-      font-size: 1.1rem;
-      color: var(--muted);
-      max-width: 500px;
-      margin-bottom: 2.5rem;
+    .entry-callout strong { font-weight: 800; }
+    .entry-callout .entry-code {
+      font-family: var(--font-mono); font-size: 0.85rem;
+      background: rgba(26,42,94,0.08); padding: 0.25rem 0.6rem;
+      border-radius: 6px;
     }
 
-    /* ─── Install steps ─────────────────────────────────────────── */
+    /* ── Sections ── */
+    .section { padding: var(--gap) 0; }
+    .section + .section { border-top: 1px solid var(--border); }
+    .section-label {
+      font-family: var(--font-head); font-size: 0.75rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--orange); margin-bottom: 0.75rem;
+    }
+    .section h2 {
+      font-family: var(--font-head); font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+      font-weight: 800; line-height: 1.2; letter-spacing: -0.02em; margin-bottom: 1rem;
+    }
+    .section p.lead {
+      font-size: 1.1rem; color: var(--muted); max-width: 520px; margin-bottom: 2.5rem;
+    }
+
+    /* ── Steps ── */
     .steps { display: flex; flex-direction: column; gap: 2rem; }
-    .step {
-      display: grid;
-      grid-template-columns: 2.5rem 1fr;
-      gap: 0 1.25rem;
-      align-items: start;
-    }
+    .step { display: grid; grid-template-columns: 2.5rem 1fr; gap: 0 1.25rem; align-items: start; }
     .step-num {
-      width: 2.5rem;
-      height: 2.5rem;
-      border-radius: 50%;
-      background: var(--navy);
-      color: #fff;
-      font-family: var(--font-head);
-      font-weight: 700;
-      font-size: 0.9rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-top: 0.1rem;
+      width: 2.5rem; height: 2.5rem; border-radius: 50%;
+      background: var(--navy); color: #fff;
+      font-family: var(--font-head); font-weight: 700; font-size: 0.9rem;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 0.1rem;
     }
-    .step-body h3 {
-      font-family: var(--font-head);
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 0.4rem;
-    }
+    .step-body h3 { font-family: var(--font-head); font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
     .step-body p { font-size: 0.9rem; color: var(--muted); margin-bottom: 0.75rem; }
+    .step-note {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.8rem; color: var(--muted); margin-top: 0.4rem;
+    }
     .code-block {
-      background: var(--code-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 0.75rem 1.1rem;
-      font-family: var(--font-mono);
-      font-size: 0.82rem;
-      color: var(--black);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
+      background: var(--code-bg); border: 1px solid var(--border);
+      border-radius: 12px; padding: 0.75rem 1.1rem;
+      font-family: var(--font-mono); font-size: 0.82rem; color: var(--black);
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
     }
     .code-block .copy-btn { border-left: none; padding: 0; }
 
-    /* ─── Feature grid ──────────────────────────────────────────── */
+    /* ── Feature grid ── */
     .feature-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
       gap: 1.5rem;
     }
     .feature-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1.5rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.5rem;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
     .feature-card:hover {
       border-color: var(--navy);
-      box-shadow: 0 4px 20px rgba(26,42,94,0.08);
+      box-shadow: 0 4px 20px rgba(26,42,94,0.07);
     }
     .feature-icon {
-      font-size: 1.75rem;
-      margin-bottom: 0.75rem;
-      display: block;
+      width: 40px; height: 40px; margin-bottom: 1rem;
+      color: var(--black); display: block;
     }
+    .feature-icon svg { width: 100%; height: 100%; }
     .feature-card h3 {
-      font-family: var(--font-head);
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 0.4rem;
+      font-family: var(--font-head); font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem;
     }
-    .feature-card p { font-size: 0.875rem; color: var(--muted); line-height: 1.5; }
+    .feature-card p { font-size: 0.875rem; color: var(--muted); line-height: 1.55; }
 
-    /* ─── Video placeholders ────────────────────────────────────── */
-    .video-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2rem;
-    }
+    /* ── Videos ── */
+    .video-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
     .video-card { display: flex; flex-direction: column; gap: 1rem; }
-    .video-card h3 {
-      font-family: var(--font-head);
-      font-size: 1.1rem;
-      font-weight: 700;
-    }
+    .video-card h3 { font-family: var(--font-head); font-size: 1.1rem; font-weight: 700; }
     .video-card p { font-size: 0.875rem; color: var(--muted); }
     .video-placeholder {
       aspect-ratio: 16/9;
-      background: var(--surface);
-      border: 2px dashed var(--border);
+      background: var(--surface); border: 2px dashed var(--border);
       border-radius: 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 0.75rem;
-      color: var(--muted);
-      font-size: 0.875rem;
-      cursor: pointer;
-      transition: border-color 0.2s;
-      position: relative;
-      overflow: hidden;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 0.75rem; color: var(--muted); font-size: 0.875rem;
+      cursor: default; transition: border-color 0.2s;
+      position: relative; overflow: hidden;
     }
-    .video-placeholder:hover { border-color: var(--navy); }
-    .video-placeholder .play-icon {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
+    .video-placeholder[data-src]:not([data-src=""]) { cursor: pointer; }
+    .video-placeholder[data-src]:not([data-src=""]):hover { border-color: var(--navy); }
+    .video-placeholder[data-src]:not([data-src=""]):hover .play-circle { background: var(--orange); }
+    .play-circle {
+      width: 52px; height: 52px; border-radius: 50%;
       background: var(--navy);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
     }
-    .video-placeholder .play-icon svg {
-      width: 22px;
-      height: 22px;
-      fill: white;
-      margin-left: 3px;
-    }
-    /* Replace placeholder with iframe: add data-src="https://youtube.com/embed/..." */
-    .video-placeholder[data-src] { cursor: pointer; }
-    .video-placeholder[data-src]:hover .play-icon { background: var(--orange); }
+    .play-circle svg { width: 22px; height: 22px; margin-left: 3px; }
 
-    /* ─── Success stories ───────────────────────────────────────── */
-    .stories-scroll {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1.5rem;
+    /* ── Stories ── */
+    .stories-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;
     }
     .story-card {
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1.75rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      background: var(--bg);
+      border: 1px solid var(--border); border-radius: 16px;
+      padding: 1.75rem; display: flex; flex-direction: column; gap: 1rem;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .story-card:hover {
-      border-color: var(--orange);
-      box-shadow: 0 4px 20px rgba(244,124,32,0.08);
-    }
-    .story-quote {
-      font-size: 0.95rem;
-      line-height: 1.65;
-      color: var(--black);
-      flex: 1;
-    }
-    .story-quote::before { content: '\201C'; color: var(--orange); font-size: 1.5rem; line-height: 0; vertical-align: -0.4rem; margin-right: 2px; }
-    .story-author {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-    .story-avatar {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: var(--navy);
-      color: #fff;
-      font-family: var(--font-head);
-      font-weight: 700;
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .story-author-name { font-family: var(--font-head); font-weight: 700; font-size: 0.9rem; }
-    .story-author-role { font-size: 0.8rem; color: var(--muted); }
+    .story-card:hover { border-color: var(--orange); box-shadow: 0 4px 20px rgba(244,124,32,0.07); }
     .story-metric {
       display: inline-block;
-      background: rgba(244,124,32,0.1);
-      color: var(--orange);
-      font-family: var(--font-head);
-      font-weight: 700;
-      font-size: 0.8rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 999px;
+      background: rgba(244,124,32,0.1); color: var(--orange);
+      font-family: var(--font-head); font-weight: 700; font-size: 0.8rem;
+      padding: 0.25rem 0.75rem; border-radius: 999px;
     }
+    .story-quote { font-size: 0.95rem; line-height: 1.65; flex: 1; }
+    .story-quote::before {
+      content: '\201C'; color: var(--orange); font-size: 1.5rem;
+      line-height: 0; vertical-align: -0.4rem; margin-right: 2px;
+    }
+    .story-author { display: flex; align-items: center; gap: 0.75rem; }
+    .story-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: var(--navy); color: #fff;
+      font-family: var(--font-head); font-weight: 700; font-size: 0.85rem;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .story-name { font-family: var(--font-head); font-weight: 700; font-size: 0.9rem; }
+    .story-role { font-size: 0.8rem; color: var(--muted); }
 
-    /* ─── Resources ─────────────────────────────────────────────── */
+    /* ── Resources ── */
     .resources-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;
     }
     .resource-link {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 1.1rem 1.25rem;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      text-decoration: none;
-      color: var(--black);
-      font-family: var(--font-head);
-      font-weight: 600;
-      font-size: 0.9rem;
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 1.1rem 1.25rem; border: 1px solid var(--border); border-radius: 12px;
+      text-decoration: none; color: var(--black);
+      font-family: var(--font-head); font-weight: 600; font-size: 0.9rem;
       transition: border-color 0.15s, color 0.15s;
-      background: var(--bg);
     }
     .resource-link:hover { border-color: var(--navy); color: var(--navy); }
-    .resource-link .icon { font-size: 1.2rem; }
+    .resource-link .r-icon { width: 20px; height: 20px; flex-shrink: 0; color: var(--muted); }
+    .resource-link .r-icon svg { width: 100%; height: 100%; }
     .resource-link .arrow { margin-left: auto; color: var(--muted); font-size: 0.85rem; }
 
-    /* ─── Footer ────────────────────────────────────────────────── */
+    /* ── Footer ── */
     footer {
-      border-top: 1px solid var(--border);
-      padding: 2.5rem 1.5rem;
-      text-align: center;
-      font-size: 0.85rem;
-      color: var(--muted);
+      border-top: 1px solid var(--border); padding: 2.5rem 1.5rem;
+      text-align: center; font-size: 0.85rem; color: var(--muted);
     }
     footer a { color: var(--navy); text-decoration: underline; text-underline-offset: 3px; }
 
-    /* ─── Responsive ─────────────────────────────────────────────── */
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+      background: var(--navy); color: white;
+      padding: 0.6rem 1.5rem; border-radius: 999px;
+      font-family: var(--font-head); font-size: 0.875rem; font-weight: 600;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 999;
+    }
+    .toast.show { opacity: 1; }
+
+    /* ── Responsive ── */
     @media (max-width: 640px) {
       .nav-links { display: none; }
       #hero { padding: 4rem 1.5rem 3rem; }
-      .install-box { width: 100%; justify-content: space-between; }
+      .install-box { width: 100%; }
+      .entry-callout { flex-direction: column; text-align: center; }
     }
-
-    /* ─── Copied feedback ─────────────────────────────────────────── */
-    .copied-msg {
-      position: fixed;
-      bottom: 2rem;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--navy);
-      color: white;
-      padding: 0.6rem 1.5rem;
-      border-radius: 999px;
-      font-family: var(--font-head);
-      font-size: 0.875rem;
-      font-weight: 600;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s;
-      z-index: 999;
-    }
-    .copied-msg.show { opacity: 1; }
   </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════
-     NAV
-═══════════════════════════════════════════ -->
+<!-- ════════════════ NAV ════════════════ -->
 <nav>
   <a href="#" class="nav-logo">
     <img src="sarthi_logo.png" alt="sArthI" />
   </a>
   <div class="nav-links">
     <a href="#install">Install</a>
-    <a href="#features">Features</a>
+    <a href="#features">Capabilities</a>
     <a href="#videos">Videos</a>
     <a href="#stories">Stories</a>
     <a href="#resources">Docs</a>
@@ -443,165 +304,178 @@
 </nav>
 
 
-<!-- ══════════════════════════════════════════
-     HERO
-═══════════════════════════════════════════ -->
+<!-- ════════════════ HERO ════════════════ -->
 <section id="hero">
   <div class="container">
     <img src="sarthi_logo.png" alt="sArthI" class="hero-logo" />
-    <h1>The ops assistant that<br /><span>never sleeps</span></h1>
-    <p class="tagline">
-      Monitor pipelines, investigate incidents, and automate routine ops — all from natural language inside Wibey.
+
+    <!-- Full form — prominent in hero -->
+    <p class="full-form">
+      <span>S</span>elf-healing &nbsp;<span>A</span>utonomous &nbsp;<span>R</span>untime &nbsp;<span>T</span>roubleshooting &nbsp;&amp;&nbsp; <span>H</span>ealth &nbsp;<span>I</span>ntelligence
     </p>
 
-    <div class="install-box" id="hero-install-box">
-      <code id="hero-install-cmd">bash &lt;(curl -fsSL https://gecgithub01.walmart.com/raw/WITDnA/sarthi/main/install.sh)</code>
-      <button class="copy-btn" onclick="copyCode('hero-install-cmd')" title="Copy to clipboard">
-        <svg id="hero-copy-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 8.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v8.25A2.25 2.25 0 006 16.5h2.25m8.25-8.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-7.5A2.25 2.25 0 018.25 18v-1.5m8.25-8.25h-6a2.25 2.25 0 00-2.25 2.25v6" />
-        </svg>
-        <svg id="hero-check-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-        </svg>
+    <h1>Talk to your systems<br />like a <em>living entity</em></h1>
+
+    <p class="tagline">
+      sArthI doesn't just monitor — it understands, reasons, and heals.
+      Ask in plain English. Get answers, fixes, and actions across every system you operate.
+    </p>
+
+    <!-- Install one-liner -->
+    <div class="install-box">
+      <code id="hero-cmd">bash &lt;(curl -fsSL https://gecgithub01.walmart.com/raw/WITDnA/sarthi/main/install.sh)</code>
+      <button class="copy-btn" onclick="copyCode('hero-cmd')" title="Copy">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 8.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v8.25A2.25 2.25 0 006 16.5h2.25m8.25-8.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-7.5A2.25 2.25 0 018.25 18v-1.5m8.25-8.25h-6a2.25 2.25 0 00-2.25 2.25v6"/></svg>
+        <svg class="hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
       </button>
     </div>
-    <p class="install-hint">
-      paste in terminal (macOS) &nbsp;·&nbsp;
-      <a href="#install">view full install steps →</a>
-    </p>
+    <p class="install-hint">macOS · Walmart network/VPN required · <a href="#install">view steps →</a></p>
+
+    <!-- Entry point callout -->
+    <div class="entry-callout">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:18px;height:18px;flex-shrink:0"><path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.82m5.84-2.56a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.835m2.546-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/></svg>
+      After install, open Wibey and type <span class="entry-code">/sarthi</span> to start. Run <span class="entry-code">/sarthi setup</span> to verify all connections.
+    </div>
   </div>
 </section>
 
 
-<!-- ══════════════════════════════════════════
-     SECTION 1 — INSTALLATION
-═══════════════════════════════════════════ -->
+<!-- ════════════════ §1 INSTALLATION ════════════════ -->
 <section id="install" class="section">
   <div class="container">
     <p class="section-label">Installation</p>
-    <h2>Up and running<br />in minutes</h2>
-    <p class="lead">macOS only. Requires Walmart network or VPN.</p>
+    <h2>One command.<br />Everything configured.</h2>
+    <p class="lead">macOS only. Requires Walmart network or VPN. Takes 5–15 minutes including auth.</p>
 
     <div class="steps">
 
-      <!-- Step 1 -->
       <div class="step">
         <div class="step-num">1</div>
         <div class="step-body">
-          <h3>Run the one-liner installer</h3>
-          <p>Open Terminal and paste. Installs Wibey CLI if missing, clones sArthI, and configures all 12 MCP servers.</p>
+          <h3>Run the installer</h3>
+          <p>Open Terminal and paste. Installs Wibey CLI if missing, clones sArthI, configures all MCP servers, and walks you through 6 one-time auth logins — all automatically.</p>
           <div class="code-block">
-            <code id="step1-cmd">bash &lt;(curl -fsSL https://gecgithub01.walmart.com/raw/WITDnA/sarthi/main/install.sh)</code>
-            <button class="copy-btn" onclick="copyCode('step1-cmd')" title="Copy">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:16px;height:16px">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 8.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v8.25A2.25 2.25 0 006 16.5h2.25m8.25-8.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-7.5A2.25 2.25 0 018.25 18v-1.5m8.25-8.25h-6a2.25 2.25 0 00-2.25 2.25v6" />
-              </svg>
+            <code id="s1">bash &lt;(curl -fsSL https://gecgithub01.walmart.com/raw/WITDnA/sarthi/main/install.sh)</code>
+            <button class="copy-btn" onclick="copyCode('s1')" title="Copy">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 8.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v8.25A2.25 2.25 0 006 16.5h2.25m8.25-8.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-7.5A2.25 2.25 0 018.25 18v-1.5m8.25-8.25h-6a2.25 2.25 0 00-2.25 2.25v6"/></svg>
             </button>
           </div>
+          <p class="step-note">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:14px;height:14px"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>
+            6 browser windows will open for Walmart SSO — one per service. Complete each login and they close automatically. This happens once and is never repeated.
+          </p>
         </div>
       </div>
 
-      <!-- Step 2 -->
       <div class="step">
         <div class="step-num">2</div>
         <div class="step-body">
-          <h3>Complete the auth wizard</h3>
-          <p>6 browser windows open — one per service. Log in with your Walmart credentials. Takes ~10 minutes. Never repeated.</p>
+          <h3>Restart Wibey</h3>
+          <p>Close the terminal and relaunch Wibey. The new MCP servers and skills load automatically.</p>
           <div class="code-block">
-            <code id="step2-cmd">bash ~/sarthi/scripts/first-time-auth.sh</code>
-            <button class="copy-btn" onclick="copyCode('step2-cmd')" title="Copy">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:16px;height:16px">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 8.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v8.25A2.25 2.25 0 006 16.5h2.25m8.25-8.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-7.5A2.25 2.25 0 018.25 18v-1.5m8.25-8.25h-6a2.25 2.25 0 00-2.25 2.25v6" />
-              </svg>
+            <code id="s2">wibey</code>
+            <button class="copy-btn" onclick="copyCode('s2')" title="Copy">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 8.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v8.25A2.25 2.25 0 006 16.5h2.25m8.25-8.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-7.5A2.25 2.25 0 018.25 18v-1.5m8.25-8.25h-6a2.25 2.25 0 00-2.25 2.25v6"/></svg>
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Step 3 -->
       <div class="step">
         <div class="step-num">3</div>
         <div class="step-body">
-          <h3>Restart Wibey and verify</h3>
-          <p>Close the terminal and relaunch Wibey. Run the health check to confirm all systems are connected.</p>
+          <h3>Start sArthI</h3>
+          <p>Type <code style="font-family:var(--font-mono);font-size:0.9em;background:var(--code-bg);padding:0.1em 0.4em;border-radius:4px">/sarthi</code> inside Wibey to begin. Run <code style="font-family:var(--font-mono);font-size:0.9em;background:var(--code-bg);padding:0.1em 0.4em;border-radius:4px">/sarthi setup</code> to verify all 12 system connections are healthy.</p>
           <div class="code-block">
-            <code id="step3-cmd">wibey   →   /sar-setup</code>
-            <button class="copy-btn" onclick="copyCode('step3-cmd')" title="Copy">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:16px;height:16px">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 8.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v8.25A2.25 2.25 0 006 16.5h2.25m8.25-8.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-7.5A2.25 2.25 0 018.25 18v-1.5m8.25-8.25h-6a2.25 2.25 0 00-2.25 2.25v6" />
-              </svg>
+            <code id="s3">/sarthi setup</code>
+            <button class="copy-btn" onclick="copyCode('s3')" title="Copy">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 8.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v8.25A2.25 2.25 0 006 16.5h2.25m8.25-8.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-7.5A2.25 2.25 0 018.25 18v-1.5m8.25-8.25h-6a2.25 2.25 0 00-2.25 2.25v6"/></svg>
             </button>
           </div>
         </div>
       </div>
 
-    </div><!-- /steps -->
+    </div>
   </div>
 </section>
 
 
-<!-- ══════════════════════════════════════════
-     SECTION 2 — FEATURES
-═══════════════════════════════════════════ -->
+<!-- ════════════════ §2 FEATURES ════════════════ -->
 <section id="features" class="section">
   <div class="container-wide">
-    <div class="container" style="max-width:var(--max-w);margin:0 auto;padding:0 1.5rem;">
+    <div class="container" style="max-width:var(--max-w);margin:0 auto;padding:0 1.5rem">
       <p class="section-label">Capabilities</p>
-      <h2>Everything ops, in<br />plain English</h2>
-      <p class="lead">sArthI connects to 12 systems. Ask anything.</p>
+      <h2>Your entire stack,<br />one conversation away</h2>
+      <p class="lead">sArthI connects to all your systems — GCP, Azure, Airflow, Kubernetes, ServiceNow, Slack, and more. Not just to observe, but to reason, fix, and act.</p>
     </div>
 
-    <div style="margin-top:2.5rem;">
+    <div style="margin-top:2.5rem">
       <div class="feature-grid container-wide">
 
-        <!-- ── Features: edit the cards below to add/remove/reorder ── -->
+        <!-- Inline SVG stroke icons — black, stroke-width 1.5, no colour -->
 
         <div class="feature-card">
-          <span class="feature-icon">✈️</span>
+          <span class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+          </span>
           <h3>Pipeline Monitoring</h3>
-          <p>Check DAG health, drill into failures, read logs — across all AFaaS Airflow environments at once.</p>
+          <p>Check DAG health, drill into failures, and read logs across all Airflow environments in one query.</p>
         </div>
 
         <div class="feature-card">
-          <span class="feature-icon">🔍</span>
-          <h3>Incident Investigation</h3>
-          <p>Diagnose root causes across Airflow, BigQuery, and GCS. Propose fixes and clear failed tasks.</p>
+          <span class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </span>
+          <h3>Autonomous Incident Resolution</h3>
+          <p>sArthI doesn't just diagnose — it clears failed tasks, triggers backfills, and restarts services. Self-healing, not just alerting.</p>
         </div>
 
         <div class="feature-card">
-          <span class="feature-icon">🎫</span>
-          <h3>ServiceNow</h3>
-          <p>Draft CRQs, check incidents, approve or reject RITMs, and raise AD group access requests — all from chat.</p>
+          <span class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 2.625c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125m16.5 2.625v5.625c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125v-5.625"/></svg>
+          </span>
+          <h3>GCP, Azure &amp; Beyond</h3>
+          <p>Query BigQuery, browse GCS, inspect Dataproc, trace Hudi timelines, and investigate Azure, CosmosDB, and Redis — all from one place.</p>
         </div>
 
         <div class="feature-card">
-          <span class="feature-icon">📧</span>
-          <h3>Inbox & Teams</h3>
+          <span class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"/></svg>
+          </span>
+          <h3>Kubernetes / WCNP</h3>
+          <p>Inspect pods, stream logs, scale deployments, and restart rollouts across 30+ clusters — without kubectl.</p>
+        </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z"/></svg>
+          </span>
+          <h3>ServiceNow &amp; Access Management</h3>
+          <p>Draft CRQs, triage incidents, approve or reject RITMs, and raise AD group access requests — all from chat.</p>
+        </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
+          </span>
+          <h3>Inbox, Teams &amp; Slack</h3>
           <p>Read and reply to Outlook emails, monitor Teams channels, and post to Slack — without leaving Wibey.</p>
         </div>
 
         <div class="feature-card">
-          <span class="feature-icon">🗄️</span>
-          <h3>BigQuery & GCS</h3>
-          <p>Query tables, explore schemas, list datasets, and inspect Hudi timelines with natural language SQL generation.</p>
+          <span class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </span>
+          <h3>Cost Intelligence</h3>
+          <p>Surface cost anomalies, identify expensive queries, and get optimisation recommendations across GCP and Azure — through Wibey's cloud agents.</p>
         </div>
 
         <div class="feature-card">
-          <span class="feature-icon">☸️</span>
-          <h3>Kubernetes / WCNP</h3>
-          <p>Inspect pods, stream logs, scale deployments, and restart rollouts across 30+ WCNP clusters.</p>
-        </div>
-
-        <div class="feature-card">
-          <span class="feature-icon">🔀</span>
-          <h3>Git & Code</h3>
-          <p>Search repos, read files, list PRs, and create pull requests on GEC GitHub — all from context.</p>
-        </div>
-
-        <div class="feature-card">
-          <span class="feature-icon">🛡️</span>
-          <h3>AD Group Management</h3>
-          <p>Look up group membership and raise ServiceNow AD group access requests — one user or many.</p>
+          <span class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>
+          </span>
+          <h3>Git &amp; Code</h3>
+          <p>Search repos, read files, list PRs, and create pull requests on GEC GitHub — within the same session as your ops work.</p>
         </div>
 
         <!-- ── Add more feature cards here ── -->
@@ -612,46 +486,38 @@
 </section>
 
 
-<!-- ══════════════════════════════════════════
-     SECTION 3 — VIDEOS
-═══════════════════════════════════════════ -->
+<!-- ════════════════ §3 VIDEOS ════════════════ -->
 <section id="videos" class="section">
   <div class="container">
     <p class="section-label">Videos</p>
     <h2>See it in action</h2>
-    <p class="lead">Watch the pitch and a live demo of sArthI in action.</p>
+    <p class="lead">A 3-minute pitch and a live demo of sArthI resolving a real pipeline failure.</p>
 
     <div class="video-row">
 
-      <!-- ── Product pitch video
-           To embed a video: add data-src="https://www.youtube.com/embed/VIDEO_ID"
-           to the .video-placeholder div and the JS below handles it ── -->
+      <!-- To activate: set data-src="https://www.youtube.com/embed/YOUR_VIDEO_ID" -->
       <div class="video-card">
-        <div class="video-placeholder" id="pitch-video"
-             data-label="Product Pitch"
-             data-src=""><!-- paste YouTube embed URL here, e.g. https://www.youtube.com/embed/abcd1234 -->
-          <div class="play-icon">
-            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <div class="video-placeholder" id="pitch-video" data-src="">
+          <div class="play-circle">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
           </div>
-          <span>Product Pitch</span>
-          <span style="font-size:0.75rem;color:#9ca3af">Coming soon</span>
+          <span style="font-weight:600">Product Pitch</span>
+          <span style="font-size:0.75rem">Coming soon</span>
         </div>
         <h3>What is sArthI?</h3>
-        <p>A 3-minute overview of what sArthI does and why it was built for INTLDLDAT.</p>
+        <p>A 3-minute overview of the vision, capabilities, and why it was built for INTLDLDAT.</p>
       </div>
 
       <div class="video-card">
-        <div class="video-placeholder" id="demo-video"
-             data-label="Product Demo"
-             data-src=""><!-- paste YouTube embed URL here -->
-          <div class="play-icon">
-            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <div class="video-placeholder" id="demo-video" data-src="">
+          <div class="play-circle">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
           </div>
-          <span>Live Demo</span>
-          <span style="font-size:0.75rem;color:#9ca3af">Coming soon</span>
+          <span style="font-weight:600">Live Demo</span>
+          <span style="font-size:0.75rem">Coming soon</span>
         </div>
         <h3>sArthI in the wild</h3>
-        <p>Watch a real pipeline failure get diagnosed and resolved from a single Wibey session.</p>
+        <p>Watch a real pipeline failure get diagnosed and autonomously resolved from a single Wibey session.</p>
       </div>
 
     </div>
@@ -659,53 +525,57 @@
 </section>
 
 
-<!-- ══════════════════════════════════════════
-     SECTION 4 — SUCCESS STORIES
-═══════════════════════════════════════════ -->
+<!-- ════════════════ §4 STORIES ════════════════ -->
 <section id="stories" class="section">
   <div class="container-wide">
-    <div style="max-width:var(--max-w);margin:0 auto;padding:0 1.5rem;margin-bottom:2.5rem;">
+    <div style="max-width:var(--max-w);margin:0 auto 2.5rem;padding:0 1.5rem">
       <p class="section-label">Success Stories</p>
       <h2>Loved by the team</h2>
       <p class="lead">Real engineers, real impact.</p>
     </div>
 
-    <div class="stories-scroll container-wide">
+    <div class="stories-grid container-wide">
 
-      <!-- ── Success story cards — edit text, author, metric, initials below ── -->
+      <!-- ── Edit these cards — or add more by copying a .story-card block ── -->
 
       <div class="story-card">
         <span class="story-metric">60 min → 4 min</span>
-        <p class="story-quote">Used to spend an hour each morning checking DAG status across 5 environments. Now I just ask sArthI and get a health report in seconds. It even tells me which tasks failed and why.</p>
+        <p class="story-quote">
+          Used to spend an hour each morning checking DAG status across 5 environments. Now I just ask sArthI and get a complete health report in seconds. It even tells me which tasks failed and why.
+        </p>
         <div class="story-author">
           <div class="story-avatar">AK</div>
           <div>
-            <div class="story-author-name">Achalla Ravi Kiran</div>
-            <div class="story-author-role">Senior Manager, Data Engineering</div>
+            <div class="story-name">Achalla Ravi Kiran</div>
+            <div class="story-role">Senior Manager, Data Engineering</div>
           </div>
         </div>
       </div>
 
       <div class="story-card">
-        <span class="story-metric">3 browser tabs → 1 command</span>
-        <p class="story-quote">Creating a CRQ used to mean opening ServiceNow, finding the form, filling 15 fields. With sArthI I describe the change in plain English and it drafts the CRQ ready to review.</p>
+        <span class="story-metric">15 fields → 1 sentence</span>
+        <p class="story-quote">
+          Creating a CRQ used to mean opening ServiceNow, navigating 3 forms, and filling 15 fields. With sArthI I describe the change in plain English and it drafts the CRQ — ready to review.
+        </p>
         <div class="story-author">
-          <div class="story-avatar">AR</div>
+          <div class="story-avatar">–</div><!-- replace with initials -->
           <div>
-            <div class="story-author-name">Team Member</div>
-            <div class="story-author-role">Staff Data Engineer — edit this</div>
+            <div class="story-name">Team Member</div><!-- edit name -->
+            <div class="story-role">Data Engineer — edit this entry</div>
           </div>
         </div>
       </div>
 
       <div class="story-card">
         <span class="story-metric">Instant</span>
-        <p class="story-quote">Someone asked me who has access to the ET360 highsecure dataset. I just asked sArthI — it listed all 40 members from the AD group in under 3 seconds.</p>
+        <p class="story-quote">
+          Someone asked who has access to the ET360 highsecure dataset. I just asked sArthI — it listed all 40 members from the AD group in under 3 seconds, no portal needed.
+        </p>
         <div class="story-author">
-          <div class="story-avatar">KS</div>
+          <div class="story-avatar">–</div>
           <div>
-            <div class="story-author-name">Team Member</div>
-            <div class="story-author-role">Staff Data Engineer — edit this</div>
+            <div class="story-name">Team Member</div>
+            <div class="story-role">Staff Data Engineer — edit this entry</div>
           </div>
         </div>
       </div>
@@ -717,51 +587,49 @@
 </section>
 
 
-<!-- ══════════════════════════════════════════
-     SECTION 5 — RESOURCES
-═══════════════════════════════════════════ -->
+<!-- ════════════════ §5 RESOURCES ════════════════ -->
 <section id="resources" class="section">
   <div class="container">
     <p class="section-label">Resources</p>
     <h2>Everything you need</h2>
-    <p class="lead">Documentation, guides, and reference material.</p>
+    <p class="lead">Documentation, source code, and contribution guides.</p>
 
     <div class="resources-grid">
 
-      <!-- ── Resource links — add/edit href and label below ── -->
+      <!-- ── Edit or add resource links below ── -->
 
       <a class="resource-link" href="https://gecgithub01.walmart.com/WITDnA/sarthi/blob/main/FIRST_RUN.md" target="_blank">
-        <span class="icon">🚀</span>
+        <span class="r-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.82m5.84-2.56a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.835m2.546-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/></svg></span>
         First Run Guide
         <span class="arrow">→</span>
       </a>
 
       <a class="resource-link" href="https://gecgithub01.walmart.com/WITDnA/sarthi/blob/main/README.md" target="_blank">
-        <span class="icon">📖</span>
+        <span class="r-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg></span>
         README
         <span class="arrow">→</span>
       </a>
 
       <a class="resource-link" href="https://gecgithub01.walmart.com/WITDnA/sarthi" target="_blank">
-        <span class="icon">💻</span>
+        <span class="r-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg></span>
         Source Code
         <span class="arrow">→</span>
       </a>
 
       <a class="resource-link" href="https://gecgithub01.walmart.com/WITDnA/sarthi/blob/main/mcp/sarthi-mcp-additions.json" target="_blank">
-        <span class="icon">🔌</span>
+        <span class="r-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg></span>
         MCP Servers
         <span class="arrow">→</span>
       </a>
 
       <a class="resource-link" href="https://gecgithub01.walmart.com/WITDnA/sarthi/tree/main/skills" target="_blank">
-        <span class="icon">🧠</span>
+        <span class="r-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg></span>
         Skills Library
         <span class="arrow">→</span>
       </a>
 
       <a class="resource-link" href="https://gecgithub01.walmart.com/WITDnA/sarthi/issues/new" target="_blank">
-        <span class="icon">🐛</span>
+        <span class="r-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg></span>
         Report an Issue
         <span class="arrow">→</span>
       </a>
@@ -773,93 +641,68 @@
 </section>
 
 
-<!-- ══════════════════════════════════════════
-     FOOTER
-═══════════════════════════════════════════ -->
+<!-- ════════════════ FOOTER ════════════════ -->
 <footer>
-  <img src="sarthi_logo.png" alt="sArthI" style="height:28px;margin-bottom:0.75rem;display:block;margin-left:auto;margin-right:auto;" />
-  <p style="margin-bottom:0.35rem;">
-    <strong>sArthI</strong> — Self-healing Autonomous Runtime Troubleshooting &amp; Health Intelligence
+  <img src="sarthi_logo.png" alt="sArthI" style="height:28px;margin:0 auto 0.75rem;display:block" />
+  <p style="margin-bottom:0.35rem">
+    <strong>sArthI</strong> — <em>S</em>elf-healing <em>A</em>utonomous <em>R</em>untime <em>T</em>roubleshooting &amp; <em>H</em>ealth <em>I</em>ntelligence
   </p>
   <p>
-    Built by <a href="https://gecgithub01.walmart.com/WITDnA" target="_blank">WITDnA</a> · Walmart International Data &amp; Analytics ·
-    <a href="https://gecgithub01.walmart.com/WITDnA/sarthi" target="_blank">GitHub</a>
+    Built by <a href="https://gecgithub01.walmart.com/WITDnA" target="_blank">WITDnA</a>
+    · Walmart International Data &amp; Analytics
+    · <a href="https://gecgithub01.walmart.com/WITDnA/sarthi" target="_blank">GitHub</a>
   </p>
 </footer>
 
+<div class="toast" id="toast">Copied!</div>
 
-<!-- ══════════════════════════════════════════
-     COPY FEEDBACK TOAST
-═══════════════════════════════════════════ -->
-<div class="copied-msg" id="toast">Copied!</div>
-
-
-<!-- ══════════════════════════════════════════
-     JS
-═══════════════════════════════════════════ -->
 <script>
-  /* ─── Copy to clipboard ─────────────────────────────────── */
-  function copyCode(elementId) {
-    const el = document.getElementById(elementId);
+  /* ── Copy to clipboard ── */
+  function copyCode(id) {
+    const el = document.getElementById(id);
     if (!el) return;
     const text = el.textContent
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&amp;/g, '&')
-      .trim();
-    navigator.clipboard.writeText(text).then(() => {
-      showToast('Copied!');
-    }).catch(() => {
-      // Fallback
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      showToast('Copied!');
+      .replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&').trim();
+    navigator.clipboard.writeText(text).then(() => toast()).catch(() => {
+      const ta = Object.assign(document.createElement('textarea'),
+        { value: text, style: 'position:fixed;opacity:0' });
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta); toast();
     });
   }
-
-  function showToast(msg) {
+  function toast() {
     const t = document.getElementById('toast');
-    t.textContent = msg;
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2000);
   }
 
-  /* ─── Video click-to-embed ──────────────────────────────── */
-  document.querySelectorAll('.video-placeholder[data-src]').forEach(el => {
+  /* ── Video click-to-embed ── */
+  document.querySelectorAll('.video-placeholder').forEach(el => {
     el.addEventListener('click', () => {
       const src = el.dataset.src;
-      if (!src) return; // placeholder — no URL yet
-      const iframe = document.createElement('iframe');
-      iframe.src = src + '?autoplay=1';
-      iframe.frameBorder = '0';
-      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-      iframe.allowFullscreen = true;
-      iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border-radius:14px;';
-      el.style.position = 'relative';
-      el.style.background = '#000';
-      el.style.border = 'none';
+      if (!src) return;
+      const f = document.createElement('iframe');
+      Object.assign(f, {
+        src: src + '?autoplay=1', frameBorder: '0',
+        allow: 'accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture',
+        allowFullscreen: true
+      });
+      f.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border-radius:14px;';
+      Object.assign(el.style, { position:'relative', background:'#000', border:'none' });
       el.innerHTML = '';
-      el.appendChild(iframe);
+      el.appendChild(f);
     });
   });
 
-  /* ─── Smooth scroll offset (sticky nav) ────────────────── */
+  /* ── Smooth scroll (sticky nav offset) ── */
   document.querySelectorAll('a[href^="#"]').forEach(a => {
     a.addEventListener('click', e => {
-      const target = document.querySelector(a.getAttribute('href'));
-      if (!target) return;
+      const t = document.querySelector(a.getAttribute('href'));
+      if (!t) return;
       e.preventDefault();
-      const top = target.getBoundingClientRect().top + window.scrollY - 70;
-      window.scrollTo({ top, behavior: 'smooth' });
+      window.scrollTo({ top: t.getBoundingClientRect().top + scrollY - 70, behavior: 'smooth' });
     });
   });
 </script>
-
 </body>
 </html>
