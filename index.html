@@ -323,12 +323,7 @@
       Ask in plain English. Get answers, fixes, and actions across every system you operate.
     </p>
 
-    <!-- Entry point callout — no duplicate install box here, see §Installation below -->
-    <div class="entry-callout">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:18px;height:18px;flex-shrink:0"><path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.82m5.84-2.56a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.835m2.546-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/></svg>
-      After install, open Wibey and type <span class="entry-code">/custom/sarthi</span> — it auto-detects first run and guides you.
-    </div>
-    <p class="install-hint" style="margin-top:1rem"><a href="#install">See installation steps →</a></p>
+    <p class="install-hint" style="margin-top:0.5rem"><a href="#install">See installation steps →</a></p>
   </div>
 </section>
 
@@ -399,7 +394,7 @@
     <div class="container" style="max-width:var(--max-w);margin:0 auto;padding:0 1.5rem">
       <p class="section-label">Capabilities</p>
       <h2>Your entire stack,<br />one conversation away</h2>
-      <p class="lead">sArthI connects to all your systems — GCP, Azure, Airflow, Kubernetes, ServiceNow, Slack, and more. Not just to observe, but to reason, fix, and act.</p>
+      <p class="lead">sArthI connects to all your systems — cloud, orchestrators, Kubernetes, ServiceNow, messaging, and more. Not just to observe, but to reason, fix, and act.</p>
     </div>
 
     <div style="margin-top:2.5rem">
@@ -411,8 +406,8 @@
           <span class="feature-icon">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
           </span>
-          <h3>Pipeline Monitoring</h3>
-          <p>Check DAG health, drill into failures, and read logs across all Airflow environments in one query.</p>
+          <h3>Orchestrator Monitoring</h3>
+          <p>Check workflow health, drill into failures, and read execution logs across all your orchestration environments in one query.</p>
         </div>
 
         <div class="feature-card">
@@ -420,7 +415,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           </span>
           <h3>Autonomous Incident Resolution</h3>
-          <p>sArthI doesn't just diagnose — it clears failed tasks, triggers backfills, and restarts services. Self-healing, not just alerting.</p>
+          <p>sArthI doesn't just diagnose — it clears failed tasks, triggers reruns, and restarts services autonomously. Self-healing, not just alerting.</p>
         </div>
 
         <div class="feature-card">
@@ -471,6 +466,14 @@
           <p>Search repos, read files, list PRs, and create pull requests on GEC GitHub — within the same session as your ops work.</p>
         </div>
 
+        <div class="feature-card">
+          <span class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </span>
+          <h3>Predictive Health Monitoring</h3>
+          <p>sArthI continuously analyses environment logs and metrics to surface warning signs before an issue occurs — and suggests fixes proactively.</p>
+        </div>
+
         <!-- ── Add more feature cards here ── -->
 
       </div>
@@ -484,7 +487,7 @@
   <div class="container">
     <p class="section-label">Videos</p>
     <h2>See it in action</h2>
-    <p class="lead">A 3-minute pitch and a live demo of sArthI resolving a real pipeline failure.</p>
+    <p class="lead">A 3-minute pitch and a live demo of sArthI resolving a real incident end-to-end.</p>
 
     <div class="video-row">
 
@@ -510,7 +513,7 @@
           <span style="font-size:0.75rem">Coming soon</span>
         </div>
         <h3>sArthI in the wild</h3>
-        <p>Watch a real pipeline failure get diagnosed and autonomously resolved from a single Wibey session.</p>
+        <p>Watch a real incident get diagnosed and autonomously resolved from a single Wibey session.</p>
       </div>
 
     </div>
