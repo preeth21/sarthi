@@ -1,0 +1,85 @@
+# ==============================================================================
+# ServiceNow AD Group Automation - .gitignore
+# ==============================================================================
+
+# ----- Python -----
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+.env
+.env.*
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+MANIFEST
+
+# Testing
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+htmlcov/
+
+# ----- Secrets & Session Data -----
+# NEVER commit session cookies - they contain auth tokens
+*.pkl
+.servicenow_cookies.pkl
+
+# Config with real values (use config.example.yaml as template)
+config.yaml
+config.yml
+
+# ----- Debug Artifacts -----
+html_page_*.txt
+/tmp/servicenow_error.png
+*.png
+*.log
+
+# ----- Browser Profiles -----
+# Chrome profiles contain user data - keep out of version control
+chrome_profile/
+
+# ----- Backups -----
+bkp/
+backup/
+*.bak
+*.orig
+
+# ----- IDEs & Editors -----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ----- OS -----
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db

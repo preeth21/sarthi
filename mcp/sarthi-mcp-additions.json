@@ -135,6 +135,26 @@
         "gcloud auth login",
         "gcloud auth application-default login"
       ]
+    },
+    "sarthi-snow-ad": {
+      "_comment": "sArthI ServiceNow AD Group Request MCP. 4 tools: ad_group_add_user, ad_group_add_multi_user, ad_group_add_multi_group, ad_group_smart. Uses Selenium+Chrome browser automation (headed) against Walmart ServiceNow portal. Requires scripts/snow-ad-automation/ and Google Chrome. Auth: reuses chrome_profile from sarthi-snow-auth first-time-auth.sh.",
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${SARTHI_ROOT}/mcp/sarthi-snow-ad/server.py"],
+      "env": {
+        "SARTHI_ROOT": "${SARTHI_ROOT}"
+      },
+      "_requires_binaries": [
+        {
+          "binary": "google-chrome",
+          "check_cmd": "ls /Applications/Google\\ Chrome.app",
+          "install_hint": "Google Chrome is required for ServiceNow automation. Download from https://www.google.com/chrome/"
+        }
+      ],
+      "_auth_steps": [
+        "Run scripts/first-time-auth.sh step 4 (ServiceNow) to populate chrome_profile",
+        "Chrome window will open for SSO if chrome_profile session has expired"
+      ]
     }
   }
 }

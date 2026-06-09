@@ -25,12 +25,14 @@ IMPORTANT — Node.js TLS patch required after skill install:
   This patch is idempotent — safe to run multiple times.
 
 Tools:
-  slack_list_channels    — List channels from local cache (no API call)
-  slack_get_messages     — Get recent messages from a channel (conversations.history)
-  slack_get_thread       — Get thread replies (conversations.replies)
-  slack_post_message     — Post to channel (requires SLACK_SEND_ALLOWED=true)
-  slack_search_messages  — Full-text search across Slack (search.messages)
-  slack_get_activity     — Get activity feed / mentions (activity.feed)
+  slack_list_channels      — List channels from local cache (no API call)
+  slack_get_messages       — Get recent messages from a channel (conversations.history)
+  slack_get_thread         — Get thread replies (conversations.replies)
+  slack_post_message       — Post to channel (requires SLACK_SEND_ALLOWED=true)
+  slack_search_messages    — Full-text search across Slack (search.messages)
+  slack_get_activity       — Get activity feed / mentions (activity.feed)
+  slack_create_channel     — Create a channel and invite members by email (requires SLACK_SEND_ALLOWED=true)
+  slack_invite_to_channel  — Invite members to an existing channel by email (requires SLACK_SEND_ALLOWED=true)
 
 Config: SLACK_SEND_ALLOWED env var — set "true" to enable post_message (default: false)
 
@@ -362,6 +364,110 @@ def tool_slack_search_messages(args: dict) -> dict:
     }
 
 
+def tool_slack_create_channel(args: dict) -> dict:
+    """
+    Open a group DM (MPIM) with specified Slack user IDs.
+    Uses conversations.open — works with xoxc user tokens (unlike conversations.create
+    which requires admin/bot tokens). You are auto-included as the opener.
+    Requires SLACK_SEND_ALLOWED=true.
+
+    Args:
+      user_ids (list[str], required) — Slack user IDs to include (e.g. ["U080LDXC9EU", "W01285XP2C9"])
+      name     (str, optional)       — ignored (MPIMs are auto-named by Slack)
+    """
+    if not SLACK_SEND_ALLOWED:
+        return {
+            "error": "send_not_allowed",
+            "detail": "Set SLACK_SEND_ALLOWED=true in the sarthi-slack MCP server env config in mcp.json to enable.",
+        }
+
+    user_ids = args.get("user_ids", [])
+    if not user_ids:
+        return {"error": "user_ids list is required"}
+
+    result = _run_slack("conversations.open", {
+        "users": ",".join(user_ids),
+    }, timeout=20)
+
+    if "error" in result:
+        return result
+
+    ch = result.get("channel", {})
+    channel_id = ch.get("id") if isinstance(ch, dict) else None
+
+    return {
+        "ok": True,
+        "channel_id": channel_id,
+        "channel_name": ch.get("name") if isinstance(ch, dict) else None,
+        "is_mpim": ch.get("is_mpim") if isinstance(ch, dict) else True,
+        "members": user_ids,
+        "note": "Group DM opened. You are auto-included. Use slack_post_message with the channel_id to send a message.",
+    }
+
+
+def tool_slack_invite_to_channel(args: dict) -> dict:
+    """
+    Invite members to an existing Slack channel by email.
+    Requires SLACK_SEND_ALLOWED=true.
+
+    Args:
+      channel (str, required) — channel name or ID
+      emails  (list[str], required) — email addresses to invite
+    """
+    if not SLACK_SEND_ALLOWED:
+        return {
+            "error": "send_not_allowed",
+            "detail": "Set SLACK_SEND_ALLOWED=true in the sarthi-slack MCP server env config in mcp.json to enable.",
+        }
+
+    channel = args.get("channel", "").strip()
+    emails = args.get("emails", [])
+
+    if not channel:
+        return {"error": "channel is required"}
+    if not emails:
+        return {"error": "emails list is required"}
+
+    # Resolve channel name → ID if needed
+    if not (channel.startswith("C") and len(channel) >= 9):
+        resolve = _run_slack("channel.resolve", {"name": channel.lstrip("#")}, timeout=15)
+        if "error" in resolve:
+            return resolve
+        channel = resolve.get("id", channel)
+
+    # Resolve emails → user IDs
+    user_ids = []
+    failed_lookups = []
+    for email in emails:
+        result = _run_slack("users.lookupByEmail", {"email": email.strip()}, timeout=15)
+        if "error" in result:
+            failed_lookups.append({"email": email, "error": result.get("error")})
+            continue
+        uid = result.get("user", {}).get("id") if isinstance(result.get("user"), dict) else None
+        if not uid:
+            failed_lookups.append({"email": email, "error": "user_not_found"})
+            continue
+        user_ids.append(uid)
+
+    if not user_ids:
+        return {"error": "no_users_resolved", "failed": failed_lookups}
+
+    invite_result = _run_slack("conversations.invite", {
+        "channel": channel,
+        "users": ",".join(user_ids),
+    }, timeout=20)
+
+    if "error" in invite_result:
+        return invite_result
+
+    return {
+        "ok": True,
+        "channel": channel,
+        "invited_users": user_ids,
+        "failed_lookups": failed_lookups,
+    }
+
+
 def tool_slack_get_activity(args: dict) -> dict:
     """
     Get Slack activity feed — mentions, reactions, thread replies directed at you.
@@ -454,6 +560,30 @@ TOOLS = {
             "properties": {
                 "limit": {"type": "integer", "description": "Max items (default 20)"},
             },
+        },
+    },
+    "slack_create_channel": {
+        "fn": tool_slack_create_channel,
+        "description": "Open a group DM (MPIM) with specified Slack user IDs. You are auto-included. Use this to create a private group conversation. Requires SLACK_SEND_ALLOWED=true.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "user_ids": {"type": "array", "items": {"type": "string"}, "description": "Slack user IDs to include (e.g. ['U080LDXC9EU', 'W01285XP2C9'])"},
+                "name":     {"type": "string", "description": "Optional label (ignored by Slack, for your reference)"},
+            },
+            "required": ["user_ids"],
+        },
+    },
+    "slack_invite_to_channel": {
+        "fn": tool_slack_invite_to_channel,
+        "description": "Invite members to an existing Slack channel by email. Requires SLACK_SEND_ALLOWED=true.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "channel": {"type": "string", "description": "Channel name or ID"},
+                "emails":  {"type": "array",  "items": {"type": "string"}, "description": "Email addresses to invite"},
+            },
+            "required": ["channel", "emails"],
         },
     },
 }

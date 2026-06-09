@@ -1,0 +1,81 @@
+# ==============================================================================
+# ServiceNow AD Group Automation — Configuration Template
+# ==============================================================================
+#
+# USAGE:
+#   1. Copy this file:  cp config.example.yaml config.yaml
+#   2. Edit config.yaml with your personal defaults
+#   3. config.yaml is git-ignored — it NEVER gets committed
+#
+# PRIORITY: CLI flags > config.yaml > these defaults
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Request Defaults
+# Values here pre-fill the automation when not supplied via CLI flags.
+# ------------------------------------------------------------------------------
+defaults:
+  # Default business justification text (can be overridden with --justification)
+  justification: "Access required for assigned project work"
+
+  # Seconds to wait for each page element before timing out
+  # Increase if ServiceNow is slow or you're on a flaky connection
+  timeout: 30
+
+  # Seconds to wait on the SSO login page for you to complete Walmart login
+  # Increase if your MFA/SSO flow takes longer (e.g. hardware token)
+  sso_timeout: 120
+
+  # Action to perform on group membership: "add" or "remove"
+  # Default is "add" (granting access)
+  action: add
+
+# ------------------------------------------------------------------------------
+# Script Variant
+# Controls which Python script is executed by run.sh / run.bat
+# ------------------------------------------------------------------------------
+script:
+  # Options:
+  #   ad_group_request            → Single group, one user at a time (default)
+  #   ad_group_request_multi_user → Single group, multiple users in one request
+  #   ad_group_batch              → Multiple groups, multiple users (batch mode)
+  variant: ad_group_request
+
+# ------------------------------------------------------------------------------
+# Chrome / Browser Settings
+# ------------------------------------------------------------------------------
+chrome:
+  # Run Chrome without a visible window.
+  # WARNING: Set to false — SSO requires visible browser interaction.
+  headless: false
+
+  # Browser window size (pixels). Larger = more reliable element detection.
+  window_width: 1920
+  window_height: 1080
+
+  # Path to a Chrome profile directory for persistent sessions.
+  # Leave empty to use a fresh profile each run.
+  # Example: /Users/yourname/.config/servicenow-chrome-profile
+  profile_path: ""
+
+# ------------------------------------------------------------------------------
+# Logging
+# ------------------------------------------------------------------------------
+logging:
+  # Verbosity level: DEBUG | INFO | WARNING | ERROR
+  level: INFO
+
+  # Save logs to a file (leave empty to log to console only)
+  # Example: /tmp/servicenow_automation.log
+  log_file: ""
+
+  # Save a screenshot on error (useful for debugging broken selectors)
+  screenshot_on_error: true
+  screenshot_path: /tmp/servicenow_error.png
+
+# ------------------------------------------------------------------------------
+# Advanced: ServiceNow URL
+# Only change this if the portal URL changes (unlikely).
+# ------------------------------------------------------------------------------
+servicenow:
+  base_url: "https://walmartglobal.service-now.com/wm_sp"

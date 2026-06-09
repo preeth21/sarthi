@@ -6,6 +6,15 @@ scripts/crq/chrome_profile/
 scripts/crq/*.bak*
 scripts/crq/__pycache__/
 
+# ── snow-ad-automation runtime state ────────────────────────
+scripts/snow-ad-automation/.venv/
+scripts/snow-ad-automation/chrome_profile/
+scripts/snow-ad-automation/config.yaml
+scripts/snow-ad-automation/.servicenow_cookies.pkl
+scripts/snow-ad-automation/__pycache__/
+scripts/snow-ad-automation/bkp/
+scripts/snow-ad-automation/html_page*.txt
+
 # ── Python cache ─────────────────────────────────────────────
 **/__pycache__/
 **/*.pyc
