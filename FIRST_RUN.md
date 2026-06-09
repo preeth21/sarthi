@@ -8,16 +8,10 @@ Every step maps 1:1 to a deterministic shell script — nothing is interpreted b
 ## Installation (run in terminal, not inside Wibey)
 
 ```bash
-bash <(curl -fsSL \
-  -H "Authorization: token $(gh auth token --hostname gecgithub01.walmart.com)" \
-  https://gecgithub01.walmart.com/raw/WITDnA/sarthi/main/install.sh)
+git clone https://gecgithub01.walmart.com/WITDnA/sarthi.git ~/sarthi && bash ~/sarthi/install.sh
 ```
 
-> **If gh is not installed yet**, clone manually first:
-> ```bash
-> git clone https://gecgithub01.walmart.com/WITDnA/sarthi.git ~/sarthi
-> bash ~/sarthi/install.sh
-> ```
+Uses your existing `gh` / git credential helper — no token flag needed. Requires Walmart network/VPN.
 
 ---
 
@@ -74,8 +68,10 @@ Each step opens a browser window — you log in once, then it's automatic foreve
 ## After installation completes
 
 1. **Restart Wibey** — close terminal and reopen, then run `wibey`
-2. **Run health check** inside Wibey: `/sar-setup`
-3. **Start using sArthI**: `/sarthi`
+2. **Start sArthI** — type `/custom/sarthi` in Wibey
+   - On first run, sArthI detects the `.auth-complete` sentinel automatically
+   - If auth is complete it goes straight to your request
+3. **Run health check** anytime: `/custom/sarthi setup`
 
 ---
 

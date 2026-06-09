@@ -6,9 +6,10 @@
 #
 # Usage (run in terminal — NOT inside Wibey):
 #
-#   bash <(curl -fsSL \
-#     -H "Authorization: token $(gh auth token --hostname gecgithub01.walmart.com)" \
-#     https://gecgithub01.walmart.com/raw/WITDnA/sarthi/main/install.sh)
+#   git clone https://gecgithub01.walmart.com/WITDnA/sarthi.git ~/sarthi && bash ~/sarthi/install.sh
+#
+# Uses your existing git credential helper (gh auth) — no token flag needed.
+# Requires Walmart network or VPN.
 #
 # Or if you already have the repo cloned:
 #   bash ~/sarthi/install.sh

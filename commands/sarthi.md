@@ -59,9 +59,23 @@ Skills MUST pass the envelope forward; they add to it, never replace it.
 
 ---
 
-## STEP 0 — Shortcuts (subcommands)
+## STEP 0 — First-run detection & shortcuts
 
 ```
+# First-run auto-detect
+AUTH_SENTINEL = Read("~/.wibey/sarthi/.auth-complete")
+if AUTH_SENTINEL is missing or contains "failed":
+    Tell user:
+      "Welcome to sArthI! It looks like this is your first time.
+       Before I can help, please run the installer in your terminal:
+
+         git clone https://gecgithub01.walmart.com/WITDnA/sarthi.git ~/sarthi && bash ~/sarthi/install.sh
+
+       This takes ~15 minutes (includes Wibey setup + 6 one-time auth logins).
+       Once done, restart Wibey and type /custom/sarthi again."
+    STOP
+
+# Shortcuts (subcommands)
 if ARGUMENTS starts with "sync":
     Skill(sar-sync)
     STOP
