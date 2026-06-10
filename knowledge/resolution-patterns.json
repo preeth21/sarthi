@@ -97,7 +97,7 @@
     },
     {
       "pattern_id":             "F-hudi-sync",
-      "description":            "Hudi sync/commit failure — concurrent writes or marker conflict",
+      "description":            "Hudi sync/commit failure — concurrent writes or marker conflict. Safe to clear and retry when recent commits exist and no dirty markers.",
       "match_criteria":         ["HoodieException", "hoodie", ".hoodie/", "marker file", "commit conflict", "InstantNotFoundException", "CONCURRENT_WRITES"],
       "resolution_type":        "airflow_action",
       "airflow_action":         "clear_task_with_deps",
@@ -107,6 +107,52 @@
       "certified_at":           null,
       "certification_notes":    "Pattern F exists in investigate.md. No simulator scenario yet. Certify after dedicated Hudi failure sim.",
       "route":                  "manual_review"
+    },
+    {
+      "pattern_id":             "F-hudi-metadata-corrupt",
+      "description":            "Hudi metadata table corruption — corrupt log file with empty version string causes NumberFormatException in FSUtils.getFileVersionFromLog. Manifests in TriggerDagRunOperator failures where the child DAG Spark job fails.",
+      "match_criteria":         ["NumberFormatException", "For input string: \"\"", "getFileVersionFromLog", "getLogVersion", "FSUtils", "HoodieLogFile"],
+      "resolution_type":        "gcs_repair",
+      "airflow_action":         null,
+      "auto_resolve":           false,
+      "auto_resolve_certified": false,
+      "certified_by":           null,
+      "certified_at":           null,
+      "certification_notes":    "Observed in MX-RAP-PROD Jun 2026. JB_INTLDLDAT_RTN_ORDER_LINE_HUDI_DL_MX. sar-fix handles via gcs_ls + gcs_cat to identify + delete corrupt file, then clear_task_with_deps.",
+      "route":                  "manual_review",
+      "definitive_resolution": {
+        "summary": "Delete the corrupt Hudi metadata log file (empty version string in filename), then clear+retry the Spark task.",
+        "steps": [
+          {
+            "step": 1,
+            "description": "List files in the Hudi metadata partition that contains the corrupt log",
+            "tool": "sarthi-gcp gcs_ls",
+            "args": { "path": "gs://<bucket>/<table_path>/.hoodie/metadata/<partition>/" },
+            "identify": "Look for a .log file with an empty version segment — filename pattern: .log. (dot log dot, no number after second dot) or .log.<uuid>. (trailing dot with no integer version). Normal files look like: .log.1_0-X-Y or .log.2_0-X-Y"
+          },
+          {
+            "step": 2,
+            "description": "Confirm it is corrupt by reading its size",
+            "tool": "sarthi-gcp gcs_stat",
+            "args": { "path": "gs://<bucket>/<table_path>/.hoodie/metadata/<partition>/<corrupt_filename>" },
+            "identify": "A corrupt metadata log is typically 0 bytes or < 100 bytes. A valid Hudi log is >= 1KB."
+          },
+          {
+            "step": 3,
+            "description": "Delete the corrupt log file using gsutil",
+            "command": "gsutil rm gs://<bucket>/<table_path>/.hoodie/metadata/<partition>/<corrupt_filename>",
+            "note": "This requires gcs write permission on the Hudi table bucket. Run via Bash in sar-fix after user approval. The metadata table will self-heal on next Hudi write — no compaction needed."
+          },
+          {
+            "step": 4,
+            "description": "Clear the failed Spark task and re-queue the parent DAG run",
+            "tool": "sarthi-airflow-ops clear_task_with_deps",
+            "args": { "env_name": "<env>", "dag_id": "<child_dag_id>", "run_id": "<child_run_id>", "task_id": "<spark_task_id>" },
+            "then": "sarthi-airflow-ops set_dag_run_state queued on the PARENT dag_id/run_id"
+          }
+        ],
+        "safety_note": "NEVER delete files under .hoodie/timeline/ or .hoodie/metadata/.files/ — those are the timeline index. Only delete a file under .hoodie/metadata/<partition>/ that matches the corrupt log pattern AND is confirmed small (< 100 bytes)."
+      }
     }
   ]
 }

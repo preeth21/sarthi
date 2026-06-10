@@ -136,6 +136,12 @@
         "gcloud auth application-default login"
       ]
     },
+    "sarthi-trino": {
+      "_comment": "sArthI Trino/Hudi MCP. 11 tools wrapping Dengy's hive_explorer CLI against presto-datadiscovery.walmart.com:8443. Read-only: list/describe/query Hudi+Hive tables. Auth: macOS Keychain (run --set-password once). No plaintext passwords stored.",
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${SARTHI_ROOT}/mcp/sarthi-trino/server.py"]
+    },
     "sarthi-snow-ad": {
       "_comment": "sArthI ServiceNow AD Group Request MCP. 4 tools: ad_group_add_user, ad_group_add_multi_user, ad_group_add_multi_group, ad_group_smart. Uses Selenium+Chrome browser automation (headed) against Walmart ServiceNow portal. Requires scripts/snow-ad-automation/ and Google Chrome. Auth: reuses chrome_profile from sarthi-snow-auth first-time-auth.sh.",
       "type": "stdio",

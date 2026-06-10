@@ -112,6 +112,9 @@ MCP SERVERS (13 registered, all ~/sarthi/mcp/)
   sarthi-git            9 tools: read + write (v1.1.0)          gh CLI keyring
                           NEW: git_create_branch, git_create_or_update_file
   sarthi-gsuite         AD group lookups (principal↔groups)     gcloud ADC
+  sarthi-trino          Trino/Hudi query via Data Discovery     macOS Keychain (run --set-password once)
+                          11 tools: list/describe/query Hudi+Hive tables on presto-datadiscovery.walmart.com
+                          Live: hudi.mx_rtn_dl_tables.rtn_order_line = 5M rows ✅ (Jun10)
   sarthi-slack          Slack read/post (6 tools)               Playwright SSO
   sarthi-wcnp           Kubernetes/WCNP ops                     sledge
 
@@ -126,7 +129,7 @@ SIMULATOR (for testing the pipeline)
   DAG:  INTLDLDAT-ET360-SIMULATOR-TEST-DAG  ENV: ET360-CL-DEV
   GCS:  gs://wmt-intl-dp-etrans-360-dev-resources/ET360/s0d0gak/pipeline-resources/simulator-test/sim.done
   Run:  python3 ~/.wibey/agents/sarthi/simulator.py --scenario <NAME>
-  Scenarios: gcs_absent✅  gcs_present✅(fixed Jun8)  sql_error✅(validated Jun10)
+  Scenarios: gcs_absent✅  gcs_present✅(fixed Jun8)  sql_error✅(full e2e Jun10 — sar-fix PR#4 merged)
              timeout⏳  consecutive⏳
   Fixtures: ~/sarthi/tests/simulator-fixtures/  (SQL fixtures for sar-fix end-to-end testing)
   NOTE: _sensor_fn ignores fail_at_task conf — only _make_task_fn tasks respond to it.
