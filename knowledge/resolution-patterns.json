@@ -1,0 +1,112 @@
+{
+  "_comment": "sArthI resolution pattern registry. investigate.md looks up patterns by match_criteria and tags every emitted item with pattern_id + auto_resolve_certified. sar-fix offers to promote patterns to auto_resolve after a user-approved fix. Default: all new patterns start as auto_resolve:false until certified by a human.",
+  "_version": "1.0.0",
+  "_last_updated": "2026-06-10",
+  "patterns": [
+    {
+      "pattern_id":             "A-transient-ssl",
+      "description":            "SSLEOFError / transient network error against GCP APIs",
+      "match_criteria":         ["SSLEOFError", "HTTPSConnectionPool", "Connection reset by peer"],
+      "resolution_type":        "airflow_action",
+      "airflow_action":         "clear_task_with_deps",
+      "auto_resolve":           true,
+      "auto_resolve_certified": true,
+      "certified_by":           "akiran",
+      "certified_at":           "2026-06-08",
+      "certification_notes":    "Validated via ssl_eof simulator scenario Jun 8. Pattern A fires correctly, task clears and retries successfully.",
+      "route":                  "actions_json"
+    },
+    {
+      "pattern_id":             "A-task-timeout",
+      "description":            "Task exceeded execution timeout — transient, safe to clear and retry",
+      "match_criteria":         ["AirflowTaskTimeout", "Task exceeded the execution timeout period", "execution_timeout"],
+      "resolution_type":        "airflow_action",
+      "airflow_action":         "clear_task_with_deps",
+      "auto_resolve":           false,
+      "auto_resolve_certified": false,
+      "certified_by":           null,
+      "certified_at":           null,
+      "certification_notes":    "Simulator scenario 'timeout' not yet validated. Certify after running: python3 simulator.py --scenario timeout && ./check.sh",
+      "route":                  "manual_review"
+    },
+    {
+      "pattern_id":             "B-dataproc-deleted",
+      "description":            "Dataproc cluster deleted by TTL before job completion",
+      "match_criteria":         ["Cluster not found", "CLUSTER_NOT_FOUND", "dataproc", "cluster.*deleted"],
+      "resolution_type":        "airflow_action",
+      "airflow_action":         "restart_cluster_then_clear",
+      "auto_resolve":           false,
+      "auto_resolve_certified": false,
+      "certified_by":           null,
+      "certified_at":           null,
+      "certification_notes":    "Pattern B logic exists in investigate.md but no simulator scenario exists yet.",
+      "route":                  "manual_review"
+    },
+    {
+      "pattern_id":             "C-teardown-cleanup",
+      "description":            "Teardown/cleanup task failure — safe to mark success",
+      "match_criteria":         ["teardown", "cleanup", "delete_cluster", "shutdown"],
+      "resolution_type":        "airflow_action",
+      "airflow_action":         "mark_task_success",
+      "auto_resolve":           false,
+      "auto_resolve_certified": false,
+      "certified_by":           null,
+      "certified_at":           null,
+      "certification_notes":    "Not yet validated via simulator.",
+      "route":                  "manual_review"
+    },
+    {
+      "pattern_id":             "D-gcs-sensor-absent",
+      "description":            "GCS sensor cannot find expected done file — upstream dependency missing",
+      "match_criteria":         ["gcs_sensor", "GCSObjectExistenceSensor", "File not found", "gs://", "sensor"],
+      "resolution_type":        "manual",
+      "airflow_action":         null,
+      "auto_resolve":           false,
+      "auto_resolve_certified": false,
+      "certified_by":           null,
+      "certified_at":           null,
+      "certification_notes":    "Pattern D requires GCS state check — context-dependent, not safe to auto-certify.",
+      "route":                  "manual_review"
+    },
+    {
+      "pattern_id":             "E-bq-column-not-found",
+      "description":            "BigQuery column not found — schema mismatch (column dropped or renamed)",
+      "match_criteria":         ["column not found", "BigQueryException", "Invalid query", "not found in table", "Unrecognized name"],
+      "resolution_type":        "code_fix",
+      "airflow_action":         null,
+      "auto_resolve":           false,
+      "auto_resolve_certified": false,
+      "certified_by":           null,
+      "certified_at":           null,
+      "certification_notes":    "sql_error simulator scenario validated Jun 10. sar-fix flow tested (propose → review → PR). Promote to auto_resolve only after 3+ real prod fixes approved.",
+      "proposed_resolution":    "Use sar-fix: fetch source SQL via sarthi-git, validate correct column via sarthi-bq bq_schema, generate minimal rename/removal fix, PR to pipeline repo.",
+      "route":                  "manual_review"
+    },
+    {
+      "pattern_id":             "E-dq-check-failure",
+      "description":            "Data quality check failed — assertion or threshold breach",
+      "match_criteria":         ["assertion failed", "data quality", "DQ check", "DQCheckFailed", "threshold"],
+      "resolution_type":        "manual",
+      "airflow_action":         null,
+      "auto_resolve":           false,
+      "auto_resolve_certified": false,
+      "certified_by":           null,
+      "certified_at":           null,
+      "certification_notes":    "DQ failures require data investigation before any action. Never auto-resolve.",
+      "route":                  "manual_review"
+    },
+    {
+      "pattern_id":             "F-hudi-sync",
+      "description":            "Hudi sync/commit failure — concurrent writes or marker conflict",
+      "match_criteria":         ["HoodieException", "hoodie", ".hoodie/", "marker file", "commit conflict", "InstantNotFoundException", "CONCURRENT_WRITES"],
+      "resolution_type":        "airflow_action",
+      "airflow_action":         "clear_task_with_deps",
+      "auto_resolve":           false,
+      "auto_resolve_certified": false,
+      "certified_by":           null,
+      "certified_at":           null,
+      "certification_notes":    "Pattern F exists in investigate.md. No simulator scenario yet. Certify after dedicated Hudi failure sim.",
+      "route":                  "manual_review"
+    }
+  ]
+}
