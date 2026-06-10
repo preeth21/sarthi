@@ -1,6 +1,6 @@
 {
   "_comment": "sArthI resolution pattern registry. investigate.md looks up patterns by match_criteria and tags every emitted item with pattern_id + auto_resolve_certified. sar-fix offers to promote patterns to auto_resolve after a user-approved fix. Default: all new patterns start as auto_resolve:false until certified by a human.",
-  "_version": "1.0.0",
+  "_version": "1.1.0",
   "_last_updated": "2026-06-10",
   "patterns": [
     {
@@ -110,48 +110,76 @@
     },
     {
       "pattern_id":             "F-hudi-metadata-corrupt",
-      "description":            "Hudi metadata table corruption — corrupt log file with empty version string causes NumberFormatException in FSUtils.getFileVersionFromLog. Manifests in TriggerDagRunOperator failures where the child DAG Spark job fails.",
-      "match_criteria":         ["NumberFormatException", "For input string: \"\"", "getFileVersionFromLog", "getLogVersion", "FSUtils", "HoodieLogFile"],
+      "description":            "Hudi metadata table corruption in rtn_order_line — two confirmed variants: (1) MX variant: corrupt log file with empty version string causes NumberFormatException in FSUtils.getFileVersionFromLog; (2) CA variant: .hfile compaction artifact appears as a log file causing InvalidHoodiePathException in FSUtils.getFileIdFromLogPath. Both fail at query planning before any write. Root cause: hoodie.metadata.enable=true hardcoded in SparkUtil.scala (WITDnA/wcp_rap). Job fails before writing — staging data not lost, picked up on next successful run.",
+      "match_criteria":         ["NumberFormatException", "For input string: \"\"", "getFileVersionFromLog", "getLogVersion", "FSUtils", "HoodieLogFile", "InvalidHoodiePathException", "getFileIdFromLogPath", "Error fetching partition paths from metadata table", "HoodieMetadataException", "Failed to retrieve list of partition from metadata"],
       "resolution_type":        "gcs_repair",
       "airflow_action":         null,
       "auto_resolve":           false,
       "auto_resolve_certified": false,
-      "certified_by":           null,
-      "certified_at":           null,
-      "certification_notes":    "Observed in MX-RAP-PROD Jun 2026. JB_INTLDLDAT_RTN_ORDER_LINE_HUDI_DL_MX. sar-fix handles via gcs_ls + gcs_cat to identify + delete corrupt file, then clear_task_with_deps.",
-      "route":                  "manual_review",
+      "certified_by":           "akiran",
+      "certified_at":           "2026-06-10",
+      "certification_notes":    "Confirmed Jun 10 2026. MX: 7 consecutive manual retries (04:58-10:39 UTC) before fix. CA: 1 failure at 07:24, recovered by 08:35. Root cause confirmed from SparkUtil.scala code + driver logs + hoodie.properties. hoodie.metadata.enable=true in SparkUtil.scala overrides any attempt to disable. hoodie.table.metadata.partitions=files in hoodie.properties further overrides job-level config. Data impact: staging records not loaded during outage (~4-6h) but NOT lost — staged in stg_rtn_order_line_dl, picked up on next successful MERGE. Time to resolve manually: 4h. Time to resolve with sarthi Pattern F: ~15min.",
+      "affected_tables": {
+        "MX": "gs://wmt-mx-rtn-prod-rtn-order-line/current/.hoodie/metadata/files/",
+        "CA": "gs://wmt-ca-rtn-prod-rtn-order-line/current/.hoodie/metadata/files/"
+      },
+      "root_cause_code": {
+        "repo":   "WITDnA/wcp_rap",
+        "branch": "DTPGISRL-MX-CA-ESHA-CPR",
+        "file":   "src/main/scala/com/walmart/omni/returns/wf/rapDaily/jobutil/SparkUtil.scala",
+        "line":   ".set(\"hoodie.metadata.enable\", \"true\")",
+        "fix":    "Change to .set(\"hoodie.metadata.enable\", \"false\") — requires JAR rebuild and redeploy"
+      },
+      "route": "manual_review",
       "definitive_resolution": {
-        "summary": "Delete the corrupt Hudi metadata log file (empty version string in filename), then clear+retry the Spark task.",
-        "steps": [
-          {
-            "step": 1,
-            "description": "List files in the Hudi metadata partition that contains the corrupt log",
-            "tool": "sarthi-gcp gcs_ls",
-            "args": { "path": "gs://<bucket>/<table_path>/.hoodie/metadata/<partition>/" },
-            "identify": "Look for a .log file with an empty version segment — filename pattern: .log. (dot log dot, no number after second dot) or .log.<uuid>. (trailing dot with no integer version). Normal files look like: .log.1_0-X-Y or .log.2_0-X-Y"
-          },
-          {
-            "step": 2,
-            "description": "Confirm it is corrupt by reading its size",
-            "tool": "sarthi-gcp gcs_stat",
-            "args": { "path": "gs://<bucket>/<table_path>/.hoodie/metadata/<partition>/<corrupt_filename>" },
-            "identify": "A corrupt metadata log is typically 0 bytes or < 100 bytes. A valid Hudi log is >= 1KB."
-          },
-          {
-            "step": 3,
-            "description": "Delete the corrupt log file using gsutil",
-            "command": "gsutil rm gs://<bucket>/<table_path>/.hoodie/metadata/<partition>/<corrupt_filename>",
-            "note": "This requires gcs write permission on the Hudi table bucket. Run via Bash in sar-fix after user approval. The metadata table will self-heal on next Hudi write — no compaction needed."
-          },
-          {
-            "step": 4,
-            "description": "Clear the failed Spark task and re-queue the parent DAG run",
-            "tool": "sarthi-airflow-ops clear_task_with_deps",
-            "args": { "env_name": "<env>", "dag_id": "<child_dag_id>", "run_id": "<child_run_id>", "task_id": "<spark_task_id>" },
-            "then": "sarthi-airflow-ops set_dag_run_state queued on the PARENT dag_id/run_id"
-          }
-        ],
-        "safety_note": "NEVER delete files under .hoodie/timeline/ or .hoodie/metadata/.files/ — those are the timeline index. Only delete a file under .hoodie/metadata/<partition>/ that matches the corrupt log pattern AND is confirmed small (< 100 bytes)."
+        "summary": "Two-step fix: (1) immediate GCS repair to unblock current run, (2) permanent code fix to prevent recurrence.",
+        "immediate_fix": {
+          "description": "Delete the entire .hoodie/metadata/ directory AND remove hoodie.table.metadata.partitions from hoodie.properties. Both steps required — hoodie.properties overrides job-level config even if code is fixed.",
+          "steps": [
+            {
+              "step": 1,
+              "description": "Confirm job is NOT currently running before proceeding",
+              "check": "sarthi-airflow-read get_task_instances — ensure JB_INTLDLDAT_RTN_ORDER_LINE_HUDI_DL_* is not in running state"
+            },
+            {
+              "step": 2,
+              "description": "Delete the Hudi metadata directory for the affected market",
+              "command_mx": "gsutil -m rm -r gs://wmt-mx-rtn-prod-rtn-order-line/current/.hoodie/metadata/",
+              "command_ca": "gsutil -m rm -r gs://wmt-ca-rtn-prod-rtn-order-line/current/.hoodie/metadata/",
+              "safety": "SAFE — metadata dir contains only derived index, zero business data. Data files under rtn_line_cre_dt=*/ are completely unaffected."
+            },
+            {
+              "step": 3,
+              "description": "Remove hoodie.table.metadata.partitions from hoodie.properties to prevent override",
+              "command_mx": "gsutil cp gs://wmt-mx-rtn-prod-rtn-order-line/current/.hoodie/hoodie.properties /tmp/mx.properties && grep -v 'hoodie.table.metadata.partitions' /tmp/mx.properties > /tmp/mx_fixed.properties && gsutil cp /tmp/mx_fixed.properties gs://wmt-mx-rtn-prod-rtn-order-line/current/.hoodie/hoodie.properties",
+              "command_ca": "gsutil cp gs://wmt-ca-rtn-prod-rtn-order-line/current/.hoodie/hoodie.properties /tmp/ca.properties && grep -v 'hoodie.table.metadata.partitions' /tmp/ca.properties > /tmp/ca_fixed.properties && gsutil cp /tmp/ca_fixed.properties gs://wmt-ca-rtn-prod-rtn-order-line/current/.hoodie/hoodie.properties",
+              "safety": "SAFE — only removes the metadata partition registration line. DO NOT remove hoodie.table.type, hoodie.table.recordkey.fields, hoodie.table.partition.fields or any other line."
+            },
+            {
+              "step": 4,
+              "description": "Clear failed Spark task and re-queue parent DAG run",
+              "tool": "sarthi-airflow-ops clear_task_with_deps",
+              "args_mx": { "env_name": "MX-RAP-PROD", "dag_id": "WF_INTLDLDAT_HUDI_RAP_DAILY_DL_MX", "task_id": "JB_INTLDLDAT_RTN_ORDER_LINE_HUDI_DL_MX" },
+              "args_ca": { "env_name": "RETURNS-CA-PROD", "dag_id": "WF_INTLDLDAT_HUDI_RAP_DAILY_DL_CA", "task_id": "JB_INTLDLDAT_RTN_ORDER_LINE_HUDI_DL_CA" },
+              "then": "set_dag_run_state queued on parent WF_INTLDLDAT_CR_DP_RAP_MASTER_MX / WF_INTLDLDAT_CR_DP_RAP_MASTER_CA"
+            }
+          ]
+        },
+        "permanent_fix": {
+          "description": "Change hoodie.metadata.enable from true to false in SparkUtil.scala. Requires JAR rebuild + GCS upload + DAG redeployment.",
+          "repo":    "WITDnA/wcp_rap",
+          "file":    "src/main/scala/com/walmart/omni/returns/wf/rapDaily/jobutil/SparkUtil.scala",
+          "change":  "Line: .set(\"hoodie.metadata.enable\", \"true\") → .set(\"hoodie.metadata.enable\", \"false\")",
+          "jar_path": "gs://1ea4d742da0e66b5f26e2896e706bd065dd901c47e846fa564a2076340975f/rap/jar/WF_RAP_DAILY.jar",
+          "performance_impact": "GCS partition listing instead of metadata index. ~30-90s added to job startup for 700+ partition table. Negligible for a 10+ minute batch job.",
+          "data_impact": "None. All 5M+ rows in rtn_order_line remain intact. Staging data from outage period picked up automatically on next successful MERGE (120-day window)."
+        },
+        "never_do": [
+          "Delete .hoodie/timeline/ — transaction log, table becomes unreadable",
+          "Delete .hoodie/hoodie.properties — table loses identity",
+          "Delete rtn_line_cre_dt=*/ partition directories — actual data loss",
+          "Retry the job without GCS repair — the corrupt metadata file is re-encountered every retry, wastes 15min per attempt"
+        ]
       }
     }
   ]
