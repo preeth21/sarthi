@@ -6,13 +6,16 @@ via keyring (akiran). No additional auth setup needed — uses the same gh token
 that `gh auth status --hostname gecgithub01.walmart.com` shows as active.
 
 Tools:
-  git_get_file        — Read a file from any repo/branch at gecgithub01.walmart.com
-  git_list_dir        — List files/dirs at a path in a repo
-  git_search_code     — Search for a string across a repo's code
-  git_get_pr          — Get PR details (description, status, diff summary)
-  git_list_prs        — List open PRs for a repo
-  git_create_pr       — Create a PR (requires write access)
-  git_get_commit      — Get details of a specific commit
+  git_get_file               — Read a file from any repo/branch at gecgithub01.walmart.com
+  git_list_dir               — List files/dirs at a path in a repo
+  git_search_code            — Search for a string across a repo's code
+  git_get_pr                 — Get PR details (description, status, diff summary)
+  git_list_prs               — List open PRs for a repo
+  git_create_pr              — Create a PR (requires write access)
+  git_get_commit             — Get details of a specific commit
+  git_create_branch          — Create a new branch from an existing ref (write)
+  git_create_or_update_file  — Create or update a single file via PUT /contents (write)
+                               IMPORTANT: pass current file sha when updating an existing file.
 
 Default hostname: gecgithub01.walmart.com (Walmart GEC GitHub)
 All tools accept an optional `hostname` param to target github.com if needed.
@@ -36,10 +39,19 @@ def log(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr, flush=True)
 
 def _gh(args: list[str], hostname: str = DEFAULT_HOSTNAME, timeout: int = 30) -> tuple[int, str, str]:
-    """Run a gh CLI command. Returns (returncode, stdout, stderr)."""
-    cmd = ["gh"] + args + ["--hostname", hostname]
+    """
+    Run a gh CLI command. Returns (returncode, stdout, stderr).
+
+    `gh api` accepts --hostname; `gh pr create/view/list` does NOT — for those
+    we pass GH_HOST env var instead. We always set GH_HOST so both paths work.
+    """
+    cmd = ["gh"] + args
+    # api subcommand supports --hostname; pr/issue subcommands use GH_HOST env
+    if args and args[0] == "api":
+        cmd += ["--hostname", hostname]
+    env = {**os.environ, "GH_HOST": hostname}
     try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, env=env)
         return r.returncode, r.stdout.strip(), r.stderr.strip()
     except subprocess.TimeoutExpired:
         return -1, "", f"TIMEOUT after {timeout}s"
@@ -358,6 +370,156 @@ def tool_git_get_commit(args: dict) -> dict:
         return {"error": "parse_failed", "detail": str(e), "raw": stdout[:500]}
 
 
+def tool_git_create_branch(args: dict) -> dict:
+    """
+    Create a new branch from an existing ref (branch/tag/SHA).
+
+    Args:
+      org       (str, required) — GitHub org/owner
+      repo      (str, required) — repo name
+      branch    (str, required) — new branch name e.g. fix/sarthi-et360-item-id-20260610
+      from_ref  (str, optional) — source branch/tag/SHA (default: main)
+      hostname  (str, optional) — GitHub hostname
+    """
+    org      = args.get("org", "").strip()
+    repo     = args.get("repo", "").strip()
+    branch   = args.get("branch", "").strip()
+    from_ref = args.get("from_ref", "main").strip()
+    hostname = args.get("hostname", DEFAULT_HOSTNAME).strip()
+
+    if not all([org, repo, branch]):
+        return {"error": "org, repo, and branch are required"}
+
+    # Resolve from_ref to a SHA
+    rc, stdout, stderr = _gh([
+        "api", f"repos/{org}/{repo}/git/ref/heads/{from_ref}",
+    ], hostname=hostname, timeout=30)
+
+    if rc != 0:
+        # Maybe from_ref is already a full SHA — try as commit directly
+        rc2, stdout2, stderr2 = _gh([
+            "api", f"repos/{org}/{repo}/commits/{from_ref}",
+        ], hostname=hostname, timeout=30)
+        if rc2 != 0:
+            if _is_auth_error(stderr):
+                return {"error": "auth_expired", "detail": f"Run: gh auth login --hostname {hostname}"}
+            return {"error": "resolve_ref_failed", "detail": f"Could not resolve '{from_ref}': {stderr[:300]}"}
+        try:
+            sha = json.loads(stdout2).get("sha", "")
+        except Exception:
+            return {"error": "parse_failed", "detail": stdout2[:300]}
+    else:
+        try:
+            sha = json.loads(stdout).get("object", {}).get("sha", "")
+        except Exception:
+            return {"error": "parse_failed", "detail": stdout[:300]}
+
+    if not sha:
+        return {"error": "no_sha", "detail": f"Could not extract SHA from ref '{from_ref}'"}
+
+    # Create the branch
+    rc, stdout, stderr = _gh([
+        "api", "-X", "POST",
+        f"repos/{org}/{repo}/git/refs",
+        "-f", f"ref=refs/heads/{branch}",
+        "-f", f"sha={sha}",
+    ], hostname=hostname, timeout=30)
+
+    if rc != 0:
+        if _is_auth_error(stderr):
+            return {"error": "auth_expired", "detail": f"Run: gh auth login --hostname {hostname}"}
+        if "already exists" in stderr.lower() or "422" in stderr:
+            return {"error": "branch_exists", "detail": f"Branch '{branch}' already exists in {org}/{repo}"}
+        return {"error": "git_create_branch_failed", "detail": stderr[:500]}
+
+    try:
+        data = json.loads(stdout)
+        return {
+            "ok":     True,
+            "branch": branch,
+            "ref":    data.get("ref"),
+            "sha":    data.get("object", {}).get("sha", "")[:12],
+            "url":    f"https://{hostname}/{org}/{repo}/tree/{branch}",
+        }
+    except Exception as e:
+        return {"error": "parse_failed", "detail": str(e), "raw": stdout[:300]}
+
+
+def tool_git_create_or_update_file(args: dict) -> dict:
+    """
+    Create or update a single file in a repo via the GitHub Contents API (PUT).
+
+    To UPDATE an existing file you MUST provide `sha` (the blob SHA of the
+    current file — obtained from git_get_file). Without sha the API returns 422.
+    To CREATE a new file omit sha (or pass null).
+
+    Args:
+      org       (str, required) — GitHub org/owner
+      repo      (str, required) — repo name
+      path      (str, required) — file path in repo e.g. sql/et360/item_load.sql
+      content   (str, required) — full new file content (plain text, not base64)
+      message   (str, required) — commit message
+      branch    (str, required) — branch to commit to (must exist — use git_create_branch first)
+      sha       (str, optional) — current file blob SHA (required when updating, omit when creating)
+      hostname  (str, optional) — GitHub hostname
+    """
+    org      = args.get("org", "").strip()
+    repo     = args.get("repo", "").strip()
+    path     = args.get("path", "").strip()
+    content  = args.get("content", "")
+    message  = args.get("message", "").strip()
+    branch   = args.get("branch", "").strip()
+    sha      = args.get("sha", "").strip()   # blob sha of existing file — required for updates
+    hostname = args.get("hostname", DEFAULT_HOSTNAME).strip()
+
+    if not all([org, repo, path, content, message, branch]):
+        return {"error": "org, repo, path, content, message, and branch are required"}
+
+    # GitHub Contents API requires content base64-encoded
+    content_b64 = base64.b64encode(content.encode("utf-8")).decode("ascii")
+
+    gh_args = [
+        "api", "-X", "PUT",
+        f"repos/{org}/{repo}/contents/{path}",
+        "-f", f"message={message}",
+        "-f", f"content={content_b64}",
+        "-f", f"branch={branch}",
+    ]
+    if sha:
+        gh_args += ["-f", f"sha={sha}"]
+
+    rc, stdout, stderr = _gh(gh_args, hostname=hostname, timeout=30)
+
+    if rc != 0:
+        if _is_auth_error(stderr):
+            return {"error": "auth_expired", "detail": f"Run: gh auth login --hostname {hostname}"}
+        if "sha" in stderr.lower() or "422" in stderr:
+            return {
+                "error": "sha_required_or_mismatch",
+                "detail": (
+                    "File already exists — provide its current blob sha (from git_get_file .sha). "
+                    f"Raw: {stderr[:300]}"
+                ),
+            }
+        return {"error": "git_create_or_update_file_failed", "detail": stderr[:500]}
+
+    try:
+        data = json.loads(stdout)
+        commit = data.get("commit", {})
+        file_data = data.get("content", {})
+        return {
+            "ok":         True,
+            "path":       file_data.get("path", path),
+            "sha":        file_data.get("sha", ""),     # new blob sha after commit
+            "commit_sha": commit.get("sha", "")[:12],
+            "commit_url": commit.get("html_url", ""),
+            "branch":     branch,
+            "html_url":   file_data.get("html_url", ""),
+        }
+    except Exception as e:
+        return {"error": "parse_failed", "detail": str(e), "raw": stdout[:300]}
+
+
 # ── Tool registry ─────────────────────────────────────────────────────────────
 
 TOOLS = {
@@ -465,6 +627,48 @@ TOOLS = {
             "required": ["org", "repo", "sha"],
         },
     },
+    "git_create_branch": {
+        "fn": tool_git_create_branch,
+        "description": (
+            "Create a new branch in a GEC GitHub repo from an existing ref (branch name, tag, or SHA). "
+            "Use before git_create_or_update_file — the target branch must exist. "
+            "Returns error 'branch_exists' if the branch already exists."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "org":      {"type": "string", "description": "GitHub org/owner"},
+                "repo":     {"type": "string", "description": "Repo name"},
+                "branch":   {"type": "string", "description": "New branch name e.g. fix/sarthi-et360-item-id-20260610"},
+                "from_ref": {"type": "string", "description": "Source branch/tag/SHA to branch from (default: main)"},
+                "hostname": {"type": "string", "description": "GitHub hostname (default: gecgithub01.walmart.com)"},
+            },
+            "required": ["org", "repo", "branch"],
+        },
+    },
+    "git_create_or_update_file": {
+        "fn": tool_git_create_or_update_file,
+        "description": (
+            "Create or update a single file in a GEC GitHub repo (PUT /contents). "
+            "IMPORTANT: when updating an existing file you MUST supply `sha` — the blob SHA "
+            "returned by git_get_file. Without it the API returns 422. "
+            "To create a new file omit sha. Branch must already exist (use git_create_branch first)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "org":      {"type": "string", "description": "GitHub org/owner"},
+                "repo":     {"type": "string", "description": "Repo name"},
+                "path":     {"type": "string", "description": "File path in repo e.g. sql/et360/item_load.sql"},
+                "content":  {"type": "string", "description": "Full new file content (plain text — auto base64-encoded)"},
+                "message":  {"type": "string", "description": "Commit message"},
+                "branch":   {"type": "string", "description": "Branch to commit to (must exist)"},
+                "sha":      {"type": "string", "description": "Current blob SHA from git_get_file (required when updating existing file)"},
+                "hostname": {"type": "string", "description": "GitHub hostname (default: gecgithub01.walmart.com)"},
+            },
+            "required": ["org", "repo", "path", "content", "message", "branch"],
+        },
+    },
 }
 
 
@@ -484,7 +688,7 @@ def handle_request(req: dict) -> dict | None:
         return ok({
             "protocolVersion": "2024-11-05",
             "capabilities": {"tools": {}},
-            "serverInfo": {"name": "sarthi-git", "version": "1.0.0"},
+            "serverInfo": {"name": "sarthi-git", "version": "1.1.0"},
         })
 
     if method == "notifications/initialized":

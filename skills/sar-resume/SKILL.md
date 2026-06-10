@@ -84,33 +84,51 @@ PROJECT LAYOUT
   ~/.wibey/sarthi/history/ops.jsonl  → ops audit log
 
 SKILL STATUS
-  ✅ Active:      sar-monitor (v1.1.0), sar-setup (v2.0.0), sar-crq
+  ✅ Active:      sar-monitor, sar-setup, sar-crq, sar-fix, sar-propose-fix, sar-pr
+                  sar-azure, sar-concord, sar-kafka, sar-looper, sar-triagent,
+                  sar-wcnp-ops, sar-resume, sar-sync, sar-local-mcp
   🔧 Partial:     sar-inbox (Slack TODO), sar-reply (Teams thread TODO)
   ⏳ Placeholder: sar-investigate, sar-resolve, sar-plan, sar-answer,
-                  sar-pr, sar-propose-fix, sar-feature-spec, sar-scaffold,
-                  sar-summary, sar-sync
+                  sar-feature-spec, sar-scaffold, sar-summary
 
-MCP SERVERS (8 registered, all ~/sarthi/mcp/)
-  sarthi-airflow-read   read-only DAG/task/log queries        auth: cookies.txt
-  sarthi-airflow-ops    clear_task, trigger, set_state        ops_allowed:true envs only
-  sarthi-airflow-auth   headless Playwright session refresh   ~84s
-  sarthi-snow           CRQ get/parse/create-draft            auth: ~/.wibey/snow-session.json
-  sarthi-snow-auth      ServiceNow session refresh            PingFed SSO
-  sarthi-msgraph        email + Teams (10 tools, cron-safe)   auth: msgraph_tokens.json
-  sarthi-gcp            GCS ls/cat/stat, Dataproc, Hudi       gcloud ADC
-  sarthi-bq             BigQuery SELECT (1GB cap)             gcloud ADC
+FIX PIPELINE (user-initiated, post check.sh beep)
+  /sar-fix
+    → sar-propose-fix  (fetch source via sarthi-git, generate fix, bq_schema validate)
+    → interactive review loop  (user approves / edits)
+    → sar-pr  (git_create_branch + git_create_or_update_file + git_create_pr)
+  Fix stored at: ~/sarthi/knowledge/proposed-prs/<dag_id>__<task_id>__<run_id>/
+  Status flow:   in_progress → approved → done | manual_required | abandoned
+
+MCP SERVERS (13 registered, all ~/sarthi/mcp/)
+  sarthi-airflow-read   read-only DAG/task/log queries          auth: cookies.txt
+  sarthi-airflow-ops    clear_task, trigger, set_state          ops_allowed:true envs only
+  sarthi-airflow-auth   headless Playwright session refresh     ~84s
+  sarthi-snow           CRQ/incident/RITM tools                 auth: ~/.wibey/snow-session.json
+  sarthi-snow-auth      ServiceNow session refresh              PingFed SSO
+  sarthi-snow-ad        AD group request automation             ServiceNow portal
+  sarthi-msgraph        email + Teams (10 tools, cron-safe)     auth: msgraph_tokens.json
+  sarthi-gcp            GCS ls/cat/stat, Dataproc, Hudi         gcloud ADC
+  sarthi-bq             BigQuery SELECT (1GB cap)               gcloud ADC
+  sarthi-git            9 tools: read + write (v1.1.0)          gh CLI keyring
+                          NEW: git_create_branch, git_create_or_update_file
+  sarthi-gsuite         AD group lookups (principal↔groups)     gcloud ADC
+  sarthi-slack          Slack read/post (6 tools)               Playwright SSO
+  sarthi-wcnp           Kubernetes/WCNP ops                     sledge
 
 AUTONOMOUS PIPELINE (check.sh)
   Stage 1: fetcher.py       → calls list_dag_runs_batch → writes report.json
   Stage 2: investigate.md   → AI classifies failures → writes actions.json + manual_review.json
   Stage 3: executor.py      → executes actions from actions.json
   Patterns: A=transient, B=dataproc-deleted, C=teardown, D=gcs-sensor, E=code/data, F=hudi
+  NOTE: investigate.md is a HEADLESS agent prompt in ~/.wibey/agents/sarthi/ (not a skill)
 
 SIMULATOR (for testing the pipeline)
-  DAG:  <from simulator.py DAG_ID>  ENV: <from simulator.py ENV_NAME>
+  DAG:  INTLDLDAT-ET360-SIMULATOR-TEST-DAG  ENV: ET360-CL-DEV
   GCS:  gs://wmt-intl-dp-etrans-360-dev-resources/ET360/s0d0gak/pipeline-resources/simulator-test/sim.done
   Run:  python3 ~/.wibey/agents/sarthi/simulator.py --scenario <NAME>
-  Scenarios: gcs_absent✅  gcs_present🔧(fixed Jun8)  sql_error⏳  timeout⏳  consecutive⏳
+  Scenarios: gcs_absent✅  gcs_present✅(fixed Jun8)  sql_error✅(validated Jun10)
+             timeout⏳  consecutive⏳
+  Fixtures: ~/sarthi/tests/simulator-fixtures/  (SQL fixtures for sar-fix end-to-end testing)
   NOTE: _sensor_fn ignores fail_at_task conf — only _make_task_fn tasks respond to it.
         gcs_present uses sim.task_a (not sim.sensor) for injected failure.
 

@@ -1,0 +1,721 @@
+# ============================================================
+# /prod-monitor Configuration
+# ============================================================
+
+environments:
+  - name: CA-ET360-PROD
+    url: "https://deployments.astro-prod3.us-central1.us.walmart.net/superluminous-azimuth-7912"
+    ops_allowed: false
+    login_url: "https://app.astro-prod3.us-central1.us.walmart.net"
+    # NOTE: Airflow only scans bucket ROOT for DAG files — subfolders are NOT auto-picked up.
+    # Files in et360/, COMMS/ subfolders are loaded via a separate mechanism (image-baked or custom loader).
+    # Deploy GCS-synced DAGs to bucket root: gs://bfdaf-dags-intcamdseprd-catalog/
+    dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/"
+    dags:
+      - id: "INTLDLDAT-CAWM-ET360-BQ-DATA-LOAD"
+        label: "ET360 CA BQ Data Load"
+        subject_area: "ET360 CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/et360/coim/coim_bq_load/"
+        dag_file: "dag_et360_ca_coim_bq_data_load.py"
+        deployment_type: "gcs-synced"   # loaded via custom subfolder scanner, not bucket root
+      - id: "INTLDLDAT-ET360-API-TEST-DAG"
+        label: "ET360 CA API Test DAG (sample)"
+        subject_area: "ET360 CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/"
+        dag_file: "INTLDLDAT-ET360-API-TEST-DAG.py"
+        deployment_type: "gcs-synced"   # bucket root — confirmed working 2026-05-10
+        test_dag: true
+        exclude_from_dashboard: true   # test/sample DAG, not a production flow
+
+  - name: CA-OMS-PROD
+    url: "https://deployments.astro-prod3.us-central1.us.walmart.net/superluminous-azimuth-7912"
+    ops_allowed: false
+    login_url: "https://app.astro-prod3.us-central1.us.walmart.net"
+    dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/COMMS/"
+    dags:
+      - id: "dag.orders.ca_cosmos_raw_to_gcs_stg_nrt_extract"
+        label: "CA Cosmos Raw to GCS STG NRT"
+        subject_area: "OMS"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/COMMS/"
+        dag_file: "dag_ca_orders_cosmos_raw_to_gcs_stg_nrt_extract.py"
+        deployment_type: "gcs-synced"
+      - id: "dag.orders.ca_gcp_cosmos_hudi_pub_ld_hrly"
+        label: "CA GCP Cosmos Hudi Pub Load Hrly"
+        subject_area: "OMS"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/COMMS/"
+        dag_file: "dag_ca_orders_gcp_cosmos_hudi_pub_ld_hrly.py"
+        deployment_type: "gcs-synced"
+      - id: "dag.orders.ca_gcp_cosmos_hudi_pub_ld_hrly_sosl"
+        label: "CA GCP Cosmos Hudi Pub Load Hrly SOSL"
+        subject_area: "OMS"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/COMMS/"
+        dag_file: "dag_ca_orders_gcp_cosmos_hudi_pub_ld_hrly_sosl.py"
+        deployment_type: "gcs-synced"
+
+  - name: MX-OMS-PROD
+    url: "https://deployments.astro-prod3.us-central1.us.walmart.net/asteroidic-apogee-9979"
+    ops_allowed: false
+    login_url: "https://app.astro-prod3.us-central1.us.walmart.net"
+    dag_bucket: "gs://bfdaf-dags-intmxmdseprd-catalog/COMMS/"
+    dags:
+      - id: "dag.orders.mx_cosmos_raw_to_gcs_stg_nrt_extract"
+        label: "MX Cosmos Raw to GCS STG NRT"
+        subject_area: "OMS"
+        dag_bucket: "gs://bfdaf-dags-intmxmdseprd-catalog/COMMS/"
+        dag_file: "dag_orders_mx_cosmos_post_dq_check.py"   # closest match found; confirm exact file
+        deployment_type: "gcs-synced"
+      - id: "dag.orders.mx_gcp_cosmos_hudi_pub_ld_hrly"
+        label: "MX GCP Cosmos Hudi Pub Load Hrly"
+        subject_area: "OMS"
+        dag_bucket: "gs://bfdaf-dags-intmxmdseprd-catalog/COMMS/"
+        deployment_type: "image-baked"   # not found as .py in bucket
+      - id: "dag.orders.mx_gcp_cosmos_hudi_pub_ld_hrly_sosl"
+        label: "MX GCP Cosmos Hudi Pub Load Hrly SOSL"
+        subject_area: "OMS"
+        dag_bucket: "gs://bfdaf-dags-intmxmdseprd-catalog/COMMS/"
+        deployment_type: "image-baked"   # not found as .py in bucket
+
+  - name: MX-ET360-PROD
+    url: "https://deployments.astro-prod3.us-central1.us.walmart.net/asteroidic-apogee-9979"
+    ops_allowed: false
+    login_url: "https://app.astro-prod3.us-central1.us.walmart.net"
+    dag_bucket: "gs://bfdaf-dags-intmxmdseprd-catalog/et360/"
+    dags:
+      - id: "INTLDLDAT-ET360-MX-COIM-BQ-DATA-LOAD"
+        label: "ET360 MX COIM BQ Data Load"
+        subject_area: "ET360 MX"
+        dag_bucket: "gs://bfdaf-dags-intmxmdseprd-catalog/et360/coim/coim_bq_load/"
+        dag_file: "dag_et360_mx_coim_bq_data_load.py"
+        deployment_type: "gcs-synced"
+      - id: "INTLDLDAT-ET360-MX-COIM-FIN-RAW-EXT"
+        label: "ET360 MX COIM Fin Raw Extract"
+        subject_area: "ET360 MX"
+        dag_bucket: "gs://bfdaf-dags-intmxmdseprd-catalog/et360/coim/fin_raw_extract/"
+        dag_file: "dag_et360_mx_coim_fin_raw_ext.py"
+        deployment_type: "gcs-synced"
+      - id: "INTLDLDAT-ET360-MX-EBS-BQ-DATA-LOAD"
+        label: "ET360 MX EBS BQ Data Load"
+        subject_area: "ET360 MX"
+        dag_bucket: "gs://bfdaf-dags-intmxmdseprd-catalog/et360/evb/evb_bq_load/"
+        dag_file: "dag_et360_mx_evb_bq_data_load.py"
+        deployment_type: "gcs-synced"
+      - id: "INTLDLDAT-MX-COIM-DQ-CHECK"
+        label: "ET360 MX COIM DQ Check"
+        subject_area: "ET360 MX"
+        dag_bucket: "gs://bfdaf-dags-intmxmdseprd-catalog/et360/coim/coim_bq_load/"
+        dag_file: "dag_et360_mx_coim_dq_check.py"
+        deployment_type: "gcs-synced"
+      - id: "INTLDLDAT-ET360-MX-COIM-DEBUG-BQ-DATA-LOAD"
+        label: "ET360 MX COIM Debug BQ Data Load"
+        subject_area: "ET360 MX"
+        dag_bucket: "gs://bfdaf-dags-intmxmdseprd-catalog/et360/coim/coim_bq_load/"
+        dag_file: "dag_et360_mx_coim_debug_bq_data_load.py"
+        deployment_type: "gcs-synced"
+        exclude_from_dashboard: true   # debug pipeline, not a regular prod flow
+
+  - name: YFS-BACKFEED-CA-PROD
+    url: "https://deployments.astro-prod3.us-central1.us.walmart.net/glowing-cosmic-9025"
+    ops_allowed: false
+    login_url: "https://app.astro-prod3.us-central1.us.walmart.net"
+    dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"   # bucket access confirmed; DAGs not found as .py files — image-baked
+    deployment_type: "image-baked"   # all 44 DAGs baked into Airflow image, not GCS-synced
+    dags:
+      - id: "INTLDLDAT-CAWM-CA-CORE-DIM-DL-TABLES-WCP-COMMS-YFS-INSTRUCTION-DETAIL"
+        label: "Ca Core Dim Dl Tables Wcp Comms Yfs Instruction Detail"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-CORE-DIM-DL-TABLES-WCP-COMMS-YFS-ITEM"
+        label: "Ca Core Dim Dl Tables Wcp Comms Yfs Item"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-CORE-DIM-DL-TABLES-WCP-COMMS-YFS-REF-TBL"
+        label: "Ca Core Dim Dl Tables Wcp Comms Yfs Ref Tbl"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-CORE-DIM-DL-TABLES-WCP-FMS-YFS-SHIP-NODE"
+        label: "Ca Core Dim Dl Tables Wcp Fms Yfs Ship Node"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-CUST-DL-HIGHSECURE-WCP-COMMS-YFS-ORDER-HDR"
+        label: "Ca Cust Dl Highsecure Wcp Comms Yfs Order Hdr"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-CUST-DL-HIGHSECURE-WCP-COMMS-YFS-PERSN-INFO"
+        label: "Ca Cust Dl Highsecure Wcp Comms Yfs Persn Info"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-CUST-DL-HIGHSECURE-WCP-FMS-YFS-ORDER-HDR"
+        label: "Ca Cust Dl Highsecure Wcp Fms Yfs Order Hdr"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-CUST-DL-HIGHSECURE-WCP-FMS-YFS-PERSN-INFO"
+        label: "Ca Cust Dl Highsecure Wcp Fms Yfs Persn Info"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-CUST-DL-HIGHSECURE-WCP-RTN-YFS-ORDER-HDR"
+        label: "Ca Cust Dl Highsecure Wcp Rtn Yfs Order Hdr"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-FIN-DL-SECURE-WCP-COMMS-MTEP-FAA-GL-FEED"
+        label: "Ca Fin Dl Secure Wcp Comms Mtep Faa Gl Feed"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-FIN-DL-SECURE-WCP-COMMS-MTEP-FAA-GL-FEED-KAFKA"
+        label: "Ca Fin Dl Secure Wcp Comms Mtep Faa Gl Feed Kafka"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-HIGHSECURE-WCP-COMMS-YFS-NOTE"
+        label: "Ca Mb Dl Highsecure Wcp Comms Yfs Note"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-HIGHSECURE-WCP-COMMS-YFS-PYMT"
+        label: "Ca Mb Dl Highsecure Wcp Comms Yfs Pymt"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-COMMS-CA-MTEP-CR-CARD-TRANS"
+        label: "Ca Mb Dl Secure Wcp Comms Ca Mtep Cr Card Trans"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-COMMS-YFS-CHRG-TRANS"
+        label: "Ca Mb Dl Secure Wcp Comms Yfs Chrg Trans"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-COMMS-YFS-CR-CARD-TRANS"
+        label: "Ca Mb Dl Secure Wcp Comms Yfs Cr Card Trans"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-COMMS-YFS-HDR-CHRG"
+        label: "Ca Mb Dl Secure Wcp Comms Yfs Hdr Chrg"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-COMMS-YFS-INV-COLL"
+        label: "Ca Mb Dl Secure Wcp Comms Yfs Inv Coll"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-COMMS-YFS-LINE-CHARGES"
+        label: "Ca Mb Dl Secure Wcp Comms Yfs Line Charges"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-COMMS-YFS-ORDER-HDR"
+        label: "Ca Mb Dl Secure Wcp Comms Yfs Order Hdr"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-COMMS-YFS-ORDER-HLD-TYPE"
+        label: "Ca Mb Dl Secure Wcp Comms Yfs Order Hld Type"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-COMMS-YFS-ORDER-INV"
+        label: "Ca Mb Dl Secure Wcp Comms Yfs Order Inv"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-COMMS-YFS-ORDER-INV-DTL"
+        label: "Ca Mb Dl Secure Wcp Comms Yfs Order Inv Dtl"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-COMMS-YFS-ORDER-LINE"
+        label: "Ca Mb Dl Secure Wcp Comms Yfs Order Line"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-COMMS-YFS-ORDER-LINE-TEST"
+        label: "Ca Mb Dl Secure Wcp Comms Yfs Order Line Test"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-COMMS-YFS-ORDER-RELEASE-STATUS"
+        label: "Ca Mb Dl Secure Wcp Comms Yfs Order Release Status"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-COMMS-YFS-TAX-BREAKUP"
+        label: "Ca Mb Dl Secure Wcp Comms Yfs Tax Breakup"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-FMS-CA-MTEP-CARRIER-STATUS-UPD"
+        label: "Ca Mb Dl Secure Wcp Fms Ca Mtep Carrier Status Upd"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-FMS-CA-MTEP-LINE-PICK-WT-DTL"
+        label: "Ca Mb Dl Secure Wcp Fms Ca Mtep Line Pick Wt Dtl"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-FMS-MTEP-ORDER-LINE-FP-ITEM-DTL"
+        label: "Ca Mb Dl Secure Wcp Fms Mtep Order Line Fp Item Dtl"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-FMS-YFS-LINE-CHARGES"
+        label: "Ca Mb Dl Secure Wcp Fms Yfs Line Charges"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-FMS-YFS-ORDER-HDR"
+        label: "Ca Mb Dl Secure Wcp Fms Yfs Order Hdr"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-FMS-YFS-ORDER-INV"
+        label: "Ca Mb Dl Secure Wcp Fms Yfs Order Inv"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-FMS-YFS-ORDER-INV-DTL"
+        label: "Ca Mb Dl Secure Wcp Fms Yfs Order Inv Dtl"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-FMS-YFS-ORDER-LINE"
+        label: "Ca Mb Dl Secure Wcp Fms Yfs Order Line"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-FMS-YFS-ORDER-LINE-SCHED"
+        label: "Ca Mb Dl Secure Wcp Fms Yfs Order Line Sched"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-FMS-YFS-ORDER-RELEASE"
+        label: "Ca Mb Dl Secure Wcp Fms Yfs Order Release"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-FMS-YFS-ORDER-RELEASE-STATUS"
+        label: "Ca Mb Dl Secure Wcp Fms Yfs Order Release Status"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-FMS-YFS-SHPMNT"
+        label: "Ca Mb Dl Secure Wcp Fms Yfs Shpmnt"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-FMS-YFS-SHPMNT-LINE"
+        label: "Ca Mb Dl Secure Wcp Fms Yfs Shpmnt Line"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-FMS-YFS-SHPMT-CNTNR"
+        label: "Ca Mb Dl Secure Wcp Fms Yfs Shpmt Cntnr"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-RTN-YFS-CHRG-TRANS"
+        label: "Ca Mb Dl Secure Wcp Rtn Yfs Chrg Trans"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-RTN-YFS-HDR-CHRG"
+        label: "Ca Mb Dl Secure Wcp Rtn Yfs Hdr Chrg"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-RTN-YFS-LINE-CHARGES"
+        label: "Ca Mb Dl Secure Wcp Rtn Yfs Line Charges"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-RTN-YFS-ORDER-HDR"
+        label: "Ca Mb Dl Secure Wcp Rtn Yfs Order Hdr"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-RTN-YFS-ORDER-INV"
+        label: "Ca Mb Dl Secure Wcp Rtn Yfs Order Inv"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-RTN-YFS-ORDER-INV-DTL"
+        label: "Ca Mb Dl Secure Wcp Rtn Yfs Order Inv Dtl"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-RTN-YFS-ORDER-LINE"
+        label: "Ca Mb Dl Secure Wcp Rtn Yfs Order Line"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-RTN-YFS-ORDER-LINE-SCHED"
+        label: "Ca Mb Dl Secure Wcp Rtn Yfs Order Line Sched"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-RTN-YFS-ORDER-RELEASE"
+        label: "Ca Mb Dl Secure Wcp Rtn Yfs Order Release"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-RTN-YFS-ORDER-RELEASE-STATUS"
+        label: "Ca Mb Dl Secure Wcp Rtn Yfs Order Release Status"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-RTN-YFS-RCPT-HDR"
+        label: "Ca Mb Dl Secure Wcp Rtn Yfs Rcpt Hdr"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-RTN-YFS-RCPT-LINE"
+        label: "Ca Mb Dl Secure Wcp Rtn Yfs Rcpt Line"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-RTN-YFS-SHPMNT"
+        label: "Ca Mb Dl Secure Wcp Rtn Yfs Shpmnt"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-RTN-YFS-SHPMNT-LINE"
+        label: "Ca Mb Dl Secure Wcp Rtn Yfs Shpmnt Line"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-SECURE-WCP-RTN-YFS-TAX-BREAKUP"
+        label: "Ca Mb Dl Secure Wcp Rtn Yfs Tax Breakup"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-MB-DL-TABLES-WCP-FMS-CA-MTEP-PCKUP-STATUS-UPD-DTL"
+        label: "Ca Mb Dl Tables Wcp Fms Ca Mtep Pckup Status Upd Dtl"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-SUPPLY-CHAIN-DL-SECURE-FULFMT-RQ-BQ-SYNC"
+        label: "Ca Supply Chain Dl Secure Fulfmt Rq Bq Sync"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-SUPPLY-CHAIN-DL-SECURE-FULFMT-RQ-LINE"
+        label: "Ca Supply Chain Dl Secure Fulfmt Rq Line"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-SUPPLY-CHAIN-DL-SECURE-FULFMT-RQ-LINE-BQ-SYNC"
+        label: "Ca Supply Chain Dl Secure Fulfmt Rq Line Bq Sync"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-CA-SUPPLY-CHAIN-DL-SECURE-FULFMT-RQ-LINE-EVENT-BQ-SYNC"
+        label: "Ca Supply Chain Dl Secure Fulfmt Rq Line Event Bq Sync"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-COMMS-DATA-REFRESH-ALERT-LOAD"
+        label: "Comms Data Refresh Alert Load"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "INTLDLDAT-CAWM-WCP-FMS-DATA-REFRESH-ALERT-LOAD"
+        label: "Wcp Fms Data Refresh Alert Load"
+        subject_area: "YFS Backfeed CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+
+  - name: RETURNS-CA-PROD
+    url: "https://deployments.astro-prod2.us-central1.us.walmart.net/true-inertia-7495"
+    ops_allowed: false
+    login_url: "https://app.astro-prod2.us-central1.us.walmart.net"
+    dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"   # DAGs not found as .py files — image-baked
+    deployment_type: "image-baked"
+    dags:
+      - id: "INTLDLDAT_CAWM_CA_RTN_DL_TABLES_WCP_RAP_KAFKA_EXTRACT_HOURLY"
+        label: "CA Returns DL Tables WCP RAP Kafka Extract Hourly"
+        subject_area: "Returns CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "WF_INTLDLDAT_CR_DP_RAP_MASTER_CA"
+        label: "CA Returns RAP Master Workflow"
+        subject_area: "Returns CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "WF_INTLDLDAT_DP_LIST_REGISTRY_KAFKA_EXTRACT_DAILY_CA"
+        label: "CA List & Registry Kafka Extract Daily"
+        subject_area: "Returns CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "WF_INTLDLDAT_DP_REGISTRY_KAFKA_EXTRACT_DAILY_CA"
+        label: "CA Registry Kafka Extract Daily"
+        subject_area: "Returns CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+
+  - name: SMARTCOMMS-CA-PROD
+    url: "https://deployments.astro-prod3.us-central1.us.walmart.net/geosynchronous-disc-2347"
+    ops_allowed: false
+    login_url: "https://app.astro-prod3.us-central1.us.walmart.net"
+    dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"   # DAGs not found as .py files — image-baked
+    deployment_type: "image-baked"
+    dags:
+      - id: "CA-Email-Message-Master-Load"
+        label: "CA Email Message Master Load"
+        subject_area: "SmartComms CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "CA-Push-Sms-Error-Master-Load"
+        label: "CA Push SMS Error Master Load"
+        subject_area: "SmartComms CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "CA-RequestContent-Load"
+        label: "CA Request Content Load"
+        subject_area: "SmartComms CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "CA-RequestLog-Load"
+        label: "CA Request Log Load"
+        subject_area: "SmartComms CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+      - id: "CA-TrackerLog-Load"
+        label: "CA Tracker Log Load"
+        subject_area: "SmartComms CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+
+  - name: SMARTCOMMS-MX-PROD
+    url: "https://deployments.astro-prod3.us-central1.us.walmart.net/electromagnetic-bolide-2111"
+    ops_allowed: false
+    login_url: "https://app.astro-prod3.us-central1.us.walmart.net"
+    dag_bucket: "gs://bfdaf-dags-intmxmdseprd-catalog/dags/"   # DAGs not found as .py files — image-baked
+    deployment_type: "image-baked"
+    dags:
+      - id: "MX-Email-Message-Master-Load"
+        label: "MX Email Message Master Load"
+        subject_area: "SmartComms MX"
+        dag_bucket: "gs://bfdaf-dags-intmxmdseprd-catalog/dags/"
+      - id: "MX-Inapp-Whatsapp-Notif-Load"
+        label: "MX Inapp Whatsapp Notif Load"
+        subject_area: "SmartComms MX"
+        dag_bucket: "gs://bfdaf-dags-intmxmdseprd-catalog/dags/"
+      - id: "MX-Push-Sms-Error-Master-Load"
+        label: "MX Push SMS Error Master Load"
+        subject_area: "SmartComms MX"
+        dag_bucket: "gs://bfdaf-dags-intmxmdseprd-catalog/dags/"
+      - id: "MX-RequestContent-Load"
+        label: "MX Request Content Load"
+        subject_area: "SmartComms MX"
+        dag_bucket: "gs://bfdaf-dags-intmxmdseprd-catalog/dags/"
+      - id: "MX-RequestLog-Load"
+        label: "MX Request Log Load"
+        subject_area: "SmartComms MX"
+        dag_bucket: "gs://bfdaf-dags-intmxmdseprd-catalog/dags/"
+      - id: "MX-TrackerLog-Load"
+        label: "MX Tracker Log Load"
+        subject_area: "SmartComms MX"
+        dag_bucket: "gs://bfdaf-dags-intmxmdseprd-catalog/dags/"
+
+  - name: SMARTCOMMS-SA-PROD
+    url: "https://deployments.astro-prod4.glb.us.walmart.net/observational-isotope-3893"
+    ops_allowed: false
+    login_url: "https://app.astro-prod4.glb.us.walmart.net"
+    dag_bucket: "gs://bfdaf-dags-intsamdseprd-catalog/dags/"  # TODO: confirm SA bucket — no GCS access verified yet
+    deployment_type: "image-baked"   # assumed; SA bucket not confirmed
+    dags:
+      - id: "SA-Email-Message-Master-Load"
+        label: "SA Email Message Master Load"
+        subject_area: "SmartComms SA"
+        dag_bucket: "gs://bfdaf-dags-intsamdseprd-catalog/dags/"  # TODO: confirm
+      - id: "SA-Push-Sms-Error-Master-Load"
+        label: "SA Push SMS Error Master Load"
+        subject_area: "SmartComms SA"
+        dag_bucket: "gs://bfdaf-dags-intsamdseprd-catalog/dags/"  # TODO: confirm
+      - id: "SA-RequestContent-Load"
+        label: "SA Request Content Load"
+        subject_area: "SmartComms SA"
+        dag_bucket: "gs://bfdaf-dags-intsamdseprd-catalog/dags/"  # TODO: confirm
+      - id: "SA-RequestLog-Load"
+        label: "SA Request Log Load"
+        subject_area: "SmartComms SA"
+        dag_bucket: "gs://bfdaf-dags-intsamdseprd-catalog/dags/"  # TODO: confirm
+      - id: "SA-TrackerLog-Load"
+        label: "SA Tracker Log Load"
+        subject_area: "SmartComms SA"
+        dag_bucket: "gs://bfdaf-dags-intsamdseprd-catalog/dags/"  # TODO: confirm
+
+# ============================================================
+# Additional DAG buckets discovered (not mapped to environments above yet)
+# ============================================================
+  # ── Dev / non-prod environments (merged from prod-monitor/dev-config.yaml 2026-06-01) ──
+
+  - name: CA-MODLR-DEV
+    url: "https://deployments.astro-prod3.us-central1.us.walmart.net/superluminous-azimuth-7912"
+    login_url: "https://app.astro-prod3.us-central1.us.walmart.net"
+    ops_allowed: true
+    country: "CA"
+    gcp_project: "wmt-intl-cons-mc-ca-prod"
+    target_project: "wmt-intl-cons-mc-ca-dev"
+    target_dataset: "CA_MDSE_ASSORT_DL_SECURE"
+    dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+    resources_bucket: "TODO_REPLACE — confirm with team (same resources bucket as ET360 CA or separate for MODLR)"
+    service_account: "svcintlet360@wmt-intl-dl-ca-prod.iam.gserviceaccount.com"
+    notes: >
+      MODLR pipeline (Modular/Assortment) targets wmt-intl-cons-mc-ca-
+      dev.CA_MDSE_ASSORT_DL_SECURE. DAG deployed to prod CA Airflow
+      (superluminous-azimuth-7912). Uses same DCAProjectConfigHook as ET360
+      CA (et360_ca_project_config.json) — confirm whether a separate
+      modlr_ca_project_config.json is needed for dataset routing. Generated
+      by /new-pipeline bq-to-bq on 2026-05-10.
+    dags:
+      - id: "INTLDLDAT-CAWM-MODLR-BQ-DATA-LOAD"
+        label: "MODLR CA BQ Data Load (7 tables)"
+        subject_area: "MODLR CA"
+        dag_bucket: "gs://bfdaf-dags-intcamdseprd-catalog/dags/"
+        status: "scaffolded — pending deployment"
+        local_dag: "~/wibey-pipeline-output/bq-to-bq/intldldat-cawm-modlr-bq-data-load/intldldat-cawm-modlr-bq-data-load.py"
+        local_sqls: "~/wibey-pipeline-output/bq-to-bq/intldldat-cawm-modlr-bq-data-load/sqls/modlr/bq/"
+        touchfile_out: "intldl/modlr/INTLDLDAT_CA_MODLR_WMT_BQ_PY_{timestamp}.done"
+
+  - name: ET360-CL-DEV
+    url: "https://deployments.astro-nonprod2.us-west1.us.walmart.net/siderean-rocket-6277"
+    login_url: "https://app.astro-nonprod2.us-west1.us.walmart.net"
+    ops_allowed: true
+    country: "CL"
+    gcp_project: "wmt-intl-dp-etrans-360-dev"
+    dag_bucket: "gs://bfdaf-dags-idpmdsedev-group1/"
+    dag_bucket_alt: "gs://bfdaf-dags-intclmdsedev-catalog1/dags/hourly/"
+    resources_bucket: "gs://wmt-intl-dp-etrans-360-dev-resources/ET360/s0d0gak/pipeline-resources/"
+    service_account: "svcintlet360@wmt-intl-dp-etrans-360-dev.iam.gserviceaccount.com"
+    dags:
+      - id: "intldldat_dag_k2_et360"
+        label: "ET360 K2 DAG"
+        subject_area: "ET360 CL"
+        dag_bucket: "gs://bfdaf-dags-intclmdsedev-catalog/dags/"
+        deployment_type: "image-baked"
+      - id: "INTLDLDAT-ET360-K2-COIM-BQ-DATA-LOAD"
+        label: "ET360 K2 COIM BQ Data Load"
+        subject_area: "ET360 CL"
+        dag_bucket: "gs://bfdaf-dags-intclmdsedev-catalog/dags/"
+        deployment_type: "image-baked"
+      - id: "INTLDLDAT-ET360-SIMULATOR-TEST-DAG"
+        label: "ET360 Simulator Test DAG (GCS sensor + failure scenarios)"
+        subject_area: "ET360 CL"
+        dag_bucket: "gs://bfdaf-dags-idpmdsedev-group1/"
+        dag_file: "INTLDLDAT-ET360-SIMULATOR-TEST-DAG.py"
+        deployment_type: "gcs-synced"
+        airflow_url: "https://deployments.astro-nonprod2.us-west1.us.walmart.net/siderean-rocket-6277/airflow/dags/INTLDLDAT-ET360-SIMULATOR-TEST-DAG/grid"
+        gcs_done_file: "gs://wmt-intl-dp-etrans-360-dev-resources/ET360/s0d0gak/pipeline-resources/simulator-test/sim.done"
+        test_dag: true
+        dag_class: "simulator"          # reporting only — never a branch condition in skills
+        source_repo: "WITDnA/sarthi"   # test fixtures travel with the tool
+        source_path: "tests/simulator-fixtures/"
+        # sql_error fixture: sim_task_d_query.sql (real table: GLBL_MB_DL_STAGE_TABLES.COSMOS_EXTRACT_ORDR_LINES)
+      - id: "INTLDLDAT-ET360-API-TEST-DAG"
+        label: "ET360 API Test DAG (sample — trigger/monitor/control via REST API)"
+        subject_area: "ET360 CL"
+        dag_bucket: "gs://bfdaf-dags-idpmdsedev-group1/"
+        dag_file: "INTLDLDAT-ET360-API-TEST-DAG.py"
+        deployment_type: "gcs-synced"
+        trigger_script: "~/.wibey/prod-monitor/dev-tools/test-dag/trigger-api-test-dag.py"
+        test_dag: true
+        exclude_from_dashboard: true   # test/sample DAG, not a production flow
+      - id: "INTLDLDAT-K2WM-ET360-AF-TEST1"
+        label: "ET360 K2 AF Test 1"
+        subject_area: "ET360 CL"
+        dag_bucket: "gs://bfdaf-dags-intclmdsedev-catalog1/dags/hourly/dtlk-gcp-et360/TEST/"
+        dag_file: "INTLDLDAT-K2WM-ET360-AF-TEST1.py"
+        deployment_type: "gcs-synced"
+        test_dag: true
+      - id: "INTLDLDAT-K2WM-ET360-AF-TEST"
+        label: "ET360 K2 AF Test (SQL)"
+        subject_area: "ET360 CL"
+        dag_bucket: "gs://bfdaf-dags-intclmdsedev-catalog1/dags/hourly/dtlk-gcp-et360/TEST_SQL/"
+        dag_file: "INTLDLDAT-K2WM-ET360-AF-TEST.py"
+        deployment_type: "gcs-synced"
+        test_dag: true
+
+  - name: MX-MODLR-DEV
+    url: "https://deployments.astro-nonprod1.us-west1.us.walmart.net/modern-asterism-1836"
+    login_url: "https://app.astro-nonprod1.us-west1.us.walmart.net"
+    ops_allowed: true
+    sla_minutes: 120
+    country: "MX"
+    gcp_project: "wmt-bfdms-intmxmdsedev"
+    target_project: "wmt-intl-cons-mc-mx-dev"
+    target_dataset: "MX_MDSE_ASSORT_DL_SECURE"
+    dag_bucket: "gs://bfdaf-dags-intmxmdsedev-catalog1/"
+    resources_bucket: "gs://9419f6dc8c47e282f76202da34117f89b305608529ec560b3ee07c40b48b48/"
+    service_account: "TODO — confirm MX dev SA"
+    notes: >
+      MODLR pipeline (Modular/Assortment) targets wmt-intl-cons-mc-mx-
+      dev.MX_MDSE_ASSORT_DL_SECURE. DAG deployed to MX dev Airflow (modern-
+      asterism-1836, nonprod1 us-west1). LOAD_ENV Airflow Variable must be
+      set to 'dev' for env routing via DCAProjectConfigHook. Config JSON
+      modlr_mx_project_config.json must be image-baked into AFaaS pod. Added
+      2026-05-13.
+    dags:
+      - id: "dag.modlr.mx.bq_data_load"
+        label: "MODLR MX BQ Data Load (7 tables)"
+        subject_area: "MODLR MX"
+        dag_bucket: "gs://bfdaf-dags-intmxmdsedev-catalog1/"
+        dag_file: "dag_modlr_mx_bq_data_load.py"
+        deployment_type: "gcs-synced"
+        status: "ready for deployment"
+        local_dag: "~/Downloads/MODLR-Analysis/Reference/Target/dag_modlr_mx_bq_data_load.py"
+        local_sqls: "~/wibey-pipeline-output/bq-to-bq/intldldat-mxwm-modlr-bq-data-load/sqls/modlr/bq/"
+        sql_gcs_path: "gs://9419f6dc8c47e282f76202da34117f89b305608529ec560b3ee07c40b48b48/dtlk-gcp-modlr/pipeline-resources/sqls/modlr/bq/"
+
+  # disabled: URL not yet confirmed — update url field before enabling
+  - name: ET360-K2-DEV
+    disabled: true
+    url: "TODO — confirm AFaaS deployment for idpmdsedev-group1"
+    ops_allowed: false
+    country: "K2"
+    gcp_project: "wmt-bfdms-idpmdsedev"
+    dag_bucket: "gs://bfdaf-dags-idpmdsedev-group1/trans_360_ecomm/dags/ET360/K2/"
+    service_account: "TODO — confirm K2 dev SA"
+    dags:
+      - id: "INTLDLDAT-K2WM-ET360-BQ-DATA-LOAD"
+        label: "ET360 K2 BQ Data Load"
+        subject_area: "ET360 K2"
+        dag_bucket: "gs://bfdaf-dags-idpmdsedev-group1/trans_360_ecomm/dags/ET360/K2/"
+        dag_file: "INTLDLDAT-K2WM-ET360-BQ-DATA-LOAD.py"
+        deployment_type: "gcs-synced"
+      - id: "dag_et360_k2_coim_bq_data_load"
+        label: "ET360 K2 COIM BQ Data Load"
+        subject_area: "ET360 K2"
+        dag_bucket: "gs://bfdaf-dags-idpmdsedev-group1/trans_360_ecomm/dags/ET360/K2/"
+        dag_file: "dag_et360_k2_coim_bq_data_load.py"
+        deployment_type: "gcs-synced"
+      - id: "dag_k2_et360"
+        label: "ET360 K2 DAG"
+        subject_area: "ET360 K2"
+        dag_bucket: "gs://bfdaf-dags-idpmdsedev-group1/trans_360_ecomm/dags/ET360/K2/"
+        dag_file: "dag_k2_et360.py"
+        deployment_type: "gcs-synced"
+
+other_dag_buckets:
+  - bucket: "gs://bfdaf-dags-intldlcaprod-catalog/"
+    gcp_project: "wmt-bfdms-intldlcaprod"
+    description: "CA prod WCP/YFS-Backfeed/incremental pipeline DAGs (separate Airflow instance — AFaaS env TBD)"
+    subfolders:
+      - "dags/ca_csd_secured_dl_tables/incremental/"   # clickstream/CSD secured tables
+      - "dags/wmt_intl_dl_ecomm/"
+      - "dags/stg_ca_core_dim_dl_tables/"
+      - "dags/stg_supply_chain_dl_tables/"
+      - "incremental/mx_mb_dl_highsecure/"
+      - "incremental/mx_mb_dl_secure/"
+      - "incremental/mx_mb_dl_tables/"
+      - "full/mx_mb_dl_tables/"
+      - "full/mx_local_tables/"
+      - "digital-etl-se/"
+    sample_dags:
+      - "INTLDLDAT-CAWM-INC-CSD-SECURED-DL-TABLES-BUYBOX-IMPR-TBLS.py"
+      - "INTLDLDAT-CAWM-INC-CSD_SECURED_DL_TABLES-ADOBE_CLICKSTREAM_GLASS.py"
+    notes: "TODO — identify which AFaaS deployment(s) this bucket feeds"
+
+notifications:
+  # Comma-separated list of email addresses
+  emails: "achallaravi.kiran@walmart.com"
+
+# ============================================================
+# Hudi table proactive monitoring catalog (used by hudi_check.py)
+# Add one entry per Hudi table that sarthi should watch independently
+# of Airflow. The uri must point to the directory containing .hoodie/
+# ============================================================
+hudi_tables:
+  - uri: "gs://bfdaf-dags-intcamdseprd-catalog/COMMS/cosmos_hudi_pub/"
+    label: "CA OMS Cosmos Hudi Pub (hourly)"
+    cadence_hours: 1
+    max_inflight_age_hours: 1
+    max_delta_commits_without_compaction: 10
+  - uri: "gs://bfdaf-dags-intcamdseprd-catalog/COMMS/cosmos_hudi_pub_sosl/"
+    label: "CA OMS Cosmos Hudi Pub SOSL (hourly)"
+    cadence_hours: 1
+    max_inflight_age_hours: 1
+    max_delta_commits_without_compaction: 10
+  - uri: "gs://bfdaf-dags-intmxmdseprd-catalog/COMMS/cosmos_hudi_pub/"
+    label: "MX OMS Cosmos Hudi Pub (hourly)"
+    cadence_hours: 1
+    max_inflight_age_hours: 1
+    max_delta_commits_without_compaction: 10
+  - uri: "gs://bfdaf-dags-intmxmdseprd-catalog/COMMS/cosmos_hudi_pub_sosl/"
+    label: "MX OMS Cosmos Hudi Pub SOSL (hourly)"
+    cadence_hours: 1
+    max_inflight_age_hours: 1
+    max_delta_commits_without_compaction: 10
+
+analysis:
+  # AUTO-RESOLVE IS DISABLED — Wibey will present findings and proposed actions but NEVER
+  # execute clearTaskInstances, PATCH taskInstances, gsutil cp, or any mutating command
+  # without explicit engineer approval in that conversation turn.
+  # Change to true only after confirming the auto-resolve pattern is safe for the specific error type.
+  auto_resolve: false
+
+  # Cluster UI endpoints — fetch dynamically with:
+  #   gcloud dataproc clusters describe <cluster> --project=<proj> --region=<region> \
+  #     --format="yaml(config.endpointConfig.httpPorts)"
+  # WARNING: ephemeral cluster URLs change on every cluster recreation. Use PHS for post-deletion access.
+
+  # DCC cluster (ldat-dcc-masterworkflow-gcp-ca) — current URLs, will change when cluster recreates
+  dcc_cluster:
+    jupyter_labs_url: "https://dljbbexw3jgm3bjyz6vixwr34u-dot-us-central1.dataproc.googleusercontent.com/gateway/default/jupyter/lab/"
+    spark_history_url: "https://dljbbexw3jgm3bjyz6vixwr34u-dot-us-central1.dataproc.googleusercontent.com/sparkhistory/"
+    yarn_url: "https://dljbbexw3jgm3bjyz6vixwr34u-dot-us-central1.dataproc.googleusercontent.com/yarn/"
+
+  # Persistent History Server (PHS) — always available, use when ephemeral cluster is gone
+  # Cluster: intcamdseprd-prod-2-1-dpaas-phs | project: wmt-bfdms-intcamdseprd | region: us-central1
+  phs_cluster:
+    spark_history_url: "https://bsf7vmla7jhxln4ittnzcfti5u-dot-us-central1.dataproc.googleusercontent.com/sparkhistory/"
+    yarn_url: "https://bsf7vmla7jhxln4ittnzcfti5u-dot-us-central1.dataproc.googleusercontent.com/yarn/"
+    mapreduce_history_url: "https://bsf7vmla7jhxln4ittnzcfti5u-dot-us-central1.dataproc.googleusercontent.com/jobhistory/"
+
+  # Scope of auto-resolution actions (only applies when auto_resolve: true above)
+  # All scopes are effectively disabled while auto_resolve: false
+  auto_resolve_scope:
+    airflow: false   # clearTaskInstances, PATCH taskInstances — requires engineer approval
+    config: false    # edit YAML/config files — requires engineer approval
+    cluster: false   # Dataproc / GCP resources — requires engineer approval
+    jira: false      # raise Jira tickets — requires engineer approval
