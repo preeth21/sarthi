@@ -69,12 +69,12 @@ def load_config() -> list:
 
 
 def main():
+    global CONFIG_FILE
     import argparse
     parser = argparse.ArgumentParser(description="First-time Airflow session bootstrap (headed browser)")
     parser.add_argument("--config", help=f"Path to config.yaml (default: {CONFIG_FILE})")
     args = parser.parse_args()
     if args.config:
-        global CONFIG_FILE
         CONFIG_FILE = args.config
 
     try:

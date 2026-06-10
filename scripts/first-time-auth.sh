@@ -226,7 +226,11 @@ else
         fi
     fi
 fi
-$MSGRAPH_OK && AUTH_RESULTS+=("msgraph:ok") || { [[ "${AUTH_RESULTS[-1]}" != "msgraph:skipped" ]] && AUTH_RESULTS+=("msgraph:failed"); }
+if $MSGRAPH_OK; then
+    AUTH_RESULTS+=("msgraph:ok")
+elif [[ ! " ${AUTH_RESULTS[*]} " =~ " msgraph:skipped " ]]; then
+    AUTH_RESULTS+=("msgraph:failed")
+fi
 
 # ── AUTH 6 — Slack ────────────────────────────────────────────
 step 6 "Walmart Enterprise Slack"
@@ -269,7 +273,11 @@ print(f'{age:.1f}')
         fi
     fi
 fi
-$SLACK_OK && AUTH_RESULTS+=("slack:ok") || { [[ "${AUTH_RESULTS[-1]}" != "slack:skipped" ]] && AUTH_RESULTS+=("slack:failed"); }
+if $SLACK_OK; then
+    AUTH_RESULTS+=("slack:ok")
+elif [[ ! " ${AUTH_RESULTS[*]} " =~ " slack:skipped " ]]; then
+    AUTH_RESULTS+=("slack:failed")
+fi
 
 # ── SUMMARY ────────────────────────────────────────────────────
 echo ""
