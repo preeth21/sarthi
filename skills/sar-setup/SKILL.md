@@ -142,6 +142,57 @@ gcloud auth list 2>/dev/null | grep -E "ACTIVE|\\*" | head -3
 - Active account present → ✅ gcloud ADC configured
 - Empty → ⚠️ Run: `gcloud auth application-default login`
 
+### Step 7.5 — Check AIRFLOW_MCP_CONFIG env var in shell profile
+
+This env var is required for `sarthi-airflow-auth` to write cookies to the correct
+location when invoked directly from the shell (`--test` mode). Without it, cookies
+go to `~/.config/airflow-mcp/cookies.txt` (wrong path) and auth silently fails.
+Wibey's MCP invocation is unaffected (it sets the var via `.mcp.json` env block),
+but this catches the issue for developers and CI usage.
+
+```bash
+python3 -c "
+import os, pathlib
+
+correct_val = str(pathlib.Path.home() / '.wibey' / 'sarthi' / 'config.yaml')
+current = os.environ.get('AIRFLOW_MCP_CONFIG', '')
+
+# Check shell profiles
+found_in = []
+for rc in ['.zshrc', '.bashrc', '.bash_profile']:
+    p = pathlib.Path.home() / rc
+    if p.exists() and 'AIRFLOW_MCP_CONFIG' in p.read_text():
+        found_in.append(str(p))
+
+if current == correct_val:
+    print(f'✅ AIRFLOW_MCP_CONFIG set correctly in current session: {current}')
+elif current:
+    print(f'⚠️  AIRFLOW_MCP_CONFIG set but points to wrong path: {current}')
+    print(f'   Expected: {correct_val}')
+else:
+    print('❌ AIRFLOW_MCP_CONFIG not set in current session')
+
+if found_in:
+    print(f'✅ Found in shell profile(s): {found_in}')
+else:
+    print('❌ Not found in any shell profile (.zshrc / .bashrc / .bash_profile)')
+    print(f'   Will auto-fix below.')
+" 2>/dev/null
+```
+
+**Auto-fix** if not found in shell profiles — run this:
+```bash
+AIRFLOW_MCP_CONFIG_VAL="$HOME/.wibey/sarthi/config.yaml"
+for rc in ~/.zshrc ~/.bashrc ~/.bash_profile; do
+  if [ -f "$rc" ] && ! grep -q "AIRFLOW_MCP_CONFIG" "$rc"; then
+    printf '\n# sArthI: Airflow MCP config path (required for --test CLI invocations)\nexport AIRFLOW_MCP_CONFIG="%s"\n' "$AIRFLOW_MCP_CONFIG_VAL" >> "$rc"
+    echo "✅ Added AIRFLOW_MCP_CONFIG to $rc"
+  fi
+done
+export AIRFLOW_MCP_CONFIG="$AIRFLOW_MCP_CONFIG_VAL"
+echo "✅ Set for current session. Restart terminal to apply permanently."
+```
+
 ### Step 8 — Check sarthi MCP servers in .mcp.json
 
 > **Note**: Wibey loads `~/.wibey/.mcp.json` (hidden file) at startup — NOT `mcp.json`.
@@ -190,6 +241,7 @@ Auth
   ✅ ServiceNow session (2.1h old)
   ✅ GEC GitHub token
   ⚠️  mcp-jira: enable at wibey.walmart.com → Plugins
+  ✅ AIRFLOW_MCP_CONFIG set in ~/.zshrc   (or ❌ with auto-fix instructions)
 
 MCP Servers (8/8 registered)
   ✅ sarthi-airflow-read / auth / ops

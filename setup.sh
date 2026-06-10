@@ -644,6 +644,19 @@ else
 fi
 
 # ─────────────────────────────────────────────
+# STEP 11 — Export AIRFLOW_MCP_CONFIG to shell profile
+# ─────────────────────────────────────────────
+AIRFLOW_MCP_CONFIG_VAL="$WIBEY_DIR/sarthi/config.yaml"
+for rc in "$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.bash_profile"; do
+    if [ -f "$rc" ] && ! grep -q "AIRFLOW_MCP_CONFIG" "$rc"; then
+        printf '\n# sArthI: Airflow MCP config path (required for --test CLI invocations)\nexport AIRFLOW_MCP_CONFIG="%s"\n' "$AIRFLOW_MCP_CONFIG_VAL" >> "$rc"
+        ok "AIRFLOW_MCP_CONFIG added to $rc"
+    fi
+done
+# Export for this session too
+export AIRFLOW_MCP_CONFIG="$AIRFLOW_MCP_CONFIG_VAL"
+
+# ─────────────────────────────────────────────
 # DONE
 # ─────────────────────────────────────────────
 echo ""

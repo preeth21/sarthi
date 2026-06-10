@@ -254,6 +254,19 @@ if __name__ == "__main__":
 
     _cfg[0] = resolve_config_path(parsed.config)
 
+    # Warn clearly if falling back to the default path — catches missing env var
+    # in shell test runs before it silently writes cookies to the wrong location.
+    if _cfg[0] == DEFAULT_CONFIG and not os.path.exists(DEFAULT_CONFIG):
+        import sys
+        print(
+            f"\n⚠️  WARNING: AIRFLOW_MCP_CONFIG not set and default path does not exist:\n"
+            f"   {DEFAULT_CONFIG}\n"
+            f"   Cookies will be written to the wrong location.\n"
+            f"   Fix: export AIRFLOW_MCP_CONFIG=~/.wibey/sarthi/config.yaml\n"
+            f"   Or:  AIRFLOW_MCP_CONFIG=~/.wibey/sarthi/config.yaml python3 server.py ...\n",
+            file=sys.stderr
+        )
+
     if parsed.test:
         asyncio.run(run_cli_test_async(parsed.test[0], parsed.test[1]))
     else:
