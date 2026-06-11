@@ -1,5 +1,21 @@
 # sárthí — Work from Phone
 
+**Description:** A Work from Phone enablement framework that exposes any team's operational capability as agentic workflows — triggered from a phone, resolved autonomously.
+
+**Track:** Track 01
+
+**Platform area:** Cross-platform (Airflow/AFaaS, BigQuery, GCS, Trino, ServiceNow, WCNP, GitHub, Teams, Slack)
+
+**Category:** MCP server suite, Wibey skill framework, autonomous ops agent
+
+**Team:** akiran, V0S06QR, s0t0ezg, u0h000k, a0n02yf
+
+**Project repo:** https://gecgithub01.walmart.com/WITDnA/sarthi
+
+**Demo video:** https://gecgithub01.walmart.com/WITDnA/sarthi/raw/main/sarthi-demo.mp4
+
+---
+
 > **WFO** · Work from Office — Millennial  
 > **WFH** · Work from Home — Gen Z  
 > **WFP** · Work from Phone — **Gen Alpha** ✦
