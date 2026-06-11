@@ -26,12 +26,15 @@ Auth:
 CRITICAL: stdout is JSON-RPC. ALL diagnostic output → sys.stderr. NEVER use print() to stdout.
 """
 
+from __future__ import annotations
+
 import sys
 import os
 import json
 import subprocess
 import argparse
 from pathlib import Path
+from typing import Optional
 
 def log(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr, flush=True)
@@ -232,14 +235,203 @@ def tool_teams_list_channels(args: dict) -> dict:
     return run_bun(TEAMS_TS, ["list-channels", team_id])
 
 
+def _sync_token_to_file(access_token: str) -> None:
+    """Write current access_token to fallback file so cron (no Keychain) can use it.
+    Also tries to pull full token blob from macOS Keychain to include refresh_token.
+    """
+    import time as _t
+    token_file = Path.home() / ".wibey" / "msgraph_tokens.json"
+    try:
+        # Try to get full blob (includes refresh_token) from Keychain
+        r = subprocess.run(
+            ["security", "find-generic-password", "-s", "wibey.msgraph", "-a", "default", "-w"],
+            capture_output=True, text=True, timeout=5
+        )
+        if r.returncode == 0 and r.stdout.strip():
+            blob = r.stdout.strip()
+            token_file.write_text(blob)
+            token_file.chmod(0o600)
+            return
+    except Exception:
+        pass
+    # Fallback: write just the access_token with estimated expiry
+    existing = {}
+    if token_file.exists():
+        try:
+            existing = json.loads(token_file.read_text())
+        except Exception:
+            pass
+    existing["access_token"] = access_token
+    existing["expires_at"] = _t.time() + 3600
+    token_file.write_text(json.dumps(existing))
+    token_file.chmod(0o600)
+
+
+def _get_graph_token() -> str | None:
+    """
+    Get a valid Graph API access token. Strategy:
+    1. Try auth.ts token (works in GUI/interactive session with Keychain)
+    2. Fall back to ~/.wibey/msgraph_tokens.json — use refresh_token to get
+       a new access token via OAuth, then update the file.
+    Returns the access token string or None.
+    """
+    import urllib.request, urllib.parse, time as _time
+
+    # ── Strategy 1: auth.ts token (Keychain path) ────────────────────────────
+    bun_paths = ["bun", str(Path.home() / ".local/bin/bun"), str(Path.home() / ".bun/bin/bun")]
+    bun_bin = next(
+        (p for p in bun_paths
+         if subprocess.run([p, "--version"], capture_output=True, timeout=5).returncode == 0),
+        None
+    ) if True else None
+
+    if bun_bin:
+        auth_ts = MSGRAPH_DIR / "auth.ts"
+        env = os.environ.copy()
+        env["NODE_PATH"] = str(Path.home() / ".local/lib/node_modules")
+        try:
+            tr = subprocess.run(
+                [bun_bin, str(auth_ts), "token"],
+                capture_output=True, text=True, timeout=15, env=env
+            )
+            if tr.returncode == 0 and tr.stdout.strip():
+                token = tr.stdout.strip()
+                # Sync token to fallback file so cron (no Keychain) can use it
+                _sync_token_to_file(token)
+                return token
+        except Exception:
+            pass
+
+    # ── Strategy 2: file-based refresh (works from cron / no Keychain) ───────
+    token_file = Path.home() / ".wibey" / "msgraph_tokens.json"
+    if not token_file.exists():
+        return None
+    try:
+        data = json.loads(token_file.read_text())
+        access_token = data.get("access_token") or data.get("accessToken")
+        refresh_token = data.get("refresh_token") or data.get("refreshToken")
+        expires_at = data.get("expires_at", 0)
+
+        # If access token is still valid (>5 min buffer), use it
+        if access_token and _time.time() < float(expires_at) - 300:
+            return access_token
+
+        # Use refresh_token to get a new access token
+        if not refresh_token:
+            return None
+
+        # Microsoft Graph Explorer client (public, same as wibey uses)
+        CLIENT_ID = "14d82eec-204b-4c2f-b7e8-296a70dab67e"
+        body = urllib.parse.urlencode({
+            "client_id": CLIENT_ID,
+            "grant_type": "refresh_token",
+            "refresh_token": refresh_token,
+            "scope": "offline_access User.Read Mail.Read Mail.Send Mail.ReadWrite Calendars.ReadWrite Chat.ReadWrite ChatMessage.Send Team.ReadBasic.All",
+        }).encode()
+        req = urllib.request.Request(
+            "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+            data=body,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            result = json.loads(resp.read().decode())
+
+        new_access = result.get("access_token")
+        new_refresh = result.get("refresh_token", refresh_token)
+        new_expires = _time.time() + int(result.get("expires_in", 3600))
+
+        if new_access:
+            # Update the file with new tokens
+            data.update({
+                "access_token": new_access,
+                "refresh_token": new_refresh,
+                "expires_at": new_expires,
+            })
+            token_file.write_text(json.dumps(data))
+            token_file.chmod(0o600)
+            log(f"Token refreshed via refresh_token (file-based). Expires in {result.get('expires_in', '?')}s")
+            return new_access
+
+    except Exception as e:
+        log(f"File-based token refresh failed: {e}")
+
+    return None
+
+
 def tool_teams_list_channel_messages(args: dict) -> dict:
-    """Get recent messages from a Teams channel."""
-    team_id = args.get("team_id", "")
+    """Get recent messages from a Teams channel.
+
+    Bypasses teams.ts because it appends $orderby=createdDateTime+desc which
+    the Graph /teams/.../channels/.../messages endpoint silently ignores and
+    returns an empty value array. We call the Graph API directly via auth.ts
+    token + curl, sort client-side by createdDateTime desc.
+    """
+    team_id    = args.get("team_id", "")
     channel_id = args.get("channel_id", "")
     if not all([team_id, channel_id]):
         return {"error": "missing_required_fields", "required": ["team_id", "channel_id"]}
-    limit = str(args.get("limit", 20))
-    return run_bun(TEAMS_TS, ["list-channel-messages", team_id, channel_id, limit])
+    limit = int(args.get("limit", 20))
+
+    # ── Get access token (tries Keychain then file-based refresh) ─────────────
+    token = _get_graph_token()
+    if not token:
+        return {"error": "auth_expired", "fix": "Run /msgraph login interactively in Wibey"}
+
+    # ── Call Graph API directly — no $orderby ─────────────────────────────────
+    import urllib.request
+    import urllib.parse
+    encoded_channel = urllib.parse.quote(channel_id, safe="")
+    url = (
+        f"https://graph.microsoft.com/v1.0/teams/{team_id}"
+        f"/channels/{encoded_channel}/messages?$top={limit}"
+    )
+    req = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}"})
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            data = json.loads(resp.read().decode())
+    except Exception as e:
+        return {"error": "graph_request_failed", "detail": str(e)}
+
+    if "error" in data:
+        err = data["error"]
+        if err.get("code") in ("InvalidAuthenticationToken", "Unauthorized"):
+            return {"error": "auth_expired", "fix": "Run /msgraph login interactively in Wibey"}
+        return {"error": err.get("code"), "message": err.get("message")}
+
+    raw_messages = data.get("value", [])
+    # Sort newest-first client-side (API doesn't support $orderby on this endpoint)
+    raw_messages.sort(key=lambda m: m.get("createdDateTime", ""), reverse=True)
+
+    messages = []
+    for m in raw_messages:
+        frm  = m.get("from") or {}
+        user = frm.get("user") or {}
+        body = m.get("body") or {}
+        messages.append({
+            "id":      m.get("id"),
+            "from": {
+                "user": {
+                    "displayName":       user.get("displayName"),
+                    "userPrincipalName": user.get("userPrincipalName"),
+                    "email":             user.get("userPrincipalName"),
+                    "id":                user.get("id"),
+                }
+            },
+            "body": {
+                "content":     body.get("content", ""),
+                "contentType": body.get("contentType", "text"),
+            },
+            "createdDateTime":      m.get("createdDateTime"),
+            "lastModifiedDateTime": m.get("lastModifiedDateTime"),
+            "messageType":          m.get("messageType"),
+        })
+
+    return {
+        "success":     True,
+        "messages":    messages,
+        "total_count": len(messages),
+        "has_more":    bool(data.get("@odata.nextLink")),
+    }
 
 
 def tool_teams_send_channel_message(args: dict) -> dict:

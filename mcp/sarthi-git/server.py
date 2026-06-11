@@ -16,6 +16,8 @@ Tools:
   git_create_branch          — Create a new branch from an existing ref (write)
   git_create_or_update_file  — Create or update a single file via PUT /contents (write)
                                IMPORTANT: pass current file sha when updating an existing file.
+  git_list_issue_comments    — List comments on a GitHub issue (for polling input channels)
+  git_create_issue_comment   — Post a comment on a GitHub issue (for replying in chat threads)
 
 Default hostname: gecgithub01.walmart.com (Walmart GEC GitHub)
 All tools accept an optional `hostname` param to target github.com if needed.
@@ -520,6 +522,84 @@ def tool_git_create_or_update_file(args: dict) -> dict:
         return {"error": "parse_failed", "detail": str(e), "raw": stdout[:300]}
 
 
+def tool_git_list_issue_comments(args: dict) -> dict:
+    """List comments on a GitHub issue. Used for polling sarthi input channels."""
+    org      = args.get("org", "")
+    repo     = args.get("repo", "")
+    issue_number = args.get("issue_number")
+    hostname = args.get("hostname", DEFAULT_HOSTNAME)
+    since    = args.get("since", "")  # ISO 8601 — only return comments after this timestamp
+    per_page = int(args.get("per_page", 100))
+
+    if not all([org, repo, issue_number]):
+        return {"error": "missing_required_fields", "required": ["org", "repo", "issue_number"]}
+
+    endpoint = f"repos/{org}/{repo}/issues/{issue_number}/comments"
+    params = [f"per_page={per_page}"]
+    if since:
+        params.append(f"since={since}")
+    if params:
+        endpoint += "?" + "&".join(params)
+
+    rc, stdout, stderr = _gh(["api", endpoint, "--hostname", hostname], hostname=hostname)
+    if rc != 0:
+        if "401" in stderr or "credentials" in stderr.lower():
+            return {"error": "auth_expired", "detail": f"Run: gh auth login --hostname {hostname}"}
+        return {"error": "git_list_issue_comments_failed", "detail": stderr[:300]}
+    try:
+        comments = json.loads(stdout)
+        return {
+            "ok": True,
+            "issue_number": issue_number,
+            "count": len(comments),
+            "comments": [
+                {
+                    "id":         c["id"],
+                    "user":       c["user"]["login"],
+                    "body":       c["body"],
+                    "created_at": c["created_at"],
+                    "updated_at": c["updated_at"],
+                    "html_url":   c["html_url"],
+                }
+                for c in comments
+            ],
+        }
+    except Exception as e:
+        return {"error": "parse_failed", "detail": str(e), "raw": stdout[:300]}
+
+
+def tool_git_create_issue_comment(args: dict) -> dict:
+    """Post a comment on a GitHub issue. Used by sarthi to reply in chat threads."""
+    org          = args.get("org", "")
+    repo         = args.get("repo", "")
+    issue_number = args.get("issue_number")
+    body         = args.get("body", "")
+    hostname     = args.get("hostname", DEFAULT_HOSTNAME)
+
+    if not all([org, repo, issue_number, body]):
+        return {"error": "missing_required_fields", "required": ["org", "repo", "issue_number", "body"]}
+
+    endpoint = f"repos/{org}/{repo}/issues/{issue_number}/comments"
+    rc, stdout, stderr = _gh(
+        ["api", endpoint, "--hostname", hostname, "--method", "POST", "--raw-field", f"body={body}"],
+        hostname=hostname,
+    )
+    if rc != 0:
+        if "401" in stderr or "credentials" in stderr.lower():
+            return {"error": "auth_expired", "detail": f"Run: gh auth login --hostname {hostname}"}
+        return {"error": "git_create_issue_comment_failed", "detail": stderr[:300]}
+    try:
+        data = json.loads(stdout)
+        return {
+            "ok":         True,
+            "comment_id": data["id"],
+            "html_url":   data["html_url"],
+            "created_at": data["created_at"],
+        }
+    except Exception as e:
+        return {"error": "parse_failed", "detail": str(e), "raw": stdout[:300]}
+
+
 # ── Tool registry ─────────────────────────────────────────────────────────────
 
 TOOLS = {
@@ -669,6 +749,37 @@ TOOLS = {
             "required": ["org", "repo", "path", "content", "message", "branch"],
         },
     },
+    "git_list_issue_comments": {
+        "fn": tool_git_list_issue_comments,
+        "description": "List comments on a GitHub issue. Used to poll sarthi chat input channels (e.g. WITDnA/sarthi#6). Pass `since` (ISO 8601) to only get new comments since last poll.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "org":          {"type": "string",  "description": "GitHub org/owner e.g. WITDnA"},
+                "repo":         {"type": "string",  "description": "Repo name e.g. sarthi"},
+                "issue_number": {"type": "integer", "description": "Issue number e.g. 6"},
+                "since":        {"type": "string",  "description": "ISO 8601 timestamp — only return comments after this (e.g. 2026-06-11T07:00:00Z)"},
+                "per_page":     {"type": "integer", "description": "Max comments to return (default 100)"},
+                "hostname":     {"type": "string",  "description": "GitHub hostname (default: gecgithub01.walmart.com)"},
+            },
+            "required": ["org", "repo", "issue_number"],
+        },
+    },
+    "git_create_issue_comment": {
+        "fn": tool_git_create_issue_comment,
+        "description": "Post a comment on a GitHub issue. Used by sarthi to reply in chat threads (e.g. WITDnA/sarthi#6).",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "org":          {"type": "string",  "description": "GitHub org/owner e.g. WITDnA"},
+                "repo":         {"type": "string",  "description": "Repo name e.g. sarthi"},
+                "issue_number": {"type": "integer", "description": "Issue number e.g. 6"},
+                "body":         {"type": "string",  "description": "Comment text (markdown supported)"},
+                "hostname":     {"type": "string",  "description": "GitHub hostname (default: gecgithub01.walmart.com)"},
+            },
+            "required": ["org", "repo", "issue_number", "body"],
+        },
+    },
 }
 
 
@@ -688,7 +799,7 @@ def handle_request(req: dict) -> dict | None:
         return ok({
             "protocolVersion": "2024-11-05",
             "capabilities": {"tools": {}},
-            "serverInfo": {"name": "sarthi-git", "version": "1.1.0"},
+            "serverInfo": {"name": "sarthi-git", "version": "1.2.0"},
         })
 
     if method == "notifications/initialized":
