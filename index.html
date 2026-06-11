@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>sárthi — Ops on autopilot</title>
+    <meta name="description" content="sárthi is a self-healing AI ops assistant for Walmart engineers. Monitor, diagnose, and resolve incidents across your entire stack in plain English." />
+    <link rel="icon" type="image/png" href="sarthi_full.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #11121a;
+            --surface-2: #161823;
+            --border: rgba(255,255,255,0.08);
+            --border-strong: rgba(255,255,255,0.16);
+            --text: #f5f6fb;
+            --text-muted: #9ca3b5;
+            --text-faint: #6b7180;
+            --coral: #ff6b6b;
+            --coral-soft: #ff8a8a;
+            --brand-2: #ffc220;
+            --accent-2: #818cf8;
+            --success: #34d399;
+            --radius: 16px;
+            --radius-sm: 10px;
+            --max: 1180px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+        a { color: inherit; text-decoration: none; }
+        code, pre { font-family: 'JetBrains Mono', monospace; }
+        .container { max-width: var(--max); margin: 0 auto; padding: 0 32px; }
+
+        /* NAV */
+        .nav {
+            position: sticky; top: 0; z-index: 50;
+            backdrop-filter: blur(18px);
+            background: rgba(10,10,15,0.72);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-inner {
+            max-width: var(--max); margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 32px;
+        }
+        .brand { display: inline-flex; align-items: center; gap: 12px; }
+
+        /* NAV badge — bare logo, no card */
+        .brand-mark {
+            height:46px;
+
+            filter:
+            drop-shadow(
+                0 4px 18px rgba(255,140,0,.28)
+            );
+
+        }
+        .brand:hover .brand-mark {
+            transform: translateY(-1px);
+            filter: drop-shadow(0 6px 16px rgba(255,107,107,0.6));
+        }
+        .brand-mark img {
+            height: 170%;
+            width: auto;
+            display: block;
+        }
+
+        .nav-links { display: flex; align-items: center; gap: 36px; }
+        .nav-links a { font-size: 14px; color: var(--text-muted); font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--text); }
+        .nav-cta {
+            background: linear-gradient(135deg, var(--coral) 0%, var(--coral-soft) 100%);
+            color: #fff !important; padding: 10px 20px; border-radius: 999px;
+            font-weight: 600; font-size: 14px;
+            box-shadow: 0 6px 20px -6px rgba(255,107,107,0.6);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 10px 24px -6px rgba(255,107,107,0.7); }
+        @media (max-width: 720px) { .nav-links a:not(.nav-cta) { display: none; } }
+
+        /* HERO */
+        .hero { position: relative; overflow: hidden; padding: 120px 0 90px; text-align: center; }
+        .hero-mesh {
+            position: absolute; inset: 0; pointer-events: none;
+            background:
+                radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,107,107,0.15) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 30% at 20% 30%, rgba(129,140,248,0.08) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 30% at 80% 20%, rgba(255,194,32,0.06) 0%, transparent 70%);
+            z-index: 0;
+        }
+        .hero-grid {
+            position: absolute; inset: 0; pointer-events: none; opacity: 0.4;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+            background-size: 56px 56px;
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, #000 30%, transparent 75%);
+            -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, #000 30%, transparent 75%);
+        }
+        .hero-halo {
+            position: absolute; top: -120px; left: 50%; transform: translateX(-50%);
+            width: 720px; height: 720px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,107,107,0.22) 0%, transparent 60%);
+            filter: blur(60px); z-index: 0;
+            animation: halo 8s ease-in-out infinite alternate;
+        }
+        @keyframes halo {
+            from { transform: translateX(-50%) scale(1); opacity: 0.8; }
+            to   { transform: translateX(-50%) scale(1.08); opacity: 1; }
+        }
+        .hero-inner { position: relative; z-index: 1; }
+
+        .chip {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 6px 20px; border-radius: 999px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            font-size: 12px; color: var(--text-muted);
+            margin-bottom: 0;
+        }
+        .chip .pulse {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 0 0 rgba(52,211,153,0.7);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%   { box-shadow: 0 0 0 0 rgba(52,211,153,0.7); }
+            70%  { box-shadow: 0 0 0 8px rgba(52,211,153,0); }
+            100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); }
+        }
+
+        /* HERO logo — BIG, centered, tight spacing to chip + tagline */
+        .hero-logo {
+    position: relative;
+    display: block;
+    width: min(720px, 88vw);
+    margin: -5px auto -125px;
+    top: -55px;
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    filter: drop-shadow(0 20px 60px rgba(255, 122, 0, 0.35));
+}
+        .hero-logo:hover { transform: translateY(-3px) scale(1.02); }
+        .hero-logo::before {
+            content: "";
+    position: absolute;
+    inset: -35%;
+    background: radial-gradient(
+        circle,
+        rgba(255, 122, 0, 0.22) 0%,
+        rgba(255, 122, 0, 0.08) 45%,
+        transparent 75%
+    );
+    filter: blur(70px);
+    z-index: -1;
+    pointer-events: none;
+        }
+        .hero-logo img {
+    width: min(720px, 88vw);
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+        .logo-base,
+        .logo-full{
+
+                width:100%;
+                height:auto;
+                display:block;
+
+            }
+
+        .hero-tagline {
+            font-size: clamp(32px, 5.5vw, 64px);
+            font-weight: 800; letter-spacing: -0.04em;
+            margin-top: -70px;
+            transform: translateY(-85px);
+            line-height: 1.05; margin-bottom: 20px;
+        }
+        .hero-tagline .grad {
+            background: linear-gradient(135deg, var(--coral) 0%, #ffa07a 45%, var(--brand-2) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p.lead {
+            font-size: clamp(16px, 1.6vw, 19px);
+            color: var(--text-muted); max-width: 620px; margin: 0 auto 40px;
+            margin-top: -85px;
+        }
+        .actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 14px 26px; border-radius: 999px;
+            font-weight: 600; font-size: 15px; transition: all 0.2s;
+            border: 1px solid transparent; cursor: pointer;
+        }
+        .flashlight-logo{
+
+    position:relative;
+    margin-top: -45px;
+    cursor:none;
+
+}
+
+.logo-reveal{
+
+    position:absolute;
+
+    inset:0;
+
+    --x:-500px;
+    --y:-500px;
+
+    -webkit-mask-image:
+
+        radial-gradient(
+
+            circle 150px at var(--x) var(--y),
+
+            white 0%,
+
+            rgba(255,255,255,.95) 35%,
+
+            rgba(255,255,255,.55) 60%,
+
+            transparent 100%
+
+        );
+
+    mask-image:
+
+        radial-gradient(
+
+            circle 150px at var(--x) var(--y),
+
+            white 0%,
+
+            rgba(255,255,255,.95) 35%,
+
+            rgba(255,255,255,.55) 60%,
+
+            transparent 100%
+
+        );
+
+}
+
+#torch{
+
+    position:fixed;
+
+    width:220px;
+
+    height:220px;
+
+    border-radius:50%;
+
+    pointer-events:none;
+
+    transform:translate(-50%,-50%);
+
+    opacity:0;
+
+    z-index:9999;
+
+    mix-blend-mode:screen;
+
+    background:
+
+        radial-gradient(
+
+            circle,
+
+            rgba(255,250,220,.22),
+
+            rgba(255,160,70,.10),
+
+            transparent 70%
+
+        );
+
+}
+
+.logo-base{
+
+    animation:breathe 5s ease-in-out infinite;
+
+}
+
+@keyframes breathe{
+
+    0%{
+
+        transform:scale(1);
+
+    }
+
+    50%{
+
+        transform:scale(1.015);
+
+    }
+
+    100%{
+
+        transform:scale(1);
+
+    }
+
+}
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--coral) 0%, var(--coral-soft) 100%);
+            color: #fff;
+            box-shadow: 0 10px 28px -8px rgba(255,107,107,0.6);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 36px -8px rgba(255,107,107,0.75); }
+        .btn-ghost { background: transparent; color: var(--text); border-color: var(--border-strong); }
+        .btn-ghost:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.28); }
+
+        /* MARQUEE */
+        .marquee {
+            margin-top: 96px; padding: 24px 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            background: rgba(255,255,255,0.015);
+            overflow: hidden; position: relative;
+        }
+        .marquee::before, .marquee::after {
+            content: ""; position: absolute; top: 0; bottom: 0; width: 120px;
+            z-index: 2; pointer-events: none;
+        }
+        .marquee::before { left: 0; background: linear-gradient(90deg, var(--bg), transparent); }
+        .marquee::after  { right: 0; background: linear-gradient(-90deg, var(--bg), transparent); }
+        .marquee-track {
+            display: flex; gap: 48px; align-items: center;
+            width: max-content; animation: scroll 40s linear infinite;
+        }
+        .marquee-item {
+            font-size: 15px; font-weight: 500;
+            color: var(--text-muted); white-space: nowrap;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .marquee-item::before {
+            content: ""; width: 4px; height: 4px;
+            border-radius: 50%; background: var(--text-faint);
+        }
+        @keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+        /* SECTIONS */
+        section { padding: 120px 0; }
+        .eyebrow {
+            display: inline-block; font-size: 12px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.15em;
+            color: var(--coral); margin-bottom: 16px;
+        }
+        h2 {
+            font-size: clamp(32px, 4.5vw, 56px);
+            font-weight: 800; letter-spacing: -0.03em;
+            line-height: 1.05; margin-bottom: 20px;
+        }
+        .section-lead { font-size: 18px; color: var(--text-muted); max-width: 580px; }
+
+        /* PILLARS */
+        .pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 64px; }
+        @media (max-width: 860px) { .pillars { grid-template-columns: 1fr; } }
+        .pillar {
+            padding: 32px; border: 1px solid var(--border); border-radius: var(--radius);
+            background: linear-gradient(180deg, var(--surface) 0%, transparent 100%);
+            transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+        }
+        .pillar:hover {
+            border-color: rgba(255,107,107,0.35);
+            transform: translateY(-4px);
+            box-shadow: 0 24px 60px -24px rgba(255,107,107,0.3);
+        }
+        .pillar-icon {
+            width: 40px; height: 40px; display: grid; place-items: center;
+            border-radius: 10px;
+            background: rgba(255,107,107,0.1);
+            border: 1px solid rgba(255,107,107,0.25);
+            margin-bottom: 24px; color: var(--coral); font-size: 18px;
+        }
+        .pillar h3 { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 10px; }
+        .pillar p { color: var(--text-muted); font-size: 15px; }
+
+        /* SPLIT */
+        .split { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+        .split.reverse > .split-text { order: 2; }
+        @media (max-width: 920px) {
+            .split { grid-template-columns: 1fr; gap: 48px; }
+            .split.reverse > .split-text { order: 0; }
+        }
+        .split + .split { margin-top: 140px; }
+        .split-text h3 {
+            font-size: clamp(28px, 3.5vw, 40px);
+            font-weight: 800; letter-spacing: -0.03em;
+            line-height: 1.1; margin-bottom: 16px;
+        }
+        .split-text p { color: var(--text-muted); font-size: 17px; margin-bottom: 20px; }
+        .split-text ul { list-style: none; padding: 0; }
+        .split-text li { padding: 8px 0; font-size: 15px; display: flex; align-items: center; gap: 10px; }
+        .split-text li::before { content: "→"; color: var(--coral); font-weight: 700; }
+
+        /* MOCK terminal */
+        .mock {
+            position: relative; border-radius: var(--radius); overflow: hidden;
+            background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface) 100%);
+            border: 1px solid var(--border);
+            box-shadow: 0 30px 80px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.02);
+        }
+        .mock-head {
+            display: flex; align-items: center; gap: 8px;
+            padding: 14px 18px; border-bottom: 1px solid var(--border);
+            background: rgba(255,255,255,0.02);
+        }
+        .mock-dot { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.1); }
+        .mock-dot.r { background: #ff5f57; } .mock-dot.y { background: #febc2e; } .mock-dot.g { background: #28c840; }
+        .mock-title { margin-left: 12px; font-size: 12px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; }
+        .mock-body { padding: 24px; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.8; color: #cbd5e1; }
+        .mock-line .u { color: var(--accent-2); }
+        .mock-line .p { color: var(--success); }
+        .mock-line .k { color: var(--coral); }
+        .mock-line .s { color: var(--brand-2); }
+        .mock-line .m { color: var(--text-muted); }
+        .mock-line .ok { color: var(--success); font-weight: 600; }
+        .mock-line .err { color: #f87171; font-weight: 600; }
+
+        /* STATS */
+        .stats {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px;
+            padding: 56px 48px; border: 1px solid var(--border); border-radius: var(--radius);
+            background:
+                radial-gradient(ellipse at top left, rgba(255,107,107,0.08), transparent 50%),
+                linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+        }
+        @media (max-width: 860px) { .stats { grid-template-columns: repeat(2, 1fr); padding: 40px 24px; } }
+        .stat { text-align: center; }
+        .stat-num {
+            font-size: clamp(36px, 5vw, 56px); font-weight: 900; letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #fff 0%, var(--coral) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; line-height: 1;
+        }
+        .stat-label { margin-top: 12px; font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+
+        /* INSTALL */
+        .install-section { text-align: center; }
+        .install-box {
+            max-width: 720px; margin: 48px auto 0;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); overflow: hidden; text-align: left;
+            box-shadow: 0 30px 80px -20px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,107,107,0.08);
+        }
+        .install-head {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 20px; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border);
+        }
+        .install-tag { font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-faint); }
+        .copy-btn {
+            background: rgba(255,255,255,0.06); color: var(--text);
+            border: 1px solid var(--border-strong); padding: 6px 14px; border-radius: 999px;
+            font-size: 12px; font-family: 'Inter', sans-serif; font-weight: 500;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .copy-btn:hover { background: rgba(255,107,107,0.15); border-color: rgba(255,107,107,0.4); }
+        .copy-btn.copied { background: var(--success); color: var(--bg); border-color: var(--success); }
+        .install-box pre { padding: 22px 20px; color: #e6e8ee; font-size: 14px; line-height: 1.6; overflow-x: auto; white-space: pre; }
+        .install-box pre .p { color: var(--coral); }
+        .install-box pre .c { color: #fff; }
+
+        .install-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 880px; margin: 32px auto 0; }
+        @media (max-width: 720px) { .install-steps { grid-template-columns: 1fr; } }
+        .istep { padding: 20px; border: 1px solid var(--border); border-radius: var(--radius-sm); text-align: left; transition: border-color 0.2s; }
+        .istep:hover { border-color: rgba(255,107,107,0.3); }
+        .istep-num {
+            display: inline-block; width: 24px; height: 24px; border-radius: 6px;
+            background: rgba(255,107,107,0.15); color: var(--coral);
+            font-size: 12px; font-weight: 700; text-align: center; line-height: 24px; margin-bottom: 12px;
+        }
+        .istep h4 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+        .istep p { font-size: 13px; color: var(--text-muted); }
+
+        /* FOOTER */
+        footer { border-top: 1px solid var(--border); padding: 64px 0 32px; background: var(--surface); }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 32px; margin-bottom: 48px; }
+        @media (max-width: 860px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
+        .footer-brand p { color: var(--text-muted); font-size: 14px; max-width: 280px; margin-top: 16px; }
+        .footer-col h5 {
+            font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em;
+            color: var(--text-faint); margin-bottom: 16px; font-weight: 600;
+        }
+        .footer-col a { display: block; padding: 6px 0; font-size: 14px; color: var(--text-muted); transition: color 0.2s; }
+        .footer-col a:hover { color: var(--coral); }
+        .footer-bottom {
+            padding-top: 32px; border-top: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            color: var(--text-faint); font-size: 13px;
+        }
+        @media (max-width: 720px) { .footer-bottom { flex-direction: column; gap: 12px; } }
+
+.hero-logo-wrapper{position:relative;display:flex;justify-content:center;cursor:none}
+.logo-full{width:min(620px,82vw);display:block}
+.logo-mask{position:absolute;inset:0;background:
+linear-gradient(#0a0a0f,#0a0a0f);
+mask:
+radial-gradient(circle 70px at 34% 52%,transparent 98%,#fff 100%),
+radial-gradient(circle 55px at 83% 52%,transparent 98%,#fff 100%);
+-webkit-mask:
+radial-gradient(circle 70px at 34% 52%,transparent 98%,#fff 100%),
+radial-gradient(circle 55px at 83% 52%,transparent 98%,#fff 100%);
+pointer-events:none}
+.hero-logo-wrapper.reveal .logo-mask{
+mask:radial-gradient(circle 170px at var(--x) var(--y),transparent 60%,#fff 100%);
+-webkit-mask:radial-gradient(circle 170px at var(--x) var(--y),transparent 60%,#fff 100%);
+}
+#flashlight{position:fixed;width:180px;height:180px;border-radius:50%;pointer-events:none;
+background:radial-gradient(circle,rgba(255,220,150,.25),rgba(255,150,60,.1),transparent 70%);
+transform:translate(-50%,-50%);mix-blend-mode:screen;z-index:9999;display:none}
+    </style>
+</head>
+<body>
+
+<nav class="nav">
+    <div class="nav-inner">
+        <a href="#" class="brand">
+            <span class="brand-mark"><img src="sarthi_img.png" alt="sárthi" /></span>
+        </a>
+        <div class="nav-links">
+            <a href="#product">Product</a>
+            <a href="#capabilities">Capabilities</a>
+            <a href="#install">Install</a>
+            <a href="https://gecgithub01.walmart.com/WITDnA/sarthi" class="nav-cta">Get sárthi →</a>
+        </div>
+    </div>
+</nav>
+
+<header class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-mesh"></div>
+    <div class="hero-halo"></div>
+    <div class="container hero-inner">
+        <div class="chip"><span class="pulse"></span>v1.0 · live for Walmart engineers</div>
+
+
+        <div class="hero-logo flashlight-logo">
+
+            <img
+                    src="sarthi_ai.png"
+                    class="logo-base"
+                    alt="sárthi"
+            >
+
+            <div class="logo-reveal">
+
+                <img
+                        src="sarthi_full.png"
+                        class="logo-full"
+                        alt="sárthi"
+                >
+
+            </div>
+
+        </div>
+
+        <div id="torch"></div>
+
+        <h1 class="hero-tagline">Work from <span class="grad">Phone.</span></h1>
+
+        <p class="lead">
+            sárthi is a self-healing AI ops assistant that monitors, diagnoses, and resolves incidents across your entire stack — in plain English.
+        </p>
+        <div class="actions">
+            <a href="#install" class="btn btn-primary">Install sárthi →</a>
+            <a href="#product" class="btn btn-ghost">See how it works</a>
+        </div>
+    </div>
+
+    <div class="marquee">
+        <div class="marquee-track">
+            <span class="marquee-item">Kubernetes</span>
+            <span class="marquee-item">Splunk</span>
+            <span class="marquee-item">Grafana</span>
+            <span class="marquee-item">PagerDuty</span>
+            <span class="marquee-item">GitHub</span>
+            <span class="marquee-item">Jenkins</span>
+            <span class="marquee-item">Datadog</span>
+            <span class="marquee-item">Concord</span>
+            <span class="marquee-item">Kubernetes</span>
+            <span class="marquee-item">Splunk</span>
+            <span class="marquee-item">Grafana</span>
+            <span class="marquee-item">PagerDuty</span>
+            <span class="marquee-item">GitHub</span>
+            <span class="marquee-item">Jenkins</span>
+            <span class="marquee-item">Datadog</span>
+            <span class="marquee-item">Concord</span>
+        </div>
+    </div>
+</header>
+
+<section id="product">
+    <div class="container">
+        <span class="eyebrow">Why sárthi</span>
+        <h2>Your incident commander, on call 24/7.</h2>
+        <p class="section-lead">sárthi unifies observability, runbooks, and remediation behind one conversational interface — so engineers spend minutes, not hours, restoring service.</p>
+
+        <div class="pillars">
+            <div class="pillar">
+                <div class="pillar-icon">◆</div>
+                <h3>Conversational ops</h3>
+                <p>Ask in plain English. sárthi queries Splunk, Grafana, and your runbooks — no dashboards to context-switch.</p>
+            </div>
+            <div class="pillar">
+                <div class="pillar-icon">◆</div>
+                <h3>Self-healing actions</h3>
+                <p>From restarting pods to rolling back deploys, sárthi executes guarded remediations with full audit trails.</p>
+            </div>
+            <div class="pillar">
+                <div class="pillar-icon">◆</div>
+                <h3>Built for Walmart</h3>
+                <p>Native to WCNP, Concord, and OneOps. Authenticated with your @ walmart credentials out of the box.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="capabilities" style="padding-top: 60px;">
+    <div class="container">
+        <div class="split">
+            <div class="split-text">
+                <span class="eyebrow">Diagnose</span>
+                <h3>Root cause in seconds, not war rooms.</h3>
+                <p>sárthi correlates logs, metrics, and traces across services to surface the actual cause — not just the symptom.</p>
+                <ul>
+                    <li>Cross-service log correlation</li>
+                    <li>Anomaly detection on key SLIs</li>
+                    <li>Auto-generated incident timelines</li>
+                </ul>
+            </div>
+            <div class="mock">
+                <div class="mock-head">
+                    <span class="mock-dot r"></span>
+                    <span class="mock-dot y"></span>
+                    <span class="mock-dot g"></span>
+                    <span class="mock-title">sárthi — incident #4821</span>
+                </div>
+                <div class="mock-body">
+                    <div class="mock-line"><span class="u">you</span> <span class="m">›</span> why is checkout-svc returning 503s?</div>
+                    <div class="mock-line"><span class="p">sárthi</span> <span class="m">›</span> scanning <span class="k">checkout-svc</span> across <span class="s">3 clusters</span>...</div>
+                    <div class="mock-line"><span class="m">  ↳ found:</span> pod <span class="k">checkout-7d4f</span> OOMKilled <span class="ok">(p99 mem +312%)</span></div>
+                    <div class="mock-line"><span class="m">  ↳ trigger:</span> deploy <span class="s">v2.14.1</span> @ 14:03 UTC</div>
+                    <div class="mock-line"><span class="p">sárthi</span> <span class="m">›</span> <span class="ok">rollback ready</span>. shall I proceed?</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="split reverse">
+            <div class="split-text">
+                <span class="eyebrow">Resolve</span>
+                <h3>Execute fixes with confidence.</h3>
+                <p>Every action sárthi takes is sandboxed, reviewed, and reversible. You stay in control of production.</p>
+                <ul>
+                    <li>Guarded remediation with approval gates</li>
+                    <li>Auto-generated runbook playbacks</li>
+                    <li>One-click rollback for every action</li>
+                </ul>
+            </div>
+            <div class="mock">
+                <div class="mock-head">
+                    <span class="mock-dot r"></span>
+                    <span class="mock-dot y"></span>
+                    <span class="mock-dot g"></span>
+                    <span class="mock-title">sárthi — remediation log</span>
+                </div>
+                <div class="mock-body">
+                    <div class="mock-line"><span class="p">sárthi</span> <span class="m">›</span> rolling back <span class="k">checkout-svc</span> → <span class="s">v2.14.0</span></div>
+                    <div class="mock-line"><span class="m">  ↳ kubectl rollout undo deployment/checkout-svc</span></div>
+                    <div class="mock-line"><span class="m">  ↳ waiting for ready pods...</span> <span class="ok">3/3 ✓</span></div>
+                    <div class="mock-line"><span class="m">  ↳ verifying SLI recovery...</span> <span class="ok">p99 latency normal ✓</span></div>
+                    <div class="mock-line"><span class="p">sárthi</span> <span class="m">›</span> <span class="ok">incident resolved</span> in <span class="k">2m 14s</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section style="padding-top: 0;">
+    <div class="container">
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-num">87%</div>
+                <div class="stat-label">faster MTTR</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">2.4k</div>
+                <div class="stat-label">incidents auto-resolved</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">60s</div>
+                <div class="stat-label">install time</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">24/7</div>
+                <div class="stat-label">always on</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="install" class="install-section">
+    <div class="container">
+        <span class="eyebrow">Get started</span>
+        <h2>Install in under 60 seconds.</h2>
+        <p class="section-lead" style="margin: 0 auto;">One command. No Docker. No YAML. Just your terminal.</p>
+
+        <div class="install-box">
+            <div class="install-head">
+                <span class="install-tag">terminal</span>
+                <button class="copy-btn" onclick="copyCmd(this)">Copy</button>
+            </div>
+            <pre><span class="p">$</span> <span class="c">git clone https://gecgithub01.walmart.com/WITDnA/sarthi.git ~/sarthi \
+    &amp;&amp; bash ~/sarthi/install.sh</span></pre>
+        </div>
+
+        <div class="install-steps">
+            <div class="istep">
+                <span class="istep-num">1</span>
+                <h4>Clone & install</h4>
+                <p>One command sets up sárthi in your home directory with all dependencies.</p>
+            </div>
+            <div class="istep">
+                <span class="istep-num">2</span>
+                <h4>Authenticate</h4>
+                <p>Sign in with your @walmart SSO. No tokens, no API keys to manage.</p>
+            </div>
+            <div class="istep">
+                <span class="istep-num">3</span>
+                <h4>Ask anything</h4>
+                <p>Type <code>sarthi</code> in your terminal. Ask about any service, anywhere.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <a href="#" class="brand">
+                    <span class="brand-mark"><img src="sarthi_img.png" alt="sárthi" /></span>
+                </a>
+                <p>Self-healing AI ops assistant built by WITDnA for Walmart engineers.</p>
+            </div>
+            <div class="footer-col">
+                <h5>Product</h5>
+                <a href="#product">Why sárthi</a>
+                <a href="#capabilities">Capabilities</a>
+                <a href="#install">Install</a>
+            </div>
+            <div class="footer-col">
+                <h5>Resources</h5>
+                <a href="#">Docs</a>
+                <a href="#">Changelog</a>
+                <a href="#">Roadmap</a>
+            </div>
+            <div class="footer-col">
+                <h5>Community</h5>
+                <a href="#">Slack</a>
+                <a href="#">GitHub</a>
+                <a href="#">Support</a>
+            </div>
+            <div class="footer-col">
+                <h5>Team</h5>
+                <a href="#">WITDnA</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>© 2025 Walmart Inc. · built with ♥ by WITDnA</span>
+            <span>v1.0.0</span>
+        </div>
+    </div>
+</footer>
+
+<script>
+    function copyCmd(btn) {
+      const text = 'git clone https://gecgithub01.walmart.com/WITDnA/sarthi.git ~/sarthi && bash ~/sarthi/install.sh';
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied ✓';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+</script>
+
+
+<div id="flashlight"></div>
+<script>
+<!--    const wrap=document.querySelector('.hero-logo-wrapper');-->
+<!--    const light=document.getElementById('flashlight');-->
+<!--    wrap.addEventListener('mouseenter',()=>{wrap.classList.add('reveal');light.style.display='block';});-->
+<!--    wrap.addEventListener('mouseleave',()=>{wrap.classList.remove('reveal');light.style.display='none';});-->
+<!--    wrap.addEventListener('mousemove',e=>{-->
+<!--     const r=wrap.getBoundingClientRect();-->
+<!--     const x=e.clientX-r.left,y=e.clientY-r.top;-->
+<!--     wrap.style.setProperty('&#45;&#45;x',x+'px');-->
+<!--     wrap.style.setProperty('&#45;&#45;y',y+'px');-->
+<!--     light.style.left=e.clientX+'px';light.style.top=e.clientY+'px';-->
+
+<!--    });-->
+
+    const hero=document.querySelector(".flashlight-logo");
+
+const reveal=document.querySelector(".logo-reveal");
+
+const torch=document.getElementById("torch");
+
+hero.addEventListener("mouseenter",()=>{
+
+    torch.style.opacity=1;
+
+});
+
+hero.addEventListener("mouseleave",()=>{
+
+    torch.style.opacity=0;
+
+    reveal.style.setProperty("--x","-500px");
+
+    reveal.style.setProperty("--y","-500px");
+
+});
+
+hero.addEventListener("mousemove",(e)=>{
+
+    const r=hero.getBoundingClientRect();
+
+    const x=e.clientX-r.left;
+
+    const y=e.clientY-r.top;
+
+    reveal.style.setProperty("--x",x+"px");
+
+    reveal.style.setProperty("--y",y+"px");
+
+    torch.style.left=e.clientX+"px";
+
+    torch.style.top=e.clientY+"px";
+
+});
+</script>
+</body>
+</html>
