@@ -3,828 +3,258 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>sárthi — Ops on autopilot</title>
-    <meta name="description" content="sárthi is a self-healing AI ops assistant for Walmart engineers. Monitor, diagnose, and resolve incidents across your entire stack in plain English." />
+    <title>sárthí — Work from Phone</title>
+    <meta name="description" content="sárthí is a Work from Phone enablement framework. Expose your team's ops capability as agentic workflows — triggered from anywhere, resolved autonomously." />
     <link rel="icon" type="image/png" href="sarthi_full.png">
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <style>
         :root {
-            --bg: #0a0a0f;
-            --surface: #11121a;
-            --surface-2: #161823;
-            --border: rgba(255,255,255,0.08);
-            --border-strong: rgba(255,255,255,0.16);
-            --text: #f5f6fb;
-            --text-muted: #9ca3b5;
-            --text-faint: #6b7180;
+            --hero-bg: #0a0a0f;
+            --hero-border: rgba(255,255,255,0.08);
+            --hero-text: #f5f6fb;
+            --hero-muted: #9ca3b5;
+            --bg: #ffffff;
+            --surface: #f8f8fb;
+            --surface-2: #f0f0f6;
+            --border: rgba(0,0,0,0.08);
+            --border-strong: rgba(0,0,0,0.14);
+            --text: #0f0f18;
+            --text-muted: #5a5a7a;
+            --text-faint: #9090b0;
             --coral: #ff6b6b;
             --coral-soft: #ff8a8a;
             --brand-2: #ffc220;
-            --accent-2: #818cf8;
-            --success: #34d399;
+            --accent-2: #6366f1;
+            --success: #10b981;
             --radius: 16px;
             --radius-sm: 10px;
             --max: 1180px;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            overflow-x: hidden;
-        }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
         a { color: inherit; text-decoration: none; }
         code, pre { font-family: 'JetBrains Mono', monospace; }
         .container { max-width: var(--max); margin: 0 auto; padding: 0 32px; }
 
         /* NAV */
-        .nav {
-            position: sticky; top: 0; z-index: 50;
-            backdrop-filter: blur(18px);
-            background: rgba(10,10,15,0.72);
-            border-bottom: 1px solid var(--border);
-        }
-        .nav-inner {
-            max-width: var(--max); margin: 0 auto;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 16px 32px;
-        }
+        .nav { position: sticky; top: 0; z-index: 50; backdrop-filter: blur(18px); background: rgba(10,10,15,0.88); border-bottom: 1px solid var(--hero-border); animation: navDown 0.6s cubic-bezier(0.2,0.8,0.2,1) backwards; }
+        @keyframes navDown { from { transform: translateY(-16px); opacity: 0; } }
+        .nav-inner { max-width: var(--max); margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; }
         .brand { display: inline-flex; align-items: center; gap: 12px; }
-
-        /* NAV badge — bare logo, no card */
-        .brand-mark {
-            display: inline-flex;
-            align-items: center;
-            height: 46px;
-
-            transition: transform 0.2s, filter 0.2s;
-
-            filter:
-            drop-shadow(
-                0 4px 18px rgba(255,140,0,.28)
-            );
-
-        }
-        .brand:hover .brand-mark {
-            transform: translateY(-1px);
-            filter: drop-shadow(0 6px 16px rgba(255,107,107,0.6));
-        }
-        .brand-mark img {
-            height: 170%;
-            width: auto;
-            display: block;
-        }
-
-        .nav-links { display: flex; align-items: center; gap: 36px; position: relative; }
-        .nav-indicator {
-            position: absolute; bottom: -10px; left: 0;
-            height: 2px; width: 0;
-            background: linear-gradient(90deg, var(--coral), var(--brand-2));
-            border-radius: 2px;
-            opacity: 0;
-            transition:
-                transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
-                width 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
-                opacity 0.25s;
-            pointer-events: none;
-        }
-        .nav-links a { font-size: 14px; color: var(--text-muted); font-weight: 500; transition: color 0.2s; }
-        .nav-links a:hover { color: var(--text); }
-        .nav-cta {
-            background: linear-gradient(135deg, var(--coral) 0%, var(--coral-soft) 100%);
-            color: #fff !important; padding: 10px 20px; border-radius: 999px;
-            font-weight: 600; font-size: 14px;
-            box-shadow: 0 6px 20px -6px rgba(255,107,107,0.6);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
+        .brand-mark { display: inline-flex; align-items: center; height: 46px; transition: transform 0.2s, filter 0.2s; filter: drop-shadow(0 4px 18px rgba(255,140,0,.28)); }
+        .brand:hover .brand-mark { transform: translateY(-1px); filter: drop-shadow(0 6px 16px rgba(255,107,107,0.6)); }
+        .brand-mark img { height: 170%; width: auto; display: block; }
+        .nav-links { display: flex; align-items: center; gap: 36px; }
+        .nav-links a { font-size: 14px; color: var(--hero-muted); font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--hero-text); }
+        .nav-cta { background: linear-gradient(135deg, var(--coral) 0%, var(--coral-soft) 100%); color: #fff !important; padding: 10px 20px; border-radius: 999px; font-weight: 600; font-size: 14px; box-shadow: 0 6px 20px -6px rgba(255,107,107,0.6); transition: transform 0.2s, box-shadow 0.2s; }
         .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 10px 24px -6px rgba(255,107,107,0.7); }
         @media (max-width: 720px) { .nav-links a:not(.nav-cta) { display: none; } }
-        .scroll-progress {
-            position: absolute; left: 0; right: 0; bottom: -1px;
-            height: 2px;
-            background: linear-gradient(90deg, var(--coral), var(--brand-2));
-            transform: scaleX(0); transform-origin: 0 50%;
-            pointer-events: none;
-        }
+        .scroll-progress { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: linear-gradient(90deg, var(--coral), var(--brand-2)); transform: scaleX(0); transform-origin: 0 50%; pointer-events: none; }
 
-        /* HERO */
-        .hero {
-            position: relative; overflow: hidden;
-            padding: 24px 0 0; text-align: center;
-            display: flex; flex-direction: column;
-            /* Fill the first screen exactly: nav (~78px) + hero = 100vh */
-            min-height: calc(100vh - 78px);
-            min-height: calc(100svh - 78px);
-        }
-        .hero-mesh {
-            position: absolute; inset: 0; pointer-events: none;
-            background:
-                radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,107,107,0.15) 0%, transparent 70%),
-                radial-gradient(ellipse 40% 30% at 20% 30%, rgba(129,140,248,0.08) 0%, transparent 70%),
-                radial-gradient(ellipse 40% 30% at 80% 20%, rgba(255,194,32,0.06) 0%, transparent 70%);
-            z-index: 0;
-        }
-        .hero-grid, .hero-mesh {
-            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-            will-change: transform;
-        }
-        .hero-grid {
-            position: absolute; inset: 0; pointer-events: none; opacity: 0.4;
-            background-image:
-                linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-            background-size: 56px 56px;
-            mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, #000 30%, transparent 75%);
-            -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, #000 30%, transparent 75%);
-        }
-        .hero-halo {
-            position: absolute; top: -120px; left: 50%; transform: translateX(-50%);
-            width: 720px; height: 720px; border-radius: 50%;
-            background: radial-gradient(circle, rgba(255,107,107,0.22) 0%, transparent 60%);
-            filter: blur(60px); z-index: 0;
-            animation: halo 8s ease-in-out infinite alternate;
-        }
-        @keyframes halo {
-            from { transform: translateX(-50%) scale(1); opacity: 0.8; }
-            to   { transform: translateX(-50%) scale(1.08); opacity: 1; }
-        }
+        /* HERO (dark) */
+        .hero { position: relative; overflow: hidden; padding: 24px 0 0; text-align: center; display: flex; flex-direction: column; min-height: calc(100vh - 78px); min-height: calc(100svh - 78px); background: var(--hero-bg); color: var(--hero-text); }
+        .hero-mesh { position: absolute; inset: 0; pointer-events: none; z-index: 0; background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,107,107,0.15) 0%, transparent 70%), radial-gradient(ellipse 40% 30% at 20% 30%, rgba(99,102,241,0.08) 0%, transparent 70%), radial-gradient(ellipse 40% 30% at 80% 20%, rgba(255,194,32,0.06) 0%, transparent 70%); transition: transform 0.4s cubic-bezier(0.2,0.8,0.2,1); }
+        .hero-grid { position: absolute; inset: 0; pointer-events: none; opacity: 0.4; background-image: linear-gradient(rgba(255,255,255,0.04) 1px,transparent 1px), linear-gradient(90deg,rgba(255,255,255,0.04) 1px,transparent 1px); background-size: 56px 56px; mask-image: radial-gradient(ellipse 80% 60% at 50% 30%,#000 30%,transparent 75%); -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 30%,#000 30%,transparent 75%); transition: transform 0.4s cubic-bezier(0.2,0.8,0.2,1); }
+        .hero-halo { position: absolute; top: -120px; left: 50%; transform: translateX(-50%); width: 720px; height: 720px; border-radius: 50%; background: radial-gradient(circle,rgba(255,107,107,0.22) 0%,transparent 60%); filter: blur(60px); z-index: 0; animation: halo 8s ease-in-out infinite alternate; }
+        @keyframes halo { from{transform:translateX(-50%) scale(1);opacity:.8;} to{transform:translateX(-50%) scale(1.08);opacity:1;} }
         .hero-inner { position: relative; z-index: 1; margin: auto; }
-
-        .chip {
-            display: inline-flex; align-items: center; gap: 5px;
-            padding: 6px 20px; border-radius: 999px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid var(--border);
-            font-size: 12px; color: var(--text-muted);
-            margin-bottom: 0;
-        }
-        .chip .pulse {
-            width: 6px; height: 6px; border-radius: 50%;
-            background: var(--success);
-            box-shadow: 0 0 0 0 rgba(52,211,153,0.7);
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%   { box-shadow: 0 0 0 0 rgba(52,211,153,0.7); }
-            70%  { box-shadow: 0 0 0 8px rgba(52,211,153,0); }
-            100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); }
-        }
-
-        /* HERO logo — BIG, centered, tight spacing to chip + tagline */
-        .hero-logo {
-    position: relative;
-    display: block;
-    width: min(720px, 88vw);
-    /* Pulls scale with the logo (88vw) and cap at desktop values */
-    margin: -5px auto max(-125px, -15.3vw);
-    top: max(-55px, -6.7vw);
-    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-    filter: drop-shadow(0 20px 60px rgba(255, 122, 0, 0.35));
-}
-        .hero-logo:hover { transform: translateY(-3px) scale(1.02); }
-        .hero-logo::before {
-            content: "";
-    position: absolute;
-    inset: -35%;
-    background: radial-gradient(
-        circle,
-        rgba(255, 122, 0, 0.22) 0%,
-        rgba(255, 122, 0, 0.08) 45%,
-        transparent 75%
-    );
-    filter: blur(70px);
-    z-index: -1;
-    pointer-events: none;
-        }
-        .hero-logo img {
-    width: min(720px, 88vw);
-    height: auto;
-    display: block;
-    margin: 0 auto;
-}
-        .logo-base,
-        .logo-full{
-
-                width:100%;
-                height:auto;
-                display:block;
-
-            }
-
-        .hero-tagline {
-            font-size: clamp(32px, 5.5vw, 64px);
-            font-weight: 800; letter-spacing: -0.04em;
-            margin-top: max(-70px, -8.6vw);
-            transform: translateY(max(-85px, -10.4vw));
-            line-height: 1.05; margin-bottom: 20px;
-        }
-        .hero-tagline .grad {
-            background: linear-gradient(135deg, var(--coral) 0%, #ffa07a 45%, var(--brand-2) 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .hero-tagline .w {
-            display: inline-block;
-            opacity: 0;
-            transform: translateY(0.6em);
-            animation: wordUp 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-        }
-        .hero-tagline .w:nth-child(1) { animation-delay: 0.8s; }
-        .hero-tagline .w:nth-child(2) { animation-delay: 0.9s; }
-        .hero-tagline .w:nth-child(3) { animation-delay: 1s; }
-        @keyframes wordUp { to { opacity: 1; transform: none; } }
-
-        /* Gradient shimmer — hue drifts across "Phone." */
-        .hero-tagline .grad {
-            background: linear-gradient(135deg,
-                var(--coral) 0%, #ffa07a 25%, var(--brand-2) 50%, #ffa07a 75%, var(--coral) 100%);
-            background-size: 300% 300%;
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation:
-                wordUp 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards,
-                shimmer 8s ease-in-out infinite;
-        }
-        @keyframes shimmer {
-            0%, 100% { background-position: 0% 50%; }
-            50%      { background-position: 100% 50%; }
-        }
-
-        /* Page-load orchestration */
-        .nav { animation: navDown 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
-        @keyframes navDown { from { transform: translateY(-16px); opacity: 0; } }
-        .chip { animation: chipPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s backwards; }
-        @keyframes chipPop { from { opacity: 0; transform: scale(0.7); } }
-        .hero-logo { animation: logoIn 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.35s backwards; }
-        @keyframes logoIn { from { opacity: 0; transform: scale(0.94) translateY(10px); } }
-        .hero .lead { animation: riseIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 1.1s backwards; }
-        .hero .actions { animation: riseIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 1.2s backwards; }
-        @keyframes riseIn { from { opacity: 0; transform: translateY(16px); } }
-
-        @media (prefers-reduced-motion: reduce) {
-            .hero-tagline .w { animation: none; opacity: 1; transform: none; }
-            .hero-tagline .grad { animation: none; opacity: 1; transform: none; }
-            .nav, .chip, .hero-logo, .hero .lead, .hero .actions { animation: none; }
-        }
-        .hero p.lead {
-            font-size: clamp(16px, 1.6vw, 19px);
-            color: var(--text-muted); max-width: 620px; margin: 0 auto 28px;
-            margin-top: max(-85px, -10.4vw);
-        }
-        .actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-        .btn {
-            display: inline-flex; align-items: center; gap: 8px;
-            padding: 14px 26px; border-radius: 999px;
-            font-weight: 600; font-size: 15px; transition: all 0.2s;
-            border: 1px solid transparent; cursor: pointer;
-        }
-        .flashlight-logo{
-
-    position:relative;
-    margin-top: max(-45px, -5.5vw);
-    cursor:none;
-    touch-action: pan-y;
-
-}
-
-/* Typed custom properties so Chromium invalidates the mask when they change */
-@property --x {
-    syntax: '<length>';
-    inherits: false;
-    initial-value: -500px;
-}
-@property --y {
-    syntax: '<length>';
-    inherits: false;
-    initial-value: -500px;
-}
-
-.logo-reveal{
-
-    position:absolute;
-
-    inset:0;
-
-    transition:opacity .4s ease;
-
-    --x:-500px;
-    --y:-500px;
-
-    /* Static mask image moved via mask-position — repaints reliably,
-       unlike a gradient whose position depends on var() */
-    -webkit-mask-image: radial-gradient(
-        circle closest-side,
-        white 0%,
-        rgba(255,255,255,.95) 35%,
-        rgba(255,255,255,.55) 60%,
-        transparent 100%
-    );
-    mask-image: radial-gradient(
-        circle closest-side,
-        white 0%,
-        rgba(255,255,255,.95) 35%,
-        rgba(255,255,255,.55) 60%,
-        transparent 100%
-    );
-
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-
-    -webkit-mask-size: 300px 300px;
-    mask-size: 300px 300px;
-
-    -webkit-mask-position: calc(var(--x) - 150px) calc(var(--y) - 150px);
-    mask-position: calc(var(--x) - 150px) calc(var(--y) - 150px);
-
-    will-change: mask-position;
-
-}
-
-/* Touch devices: no hover, so auto-sweep the reveal instead */
-@media (hover: none){
-
-    #torch{ display:none; }
-
-    .flashlight-logo{ cursor:auto; }
-
-    .logo-reveal{
-        animation: sweep 7s ease-in-out infinite;
-    }
-
-}
-
-@keyframes sweep{
-
-    0%   { -webkit-mask-position: -20% 50%; mask-position: -20% 50%; }
-    50%  { -webkit-mask-position: 120% 50%; mask-position: 120% 50%; }
-    100% { -webkit-mask-position: -20% 50%; mask-position: -20% 50%; }
-
-}
-
-#torch{
-
-    position:fixed;
-
-    width:220px;
-
-    height:220px;
-
-    border-radius:50%;
-
-    pointer-events:none;
-
-    transform:translate(-50%,-50%);
-
-    opacity:0;
-
-    transition:opacity .35s ease;
-
-    z-index:9999;
-
-    mix-blend-mode:screen;
-
-    background:
-
-        radial-gradient(
-
-            circle,
-
-            rgba(255,250,220,.22),
-
-            rgba(255,160,70,.10),
-
-            transparent 70%
-
-        );
-
-}
-
-.logo-base,
-.logo-full{
-
-    animation:breathe 5s ease-in-out infinite;
-
-}
-
-@keyframes breathe{
-
-    0%{
-
-        transform:scale(1);
-
-    }
-
-    50%{
-
-        transform:scale(1.015);
-
-    }
-
-    100%{
-
-        transform:scale(1);
-
-    }
-
-}
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--coral) 0%, var(--coral-soft) 100%);
-            color: #fff;
-            box-shadow: 0 10px 28px -8px rgba(255,107,107,0.6);
-        }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 36px -8px rgba(255,107,107,0.75); }
-        .btn-ghost { background: transparent; color: var(--text); border-color: var(--border-strong); }
-        .btn-ghost:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.28); }
-
-        /* Hero film teaser */
-        .btn-film {
-            display: inline-flex; align-items: center; gap: 12px;
-            padding: 8px 22px 8px 8px; border-radius: 999px;
-            border: 1px solid var(--border-strong);
-            background: rgba(255,255,255,0.03);
-            font-weight: 600; font-size: 15px; color: var(--text);
-            transition: all 0.2s;
-        }
-        .btn-film:hover {
-            transform: translateY(-2px);
-            border-color: rgba(255,107,107,0.45);
-            background: rgba(255,107,107,0.08);
-            box-shadow: 0 10px 28px -10px rgba(255,107,107,0.4);
-        }
-        .btn-film-thumb {
-            position: relative; width: 38px; height: 38px;
-            border-radius: 50%; overflow: hidden; flex: none;
-            border: 1px solid var(--border-strong);
-        }
-        .btn-film-thumb img {
-            width: 100%; height: 100%; object-fit: cover; display: block;
-            filter: brightness(0.75);
-        }
-        .btn-film-play {
-            position: absolute; inset: 0;
-            display: grid; place-items: center;
-            color: #fff; font-size: 12px;
-            text-shadow: 0 1px 6px rgba(0,0,0,0.8);
-        }
-        .btn-film:hover .btn-film-play { color: var(--coral-soft); }
-        .btn-film small { color: var(--text-faint); font-weight: 500; }
-
-        /* MARQUEE */
-        .marquee {
-            margin-top: 32px; padding: 24px 0;
-            border-top: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
-            background: rgba(255,255,255,0.015);
-            overflow: hidden; position: relative;
-        }
-        .marquee::before, .marquee::after {
-            content: ""; position: absolute; top: 0; bottom: 0; width: 120px;
-            z-index: 2; pointer-events: none;
-        }
-        .marquee::before { left: 0; background: linear-gradient(90deg, var(--bg), transparent); }
-        .marquee::after  { right: 0; background: linear-gradient(-90deg, var(--bg), transparent); }
-        .marquee-track {
-            display: flex; gap: 48px; align-items: center;
-            width: max-content; animation: scroll 40s linear infinite;
-        }
-        .marquee-item {
-            font-size: 15px; font-weight: 500;
-            color: var(--text-muted); white-space: nowrap;
-            display: flex; align-items: center; gap: 8px;
-        }
-        .marquee-item::before {
-            content: ""; width: 4px; height: 4px;
-            border-radius: 50%; background: var(--text-faint);
-        }
-        @keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-        .marquee:hover .marquee-track { animation-play-state: paused; }
-
-        /* SECTIONS */
-        section { padding: 120px 0; }
-        #product, #film, #capabilities, #install { scroll-margin-top: 96px; }
-
-        /* Scroll reveal */
-        .reveal-up {
-            opacity: 0;
-            transform: translateY(28px);
-            transition:
-                opacity 0.7s cubic-bezier(0.2, 0.8, 0.2, 1),
-                transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1),
-                border-color 0.25s, box-shadow 0.25s;
-        }
-        .reveal-up.in { opacity: 1; transform: none; }
-        @media (prefers-reduced-motion: reduce) {
-            .reveal-up { opacity: 1; transform: none; transition: none; }
-        }
-        .eyebrow {
-            display: inline-block; font-size: 12px; font-weight: 600;
-            text-transform: uppercase; letter-spacing: 0.15em;
-            color: var(--coral); margin-bottom: 16px;
-        }
-        .eyebrow::after {
-            content: ""; display: block; height: 2px; margin-top: 6px;
-            background: linear-gradient(90deg, var(--coral), transparent);
-            transform: scaleX(0); transform-origin: 0 50%;
-            transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s;
-        }
-        .eyebrow.drawn::after { transform: scaleX(1); }
-        @media (prefers-reduced-motion: reduce) {
-            .eyebrow::after { transform: scaleX(1); transition: none; }
-        }
-        h2 {
-            font-size: clamp(32px, 4.5vw, 56px);
-            font-weight: 800; letter-spacing: -0.03em;
-            line-height: 1.05; margin-bottom: 20px;
-        }
-        .section-lead { font-size: 18px; color: var(--text-muted); max-width: 580px; }
-
-        /* PILLARS */
-        .pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 64px; }
-        @media (max-width: 860px) { .pillars { grid-template-columns: 1fr; } }
-        .pillar {
-            padding: 32px; border: 1px solid var(--border); border-radius: var(--radius);
-            background: linear-gradient(180deg, var(--surface) 0%, transparent 100%);
-            transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
-        }
-        .pillar:hover {
-            border-color: rgba(255,107,107,0.35);
-            transform: translateY(-4px);
-            box-shadow: 0 24px 60px -24px rgba(255,107,107,0.3);
-        }
-        .pillar-icon {
-            width: 40px; height: 40px; display: grid; place-items: center;
-            border-radius: 10px;
-            background: rgba(255,107,107,0.1);
-            border: 1px solid rgba(255,107,107,0.25);
-            margin-bottom: 24px; color: var(--coral); font-size: 18px;
-        }
-        .pillar h3 { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 10px; }
-        .pillar p { color: var(--text-muted); font-size: 15px; }
-
-        /* Cursor spotlight — light pools inside the card and on its border */
-        .pillar, .istep { position: relative; }
-        .pillar::before, .istep::before {
-            content: ""; position: absolute; inset: 0; border-radius: inherit;
-            background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%),
-                rgba(255,107,107,0.09), transparent 65%);
-            opacity: 0; transition: opacity 0.35s; pointer-events: none;
-        }
-        .pillar:hover::before, .istep:hover::before { opacity: 1; }
-        .pillar::after, .istep::after {
-            content: ""; position: absolute; inset: -1px; border-radius: inherit;
-            padding: 1px;
-            background: radial-gradient(200px circle at var(--mx, 50%) var(--my, 50%),
-                rgba(255,107,107,0.6), transparent 70%);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask-composite: exclude;
-            opacity: 0; transition: opacity 0.35s; pointer-events: none;
-        }
-        .pillar:hover::after, .istep:hover::after { opacity: 1; }
-
-        /* FILM */
-        .film-section { text-align: center; }
-        .film-wrap { position: relative; max-width: 880px; margin: 48px auto 0; }
-        .film-wrap .film-frame { margin: 0; max-width: none; }
-        #ambilight {
-            position: absolute; inset: -10% -8%;
-            border-radius: 50%;
-            filter: blur(70px) saturate(1.4) brightness(1.1);
-            opacity: 0; transition: opacity 1.2s ease;
-            pointer-events: none;
-        }
-        .film-frame {
-            position: relative;
-            max-width: 880px;
-            margin: 48px auto 0;
-            border-radius: var(--radius);
-            overflow: hidden;
-            border: 1px solid var(--border);
-            background: var(--surface);
-            box-shadow: 0 40px 100px -30px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,107,107,0.08);
-            cursor: pointer;
-            transition: border-color 0.25s, box-shadow 0.25s, transform 0.18s ease-out;
-        }
-        .film-frame:hover {
-            border-color: rgba(255,107,107,0.3);
-            box-shadow: 0 40px 100px -30px rgba(0,0,0,0.7), 0 0 60px -20px rgba(255,107,107,0.25);
-        }
-        .film-frame video { display: block; width: 100%; height: auto; }
-        .film-sound {
-            position: absolute; bottom: 16px; right: 16px; z-index: 2;
-            display: inline-flex; align-items: center; gap: 8px;
-            padding: 10px 18px; border-radius: 999px;
-            background: rgba(10,10,15,0.72);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--border-strong);
-            color: var(--text);
-            font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
-            cursor: pointer; pointer-events: none;
-            transition: opacity 0.3s, background 0.2s, border-color 0.2s;
-        }
-        .film-frame:hover .film-sound {
-            background: rgba(255,107,107,0.25);
-            border-color: rgba(255,107,107,0.5);
-        }
-        .film-frame.engaged { cursor: default; }
-        .film-frame.engaged:hover { border-color: var(--border); }
-        .film-frame.engaged .film-sound { opacity: 0; }
-        .film-endcard {
-            position: absolute; inset: 0; z-index: 3;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center; gap: 20px;
-            background: rgba(10,10,15,0.82);
-            backdrop-filter: blur(6px);
-            opacity: 0; pointer-events: none;
-            transition: opacity 0.6s ease;
-        }
-        .film-endcard p {
-            font-size: clamp(20px, 2.4vw, 30px);
-            font-weight: 800; letter-spacing: -0.02em;
-        }
-        .film-frame.finished .film-endcard { opacity: 1; pointer-events: auto; }
-        .film-replay {
-            background: transparent; border: 1px solid var(--border-strong);
-            color: var(--text-muted); padding: 8px 18px; border-radius: 999px;
-            font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
-            cursor: pointer; transition: all 0.2s;
-        }
-        .film-replay:hover {
-            color: var(--text);
-            border-color: rgba(255,107,107,0.5);
-            background: rgba(255,107,107,0.1);
-        }
-
-        /* SPLIT */
-        .split { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
-        .split.reverse > .split-text { order: 2; }
-        @media (max-width: 920px) {
-            .split { grid-template-columns: 1fr; gap: 48px; }
-            .split.reverse > .split-text { order: 0; }
-        }
-        .split + .split { margin-top: 140px; }
-        .split-text h3 {
-            font-size: clamp(28px, 3.5vw, 40px);
-            font-weight: 800; letter-spacing: -0.03em;
-            line-height: 1.1; margin-bottom: 16px;
-        }
-        .split-text p { color: var(--text-muted); font-size: 17px; margin-bottom: 20px; }
-        .split-text ul { list-style: none; padding: 0; }
-        .split-text li { padding: 8px 0; font-size: 15px; display: flex; align-items: center; gap: 10px; }
-        .split-text li::before { content: "→"; color: var(--coral); font-weight: 700; }
-
-        /* MOCK terminal */
-        .mock {
-            position: relative; border-radius: var(--radius); overflow: hidden;
-            background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface) 100%);
-            border: 1px solid var(--border);
-            box-shadow: 0 30px 80px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.02);
-            transition: transform 0.18s ease-out;
-        }
-        .mock-head {
-            display: flex; align-items: center; gap: 8px;
-            padding: 14px 18px; border-bottom: 1px solid var(--border);
-            background: rgba(255,255,255,0.02);
-        }
-        .mock-dot { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.1); }
-        .mock-dot.r { background: #ff5f57; } .mock-dot.y { background: #febc2e; } .mock-dot.g { background: #28c840; }
-        .mock-title { margin-left: 12px; font-size: 12px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; }
-        .mock-body { padding: 24px; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.8; color: #cbd5e1; }
-        .mock-line .u { color: var(--accent-2); }
-        .mock-line .p { color: var(--success); }
-        .mock-line .k { color: var(--coral); }
-        .mock-line .s { color: var(--brand-2); }
-        .mock-line .m { color: var(--text-muted); }
-        .mock-line .ok { color: var(--success); font-weight: 600; }
-        .mock-line .err { color: #f87171; font-weight: 600; }
-        .type-cursor {
-            display: inline-block;
-            width: 7px; height: 14px;
-            margin-left: 3px;
-            vertical-align: -2px;
-            background: var(--coral);
-            animation: blink 0.8s steps(1) infinite;
-        }
-        @keyframes blink { 50% { opacity: 0; } }
-
-        /* STATS */
-        .stats {
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px;
-            padding: 56px 48px; border: 1px solid var(--border); border-radius: var(--radius);
-            background:
-                radial-gradient(ellipse at top left, rgba(255,107,107,0.08), transparent 50%),
-                linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
-        }
-        @media (max-width: 860px) { .stats { grid-template-columns: repeat(2, 1fr); padding: 40px 24px; } }
-        .stat { text-align: center; }
-        .stat-num {
-            font-size: clamp(36px, 5vw, 56px); font-weight: 900; letter-spacing: -0.03em;
-            background: linear-gradient(135deg, #fff 0%, var(--coral) 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text; line-height: 1;
-        }
-        .stat-label { margin-top: 12px; font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
-
-        /* Border beam — gradient streak loops around the stats card */
-        @property --beam {
-            syntax: '<angle>';
-            inherits: false;
-            initial-value: 0deg;
-        }
-        .stats { position: relative; }
-        .stats::after {
-            content: ""; position: absolute; inset: -1px; border-radius: var(--radius);
-            padding: 1px;
-            background: conic-gradient(from var(--beam),
-                transparent 0deg, transparent 320deg,
-                rgba(255,107,107,0.9) 345deg, var(--brand-2) 352deg, transparent 360deg);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask-composite: exclude;
-            animation: beamSpin 7s linear infinite;
-            pointer-events: none;
-        }
-        @keyframes beamSpin { to { --beam: 360deg; } }
-        @media (prefers-reduced-motion: reduce) { .stats::after { display: none; } }
+        .chip { display: inline-flex; align-items: center; gap: 5px; padding: 6px 20px; border-radius: 999px; background: rgba(255,255,255,0.04); border: 1px solid var(--hero-border); font-size: 12px; color: var(--hero-muted); animation: chipPop 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.25s backwards; }
+        @keyframes chipPop { from{opacity:0;transform:scale(0.7);} }
+        .chip .pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(16,185,129,0.7);} 70%{box-shadow:0 0 0 8px rgba(16,185,129,0);} 100%{box-shadow:0 0 0 0 rgba(16,185,129,0);} }
+
+        /* Torch + logo */
+        .flashlight-logo { position:relative; margin-top:max(-45px,-5.5vw); cursor:none; touch-action:pan-y; }
+        .hero-logo { position:relative; display:block; width:min(720px,88vw); margin:-5px auto max(-125px,-15.3vw); top:max(-55px,-6.7vw); transition:transform 0.4s cubic-bezier(0.2,0.8,0.2,1); filter:drop-shadow(0 20px 60px rgba(255,122,0,0.35)); animation:logoIn 0.9s cubic-bezier(0.2,0.8,0.2,1) 0.35s backwards; }
+        @keyframes logoIn { from{opacity:0;transform:scale(0.94) translateY(10px);} }
+        .hero-logo:hover { transform:translateY(-3px) scale(1.02); }
+        .hero-logo::before { content:""; position:absolute; inset:-35%; background:radial-gradient(circle,rgba(255,122,0,0.22) 0%,rgba(255,122,0,0.08) 45%,transparent 75%); filter:blur(70px); z-index:-1; pointer-events:none; }
+        .hero-logo img { width:min(720px,88vw); height:auto; display:block; margin:0 auto; }
+        .logo-base,.logo-full { width:100%; height:auto; display:block; animation:breathe 5s ease-in-out infinite; }
+        @keyframes breathe { 0%,100%{transform:scale(1);} 50%{transform:scale(1.015);} }
+        @property --x { syntax:'<length>'; inherits:false; initial-value:-500px; }
+        @property --y { syntax:'<length>'; inherits:false; initial-value:-500px; }
+        .logo-reveal { position:absolute; inset:0; transition:opacity .4s ease; --x:-500px; --y:-500px; -webkit-mask-image:radial-gradient(circle closest-side,white 0%,rgba(255,255,255,.95) 35%,rgba(255,255,255,.55) 60%,transparent 100%); mask-image:radial-gradient(circle closest-side,white 0%,rgba(255,255,255,.95) 35%,rgba(255,255,255,.55) 60%,transparent 100%); -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; -webkit-mask-size:300px 300px; mask-size:300px 300px; -webkit-mask-position:calc(var(--x) - 150px) calc(var(--y) - 150px); mask-position:calc(var(--x) - 150px) calc(var(--y) - 150px); will-change:mask-position; }
+        @media (hover:none) { #torch{display:none;} .flashlight-logo{cursor:auto;} .logo-reveal{animation:sweep 7s ease-in-out infinite;} }
+        @keyframes sweep { 0%{-webkit-mask-position:-20% 50%;mask-position:-20% 50%;} 50%{-webkit-mask-position:120% 50%;mask-position:120% 50%;} 100%{-webkit-mask-position:-20% 50%;mask-position:-20% 50%;} }
+        #torch { position:fixed; width:220px; height:220px; border-radius:50%; pointer-events:none; transform:translate(-50%,-50%); opacity:0; transition:opacity .35s ease; z-index:9999; mix-blend-mode:screen; background:radial-gradient(circle,rgba(255,250,220,.22),rgba(255,160,70,.10),transparent 70%); }
+
+        /* Hero tagline */
+        .hero-tagline { font-size:clamp(32px,5.5vw,64px); font-weight:800; letter-spacing:-0.04em; margin-top:max(-70px,-8.6vw); transform:translateY(max(-85px,-10.4vw)); line-height:1.05; margin-bottom:20px; color:var(--hero-text); }
+        .hero-tagline .w { display:inline-block; opacity:0; transform:translateY(0.6em); animation:wordUp 0.7s cubic-bezier(0.2,0.8,0.2,1) forwards; }
+        .hero-tagline .w:nth-child(1){animation-delay:0.8s;} .hero-tagline .w:nth-child(2){animation-delay:0.9s;} .hero-tagline .w:nth-child(3){animation-delay:1s;}
+        @keyframes wordUp { to{opacity:1;transform:none;} }
+        .hero-tagline .grad { background:linear-gradient(135deg,var(--coral) 0%,#ffa07a 25%,var(--brand-2) 50%,#ffa07a 75%,var(--coral) 100%); background-size:300% 300%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation:wordUp 0.7s cubic-bezier(0.2,0.8,0.2,1) forwards, shimmer 8s ease-in-out infinite; }
+        @keyframes shimmer { 0%,100%{background-position:0% 50%;} 50%{background-position:100% 50%;} }
+        .hero p.lead { font-size:clamp(16px,1.6vw,19px); color:var(--hero-muted); max-width:620px; margin:0 auto 28px; margin-top:max(-85px,-10.4vw); animation:riseIn 0.7s cubic-bezier(0.2,0.8,0.2,1) 1.1s backwards; }
+        .actions { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; animation:riseIn 0.7s cubic-bezier(0.2,0.8,0.2,1) 1.2s backwards; }
+        @keyframes riseIn { from{opacity:0;transform:translateY(16px);} }
+        .btn { display:inline-flex; align-items:center; gap:8px; padding:14px 26px; border-radius:999px; font-weight:600; font-size:15px; transition:all 0.2s; border:1px solid transparent; cursor:pointer; }
+        .btn-primary { background:linear-gradient(135deg,var(--coral) 0%,var(--coral-soft) 100%); color:#fff; box-shadow:0 10px 28px -8px rgba(255,107,107,0.6); }
+        .btn-primary:hover { transform:translateY(-2px); box-shadow:0 16px 36px -8px rgba(255,107,107,0.75); }
+        .btn-ghost { background:transparent; color:var(--hero-text); border-color:var(--hero-border); }
+        .btn-ghost:hover { background:rgba(255,255,255,0.07); border-color:rgba(255,255,255,0.28); }
+
+        /* WFO/WFH/WFP strip */
+        .wfp-strip { display:flex; justify-content:center; margin:40px auto 0; max-width:760px; border:1px solid var(--hero-border); border-radius:var(--radius); background:rgba(255,255,255,0.03); overflow:hidden; }
+        .wfp-item { flex:1; padding:28px 24px; text-align:center; border-right:1px solid var(--hero-border); }
+        .wfp-item:last-child { border-right:none; }
+        .wfp-era { font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.25); margin-bottom:6px; }
+        .wfp-acronym { font-size:clamp(22px,2.8vw,32px); font-weight:900; letter-spacing:-0.03em; line-height:1; }
+        .wfp-acronym.dim { color:rgba(245,246,251,0.3); }
+        .wfp-acronym.active { background:linear-gradient(135deg,var(--coral) 0%,var(--brand-2) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .wfp-label { font-size:13px; color:var(--hero-muted); margin-top:4px; }
+        .wfp-gen { font-size:11px; color:rgba(255,255,255,0.25); margin-top:2px; }
+        .wfp-gen.highlight { color:var(--brand-2); font-weight:600; }
+        @media (max-width:600px) { .wfp-strip{flex-direction:column;} .wfp-item{border-right:none;border-bottom:1px solid var(--hero-border);} }
+
+        /* Marquee */
+        .marquee { margin-top:40px; padding:24px 0; border-top:1px solid var(--hero-border); background:rgba(255,255,255,0.015); overflow:hidden; position:relative; }
+        .marquee::before,.marquee::after { content:""; position:absolute; top:0; bottom:0; width:120px; z-index:2; pointer-events:none; }
+        .marquee::before { left:0; background:linear-gradient(90deg,var(--hero-bg),transparent); }
+        .marquee::after { right:0; background:linear-gradient(-90deg,var(--hero-bg),transparent); }
+        .marquee-track { display:flex; gap:48px; align-items:center; width:max-content; animation:scroll 40s linear infinite; }
+        .marquee-item { font-size:15px; font-weight:500; color:var(--hero-muted); white-space:nowrap; display:flex; align-items:center; gap:8px; }
+        .marquee-item::before { content:""; width:4px; height:4px; border-radius:50%; background:rgba(255,255,255,0.2); }
+        @keyframes scroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
+        .marquee:hover .marquee-track { animation-play-state:paused; }
+
+        /* MCP SCROLLER */
+        .mcp-scroller { display:flex; align-items:center; gap:24px; padding:20px 32px; background:var(--surface); border-bottom:1px solid var(--border); overflow:hidden; }
+        .mcp-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:var(--coral); white-space:nowrap; flex-shrink:0; }
+        .mcp-track-wrap { flex:1; overflow:hidden; position:relative; }
+        .mcp-track-wrap::before,.mcp-track-wrap::after { content:""; position:absolute; top:0; bottom:0; width:60px; z-index:2; pointer-events:none; }
+        .mcp-track-wrap::before { left:0; background:linear-gradient(90deg,var(--surface),transparent); }
+        .mcp-track-wrap::after { right:0; background:linear-gradient(-90deg,var(--surface),transparent); }
+        .mcp-track { display:flex; gap:8px; width:max-content; animation:scroll 35s linear infinite; }
+        .mcp-scroller:hover .mcp-track { animation-play-state:paused; }
+        .mcp-item { display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:999px; background:var(--bg); border:1px solid var(--border); font-size:12px; font-weight:500; color:var(--text-muted); white-space:nowrap; transition:border-color 0.2s,color 0.2s; }
+        .mcp-item:hover { border-color:rgba(255,107,107,0.3); color:var(--text); }
+        @media (max-width:600px) { .mcp-scroller{padding:14px 16px;} .mcp-label{display:none;} }
+
+        /* WHITE BODY */
+        section { padding:100px 0; }
+        #how,#film,#demo,#install { scroll-margin-top:96px; }
+        .reveal-up { opacity:0; transform:translateY(28px); transition:opacity 0.7s cubic-bezier(0.2,0.8,0.2,1),transform 0.7s cubic-bezier(0.2,0.8,0.2,1); }
+        .reveal-up.in { opacity:1; transform:none; }
+        @media (prefers-reduced-motion:reduce) { .reveal-up{opacity:1;transform:none;transition:none;} .hero-tagline .w,.hero-tagline .grad,.nav,.chip,.hero-logo,.hero .lead,.hero .actions{animation:none;opacity:1;transform:none;} }
+        .eyebrow { display:inline-block; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.15em; color:var(--coral); margin-bottom:16px; }
+        .eyebrow::after { content:""; display:block; height:2px; margin-top:6px; background:linear-gradient(90deg,var(--coral),transparent); transform:scaleX(0); transform-origin:0 50%; transition:transform 0.8s cubic-bezier(0.2,0.8,0.2,1) 0.15s; }
+        .eyebrow.drawn::after { transform:scaleX(1); }
+        h2 { font-size:clamp(32px,4.5vw,52px); font-weight:800; letter-spacing:-0.03em; line-height:1.05; margin-bottom:20px; }
+        .section-lead { font-size:18px; color:var(--text-muted); max-width:580px; }
+
+        /* AD FILM */
+        .ad-section { background:var(--surface); padding:80px 0; text-align:center; }
+        .ad-wrap { max-width:880px; margin:48px auto 0; position:relative; }
+        .ad-frame { border-radius:var(--radius); overflow:hidden; border:1px solid var(--border); background:#000; cursor:pointer; box-shadow:0 30px 80px -20px rgba(0,0,0,0.12),0 0 0 1px rgba(255,107,107,0.06); transition:border-color 0.25s,box-shadow 0.25s; }
+        .ad-frame:hover { border-color:rgba(255,107,107,0.3); }
+        .ad-frame video { display:block; width:100%; height:auto; }
+        .film-sound { position:absolute; bottom:16px; right:16px; z-index:2; display:inline-flex; align-items:center; gap:8px; padding:10px 18px; border-radius:999px; background:rgba(10,10,15,0.72); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.15); color:#fff; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; cursor:pointer; pointer-events:none; transition:opacity 0.3s,background 0.2s; }
+        .ad-frame:hover .film-sound { background:rgba(255,107,107,0.35); border-color:rgba(255,107,107,0.5); }
+        .ad-frame.engaged .film-sound { opacity:0; }
+
+        /* 5 STEPS */
+        .how-section { background:var(--bg); }
+        .step-grid { margin-top:80px; }
+        .step { display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; margin-bottom:100px; }
+        .step:last-child { margin-bottom:0; }
+        .step.flip .step-visual { order:-1; }
+        @media (max-width:860px) { .step{grid-template-columns:1fr;gap:40px;margin-bottom:72px;} .step.flip .step-visual{order:0;} }
+        .step-num { display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,var(--coral),var(--coral-soft)); color:#fff; font-size:15px; font-weight:800; margin-bottom:20px; box-shadow:0 6px 16px -4px rgba(255,107,107,0.4); }
+        .step-text h3 { font-size:clamp(24px,3vw,36px); font-weight:800; letter-spacing:-0.03em; line-height:1.1; margin-bottom:14px; }
+        .step-text p { color:var(--text-muted); font-size:17px; margin-bottom:16px; line-height:1.65; }
+        .step-text ul { list-style:none; padding:0; }
+        .step-text li { padding:7px 0; font-size:15px; display:flex; align-items:flex-start; gap:10px; color:var(--text-muted); }
+        .step-text li::before { content:"→"; color:var(--coral); font-weight:700; flex-shrink:0; margin-top:1px; }
+        .step-badge { display:inline-block; padding:4px 12px; border-radius:999px; font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; background:rgba(255,107,107,0.1); color:var(--coral); border:1px solid rgba(255,107,107,0.2); margin-top:12px; }
+        .step-visual { border-radius:var(--radius); overflow:hidden; background:var(--surface); border:1px solid var(--border); box-shadow:0 20px 60px -16px rgba(0,0,0,0.10); transition:transform 0.18s ease-out,box-shadow 0.25s; }
+        .step-visual:hover { transform:translateY(-4px); box-shadow:0 28px 70px -16px rgba(0,0,0,0.14); }
+        .step-visual-head { display:flex; align-items:center; gap:8px; padding:14px 18px; border-bottom:1px solid var(--border); background:var(--surface-2); }
+        .dot { width:11px; height:11px; border-radius:50%; }
+        .dot.r{background:#ff5f57;} .dot.y{background:#febc2e;} .dot.g{background:#28c840;}
+        .vtitle { margin-left:10px; font-size:12px; color:var(--text-faint); font-family:'JetBrains Mono',monospace; }
+        .step-visual-body { padding:24px; font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.85; color:var(--text-muted); }
+        .vl .vc{color:var(--text);} .vl .vk{color:var(--coral);} .vl .vs{color:var(--accent-2);} .vl .vp{color:var(--success);} .vl .vm{color:var(--text-faint);}
+        .icon-strip { display:flex; flex-wrap:wrap; gap:12px; padding:24px; }
+        .icon-chip { display:inline-flex; align-items:center; gap:8px; padding:8px 16px; border-radius:999px; background:var(--bg); border:1px solid var(--border); font-size:13px; font-weight:500; color:var(--text-muted); transition:border-color 0.2s,background 0.2s; }
+        .icon-chip:hover { border-color:rgba(255,107,107,0.3); background:rgba(255,107,107,0.04); color:var(--text); }
+        .icon-chip .ic { font-size:16px; }
+
+        /* DEMO VIDEO */
+        .demo-section { background:var(--surface); text-align:center; }
+        .demo-wrap { max-width:960px; margin:48px auto 0; position:relative; }
+        .demo-frame { border-radius:var(--radius); overflow:hidden; border:1px solid var(--border); background:#000; cursor:pointer; box-shadow:0 40px 100px -30px rgba(0,0,0,0.12),0 0 0 1px rgba(255,107,107,0.06); transition:border-color 0.25s,box-shadow 0.25s; }
+        .demo-frame video { display:block; width:100%; height:auto; }
+        .demo-overlay { position:absolute; inset:0; z-index:2; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; background:rgba(0,0,0,0.38); backdrop-filter:blur(2px); transition:opacity 0.3s; cursor:pointer; }
+        .demo-play { width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg,var(--coral),var(--coral-soft)); display:grid; place-items:center; color:#fff; font-size:24px; box-shadow:0 16px 40px -8px rgba(255,107,107,0.6); transition:transform 0.2s,box-shadow 0.2s; pointer-events:none; }
+        .demo-overlay:hover .demo-play { transform:scale(1.08); }
+        .demo-overlay p { color:rgba(255,255,255,0.9); font-size:15px; font-weight:600; pointer-events:none; }
+        .demo-frame.playing .demo-overlay { opacity:0; pointer-events:none; }
+
+        /* TESTIMONIALS */
+        .stats-section { background:var(--bg); padding:80px 0; }
+        .testimonials { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:48px; }
+        @media (max-width:860px) { .testimonials{grid-template-columns:1fr;} }
+        .tcard { padding:32px; border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); transition:border-color 0.25s,transform 0.2s,box-shadow 0.25s; }
+        .tcard:hover { border-color:rgba(255,107,107,0.25); transform:translateY(-4px); box-shadow:0 20px 48px -16px rgba(0,0,0,0.10); }
+        .tquote { font-size:16px; color:var(--text-muted); line-height:1.7; margin-bottom:24px; font-style:italic; }
+        .tquote::before { content:'"'; font-size:48px; color:var(--coral); opacity:0.3; line-height:0; vertical-align:-16px; margin-right:4px; }
+        .tauthor { display:flex; align-items:center; gap:14px; }
+        .tavatar { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,var(--coral),var(--brand-2)); display:grid; place-items:center; color:#fff; font-size:13px; font-weight:700; flex-shrink:0; }
+        .tname { font-size:14px; font-weight:700; color:var(--text); }
+        .trole { font-size:12px; color:var(--text-faint); margin-top:2px; }
 
         /* INSTALL */
-        .install-section { text-align: center; }
-        .install-box {
-            max-width: 720px; margin: 48px auto 0;
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: var(--radius); overflow: hidden; text-align: left;
-            box-shadow: 0 30px 80px -20px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,107,107,0.08);
-        }
-        .install-head {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 14px 20px; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border);
-        }
-        .install-tag { font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-faint); }
-        .copy-btn {
-            background: rgba(255,255,255,0.06); color: var(--text);
-            border: 1px solid var(--border-strong); padding: 6px 14px; border-radius: 999px;
-            font-size: 12px; font-family: 'Inter', sans-serif; font-weight: 500;
-            cursor: pointer; transition: all 0.2s;
-        }
-        .copy-btn:hover { background: rgba(255,107,107,0.15); border-color: rgba(255,107,107,0.4); }
-        .copy-btn.copied { background: var(--success); color: var(--bg); border-color: var(--success); }
-        .install-box pre { padding: 22px 20px; color: #e6e8ee; font-size: 14px; line-height: 1.6; overflow-x: auto; white-space: pre; }
-        .install-box pre .p { color: var(--coral); }
-        .install-box pre .c { color: #fff; }
-
-        .install-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 880px; margin: 32px auto 0; }
-        @media (max-width: 720px) { .install-steps { grid-template-columns: 1fr; } }
-        .istep { padding: 20px; border: 1px solid var(--border); border-radius: var(--radius-sm); text-align: left; transition: border-color 0.2s; }
-        .istep:hover { border-color: rgba(255,107,107,0.3); }
-        .istep-num {
-            display: inline-block; width: 24px; height: 24px; border-radius: 6px;
-            background: rgba(255,107,107,0.15); color: var(--coral);
-            font-size: 12px; font-weight: 700; text-align: center; line-height: 24px; margin-bottom: 12px;
-        }
-        .istep h4 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
-        .istep p { font-size: 13px; color: var(--text-muted); }
+        .install-section { background:var(--surface); text-align:center; }
+        .install-box { max-width:720px; margin:48px auto 0; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; text-align:left; box-shadow:0 20px 60px -16px rgba(0,0,0,0.08),0 0 0 1px rgba(255,107,107,0.06); }
+        .install-head { display:flex; align-items:center; justify-content:space-between; padding:14px 20px; background:var(--surface); border-bottom:1px solid var(--border); }
+        .install-tag { font-size:11px; text-transform:uppercase; letter-spacing:0.15em; color:var(--text-faint); }
+        .copy-btn { background:var(--surface-2); color:var(--text); border:1px solid var(--border-strong); padding:6px 14px; border-radius:999px; font-size:12px; font-family:'Inter',sans-serif; font-weight:500; cursor:pointer; transition:all 0.2s; }
+        .copy-btn:hover { background:rgba(255,107,107,0.1); border-color:rgba(255,107,107,0.4); }
+        .copy-btn.copied { background:var(--success); color:#fff; border-color:var(--success); }
+        .install-box pre { padding:22px 20px; color:var(--text); font-size:14px; line-height:1.7; overflow-x:auto; white-space:pre; }
+        .install-box pre .p{color:var(--coral);} .install-box pre .c{color:var(--text);} .install-box pre .m{color:var(--text-faint);}
+        .install-steps { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; max-width:880px; margin:32px auto 0; }
+        @media (max-width:720px) { .install-steps{grid-template-columns:1fr;} }
+        .istep { padding:24px; border:1px solid var(--border); border-radius:var(--radius-sm); text-align:left; background:var(--bg); position:relative; transition:border-color 0.2s,box-shadow 0.2s,transform 0.18s; }
+        .istep:hover { border-color:rgba(255,107,107,0.3); transform:translateY(-2px); box-shadow:0 12px 32px -8px rgba(0,0,0,0.08); }
+        .istep::before { content:""; position:absolute; inset:0; border-radius:inherit; background:radial-gradient(220px circle at var(--mx,50%) var(--my,50%),rgba(255,107,107,0.07),transparent 65%); opacity:0; transition:opacity 0.35s; pointer-events:none; }
+        .istep:hover::before { opacity:1; }
+        .istep-num { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:8px; background:rgba(255,107,107,0.12); color:var(--coral); font-size:12px; font-weight:700; margin-bottom:14px; }
+        .istep h4 { font-size:15px; font-weight:700; margin-bottom:6px; color:var(--text); }
+        .istep p { font-size:13px; color:var(--text-muted); line-height:1.6; }
+        .istep code { font-size:12px; background:var(--surface-2); padding:1px 6px; border-radius:4px; color:var(--coral); }
 
         /* FOOTER */
-        footer { border-top: 1px solid var(--border); padding: 64px 0 32px; background: var(--surface); }
-        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 32px; margin-bottom: 48px; }
-        @media (max-width: 860px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
-        .footer-brand p { color: var(--text-muted); font-size: 14px; max-width: 280px; margin-top: 16px; }
-        .footer-col h5 {
-            font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em;
-            color: var(--text-faint); margin-bottom: 16px; font-weight: 600;
-        }
-        .footer-col a { display: block; padding: 6px 0; font-size: 14px; color: var(--text-muted); transition: color 0.2s; }
-        .footer-col a:hover { color: var(--coral); }
-        .footer-bottom {
-            padding-top: 32px; border-top: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: space-between;
-            color: var(--text-faint); font-size: 13px;
-        }
-        @media (max-width: 720px) { .footer-bottom { flex-direction: column; gap: 12px; } }
-
+        footer { border-top:1px solid var(--border); padding:64px 0 32px; background:var(--surface); }
+        .footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1fr; gap:32px; margin-bottom:48px; }
+        @media (max-width:860px) { .footer-grid{grid-template-columns:1fr 1fr;} }
+        .footer-brand p { color:var(--text-muted); font-size:14px; max-width:280px; margin-top:16px; }
+        .footer-col h5 { font-size:12px; text-transform:uppercase; letter-spacing:0.12em; color:var(--text-faint); margin-bottom:16px; font-weight:600; }
+        .footer-col a { display:block; padding:6px 0; font-size:14px; color:var(--text-muted); transition:color 0.2s; }
+        .footer-col a:hover { color:var(--coral); }
+        .footer-bottom { padding-top:32px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; color:var(--text-faint); font-size:13px; }
+        @media (max-width:720px) { .footer-bottom{flex-direction:column;gap:12px;} }
     </style>
 </head>
 <body>
 
+<div id="torch"></div>
+
 <nav class="nav">
     <div class="nav-inner">
-        <a href="#" class="brand">
-            <span class="brand-mark"><img src="sarthi_full.png" alt="sárthi" /></span>
-        </a>
+        <a href="#" class="brand"><span class="brand-mark"><img src="sarthi_full.png" alt="sárthí" /></span></a>
         <div class="nav-links">
-            <a href="#product">Product</a>
+            <a href="#how">How it works</a>
             <a href="#film">Film</a>
-            <a href="#capabilities">Capabilities</a>
+            <a href="#demo">Demo</a>
             <a href="#install">Install</a>
-            <a href="https://gecgithub01.walmart.com/WITDnA/sarthi" class="nav-cta">Get sárthi →</a>
+            <a href="https://gecgithub01.walmart.com/WITDnA/sarthi" class="nav-cta">Get sárthí →</a>
         </div>
     </div>
     <div class="scroll-progress" id="scrollProgress"></div>
@@ -835,232 +265,354 @@
     <div class="hero-mesh"></div>
     <div class="hero-halo"></div>
     <div class="container hero-inner">
-        <div class="chip"><span class="pulse"></span>v1.0 · live for Walmart engineers</div>
-
+        <div class="chip"><span class="pulse"></span>v1.0 · Work from Phone enablement</div>
 
         <div class="hero-logo flashlight-logo">
-
-            <img
-                    src="sarthi_ai.png"
-                    class="logo-base"
-                    alt="sárthi"
-            >
-
-            <div class="logo-reveal">
-
-                <img
-                        src="sarthi_full.png"
-                        class="logo-full"
-                        alt="sárthi"
-                >
-
-            </div>
-
+            <img src="sarthi_ai.png" class="logo-base" alt="sárthí" />
+            <div class="logo-reveal"><img src="sarthi_full.png" class="logo-full" alt="sárthí" /></div>
         </div>
-
-        <div id="torch"></div>
 
         <h1 class="hero-tagline"><span class="w">Work</span> <span class="w">from</span> <span class="w grad">Phone.</span></h1>
 
-        <p class="lead">
-            sárthi is a self-healing AI ops assistant that monitors, diagnoses, and resolves incidents across your entire stack — in plain English.
-        </p>
+        <p class="lead">sárthí exposes your team's operational capability as agentic workflows — triggered from anywhere, resolved autonomously. Your stack, in your pocket.</p>
+
         <div class="actions">
-            <a href="#install" class="btn btn-primary">Install sárthi →</a>
-            <a href="#product" class="btn btn-ghost">See how it works</a>
-            <a href="#film" class="btn-film">
-                <span class="btn-film-thumb">
-                    <img src="ad_poster.jpg" alt="" />
-                    <span class="btn-film-play">▶</span>
-                </span>
-                Watch the film&nbsp;<small>· 60s</small>
-            </a>
+            <a href="#install" class="btn btn-primary">Get started →</a>
+            <a href="#how" class="btn btn-ghost">How it works</a>
+        </div>
+
+        <div class="wfp-strip">
+            <div class="wfp-item">
+                <div class="wfp-era">2000s</div>
+                <div class="wfp-acronym dim">WFO</div>
+                <div class="wfp-label">Work from Office</div>
+                <div class="wfp-gen">Millennial</div>
+            </div>
+            <div class="wfp-item">
+                <div class="wfp-era">2020s</div>
+                <div class="wfp-acronym dim">WFH</div>
+                <div class="wfp-label">Work from Home</div>
+                <div class="wfp-gen">Gen Z</div>
+            </div>
+            <div class="wfp-item">
+                <div class="wfp-era">Now</div>
+                <div class="wfp-acronym active">WFP</div>
+                <div class="wfp-label">Work from Phone</div>
+                <div class="wfp-gen highlight">Gen Alpha ✦</div>
+            </div>
         </div>
     </div>
 
     <div class="marquee">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:rgba(255,255,255,0.25);text-align:center;padding:0 0 12px;position:relative;z-index:3;">Integrates with your entire stack</div>
         <div class="marquee-track">
-            <span class="marquee-item">Kubernetes</span>
-            <span class="marquee-item">Splunk</span>
-            <span class="marquee-item">Grafana</span>
-            <span class="marquee-item">PagerDuty</span>
-            <span class="marquee-item">GitHub</span>
-            <span class="marquee-item">Jenkins</span>
-            <span class="marquee-item">Datadog</span>
-            <span class="marquee-item">Concord</span>
-            <span class="marquee-item">Kubernetes</span>
-            <span class="marquee-item">Splunk</span>
-            <span class="marquee-item">Grafana</span>
-            <span class="marquee-item">PagerDuty</span>
-            <span class="marquee-item">GitHub</span>
-            <span class="marquee-item">Jenkins</span>
-            <span class="marquee-item">Datadog</span>
-            <span class="marquee-item">Concord</span>
+            <span class="marquee-item">Apache Airflow</span><span class="marquee-item">Kubernetes / WCNP</span><span class="marquee-item">Google BigQuery</span><span class="marquee-item">Trino / Hudi</span><span class="marquee-item">GitHub Enterprise</span><span class="marquee-item">ServiceNow</span><span class="marquee-item">Dataproc / GCS</span><span class="marquee-item">Apache Kafka</span><span class="marquee-item">Concord CI/CD</span><span class="marquee-item">Azure CosmosDB</span><span class="marquee-item">Slack</span><span class="marquee-item">Microsoft Teams</span><span class="marquee-item">Outlook</span><span class="marquee-item">Grafana</span><span class="marquee-item">Splunk</span>
+            <span class="marquee-item">Apache Airflow</span><span class="marquee-item">Kubernetes / WCNP</span><span class="marquee-item">Google BigQuery</span><span class="marquee-item">Trino / Hudi</span><span class="marquee-item">GitHub Enterprise</span><span class="marquee-item">ServiceNow</span><span class="marquee-item">Dataproc / GCS</span><span class="marquee-item">Apache Kafka</span><span class="marquee-item">Concord CI/CD</span><span class="marquee-item">Azure CosmosDB</span><span class="marquee-item">Slack</span><span class="marquee-item">Microsoft Teams</span><span class="marquee-item">Outlook</span><span class="marquee-item">Grafana</span><span class="marquee-item">Splunk</span>
         </div>
     </div>
 </header>
 
-<section id="product">
-    <div class="container">
-        <span class="eyebrow">Why sárthi</span>
-        <h2>Your incident commander, on call 24/7.</h2>
-        <p class="section-lead">sárthi unifies observability, runbooks, and remediation behind one conversational interface — so engineers spend minutes, not hours, restoring service.</p>
-
-        <div class="pillars">
-            <div class="pillar">
-                <div class="pillar-icon">◆</div>
-                <h3>Conversational ops</h3>
-                <p>Ask in plain English. sárthi queries Splunk, Grafana, and your runbooks — no dashboards to context-switch.</p>
-            </div>
-            <div class="pillar">
-                <div class="pillar-icon">◆</div>
-                <h3>Self-healing actions</h3>
-                <p>From restarting pods to rolling back deploys, sárthi executes guarded remediations with full audit trails.</p>
-            </div>
-            <div class="pillar">
-                <div class="pillar-icon">◆</div>
-                <h3>Built for Walmart</h3>
-                <p>Native to WCNP, Concord, and OneOps. Authenticated with your @ walmart credentials out of the box.</p>
-            </div>
+<!-- MCP + SKILLS SCROLLER (white body, right below hero) -->
+<div class="mcp-scroller">
+    <div class="mcp-label">Supports →</div>
+    <div class="mcp-track-wrap">
+        <div class="mcp-track">
+            <span class="mcp-item">🔌 sarthi-airflow-read</span>
+            <span class="mcp-item">⚙️ sarthi-airflow-ops</span>
+            <span class="mcp-item">🔐 sarthi-airflow-auth</span>
+            <span class="mcp-item">☁️ sarthi-gcp</span>
+            <span class="mcp-item">📊 sarthi-bq</span>
+            <span class="mcp-item">🗃️ sarthi-trino</span>
+            <span class="mcp-item">🐙 sarthi-git</span>
+            <span class="mcp-item">❄️ sarthi-snow</span>
+            <span class="mcp-item">💬 sarthi-slack</span>
+            <span class="mcp-item">📧 sarthi-msgraph</span>
+            <span class="mcp-item">☸️ sarthi-wcnp</span>
+            <span class="mcp-item">✨ sar-monitor</span>
+            <span class="mcp-item">✨ sar-investigate</span>
+            <span class="mcp-item">✨ sar-resolve</span>
+            <span class="mcp-item">✨ sar-onboard</span>
+            <span class="mcp-item">✨ sar-health</span>
+            <span class="mcp-item">✨ sar-fix</span>
+            <span class="mcp-item">✨ sar-crq</span>
+            <span class="mcp-item">✨ sar-scaffold</span>
+            <span class="mcp-item">✨ sar-pr</span>
+            <span class="mcp-item">🔌 sarthi-airflow-read</span>
+            <span class="mcp-item">⚙️ sarthi-airflow-ops</span>
+            <span class="mcp-item">🔐 sarthi-airflow-auth</span>
+            <span class="mcp-item">☁️ sarthi-gcp</span>
+            <span class="mcp-item">📊 sarthi-bq</span>
+            <span class="mcp-item">🗃️ sarthi-trino</span>
+            <span class="mcp-item">🐙 sarthi-git</span>
+            <span class="mcp-item">❄️ sarthi-snow</span>
+            <span class="mcp-item">💬 sarthi-slack</span>
+            <span class="mcp-item">📧 sarthi-msgraph</span>
+            <span class="mcp-item">☸️ sarthi-wcnp</span>
+            <span class="mcp-item">✨ sar-monitor</span>
+            <span class="mcp-item">✨ sar-investigate</span>
+            <span class="mcp-item">✨ sar-resolve</span>
+            <span class="mcp-item">✨ sar-onboard</span>
+            <span class="mcp-item">✨ sar-health</span>
+            <span class="mcp-item">✨ sar-fix</span>
+            <span class="mcp-item">✨ sar-crq</span>
+            <span class="mcp-item">✨ sar-scaffold</span>
+            <span class="mcp-item">✨ sar-pr</span>
         </div>
     </div>
-</section>
+    <div class="mcp-label">11+ MCP Servers · 20+ Skills</div>
+</div>
 
-<section id="film" class="film-section" style="padding-top: 0;">
+<!-- AD FILM -->
+<section id="film" class="ad-section">
     <div class="container">
         <span class="eyebrow">The film</span>
-        <h2>sárthi in 60 seconds.</h2>
-        <p class="section-lead" style="margin: 0 auto;">Don't be the on-call dog. Click the film for sound.</p>
-        <div class="film-wrap">
-            <canvas id="ambilight" aria-hidden="true"></canvas>
-            <div class="film-frame" id="filmFrame">
-                <video id="adVideo" src="SARTHI-Ad.mp4" poster="ad_poster.jpg" preload="metadata" muted loop playsinline></video>
-                <button class="film-sound" id="filmSound" tabindex="-1">🔊 Click for sound</button>
-                <div class="film-endcard" id="filmEndcard">
-                    <p>Don't be the on-call dog.</p>
-                    <a href="#install" class="btn btn-primary">Install sárthi →</a>
-                    <button class="film-replay" id="filmReplay">↺ Watch again</button>
-                </div>
+        <h2>sárthí in 60 seconds.</h2>
+        <p class="section-lead" style="margin:0 auto;">Your operations team, reimagined. Click for sound.</p>
+        <div class="ad-wrap">
+            <div class="ad-frame" id="adFrame">
+                <video id="adVideo" src="sarthi-ad.mp4" poster="ad_poster.jpg" preload="metadata" muted loop playsinline></video>
+                <div class="film-sound">🔊 Click for sound</div>
             </div>
         </div>
     </div>
 </section>
 
-<section id="capabilities" style="padding-top: 60px;">
+<!-- 5 STEPS -->
+<section id="how" class="how-section">
     <div class="container">
-        <div class="split">
-            <div class="split-text">
-                <span class="eyebrow">Diagnose</span>
-                <h3>Root cause in seconds, not war rooms.</h3>
-                <p>sárthi correlates logs, metrics, and traces across services to surface the actual cause — not just the symptom.</p>
-                <ul>
-                    <li>Cross-service log correlation</li>
-                    <li>Anomaly detection on key SLIs</li>
-                    <li>Auto-generated incident timelines</li>
-                </ul>
-            </div>
-            <div class="mock">
-                <div class="mock-head">
-                    <span class="mock-dot r"></span>
-                    <span class="mock-dot y"></span>
-                    <span class="mock-dot g"></span>
-                    <span class="mock-title">sárthi — incident #4821</span>
-                </div>
-                <div class="mock-body">
-                    <div class="mock-line"><span class="u">you</span> <span class="m">›</span> why is checkout-svc returning 503s?</div>
-                    <div class="mock-line"><span class="p">sárthi</span> <span class="m">›</span> scanning <span class="k">checkout-svc</span> across <span class="s">3 clusters</span>...</div>
-                    <div class="mock-line"><span class="m">  ↳ found:</span> pod <span class="k">checkout-7d4f</span> OOMKilled <span class="ok">(p99 mem +312%)</span></div>
-                    <div class="mock-line"><span class="m">  ↳ trigger:</span> deploy <span class="s">v2.14.1</span> @ 14:03 UTC</div>
-                    <div class="mock-line"><span class="p">sárthi</span> <span class="m">›</span> <span class="ok">rollback ready</span>. shall I proceed?</div>
-                </div>
-            </div>
-        </div>
+        <span class="eyebrow">How it works</span>
+        <h2>Five steps from zero to<br>ops on your phone.</h2>
+        <p class="section-lead">Any team. Any stack. Up and running in under 10 minutes — even if you don't have an MCP server yet.</p>
 
-        <div class="split reverse">
-            <div class="split-text">
-                <span class="eyebrow">Resolve</span>
-                <h3>Execute fixes with confidence.</h3>
-                <p>Every action sárthi takes is sandboxed, reviewed, and reversible. You stay in control of production.</p>
-                <ul>
-                    <li>Guarded remediation with approval gates</li>
-                    <li>Auto-generated runbook playbacks</li>
-                    <li>One-click rollback for every action</li>
-                </ul>
-            </div>
-            <div class="mock">
-                <div class="mock-head">
-                    <span class="mock-dot r"></span>
-                    <span class="mock-dot y"></span>
-                    <span class="mock-dot g"></span>
-                    <span class="mock-title">sárthi — remediation log</span>
+        <div class="step-grid">
+            <div class="step reveal-up">
+                <div class="step-text">
+                    <div class="step-num">1</div>
+                    <h3>Onboard your system</h3>
+                    <p>Run <code style="background:var(--surface-2);padding:2px 8px;border-radius:6px;font-size:14px;color:var(--coral);">sarthi onboard</code>. A guided intake captures your team, services, environments, and data platforms — then builds a complete system understanding for sárthí.</p>
+                    <ul>
+                        <li>Captures Airflow, BigQuery, Trino, GCS, GitHub, Kafka, ServiceNow and many more</li>
+                        <li>11+ pre-built MCP servers and a growing library of sárthí skills included out of the box</li>
+                        <li>Builds a deep system understanding — no manual configuration files</li>
+                        <li>Can't find your system integration? sárthí scaffolds a local MCP server in under 10 minutes</li>
+                    </ul>
+                    <span class="step-badge">sarthi onboard</span>
                 </div>
-                <div class="mock-body">
-                    <div class="mock-line"><span class="p">sárthi</span> <span class="m">›</span> rolling back <span class="k">checkout-svc</span> → <span class="s">v2.14.0</span></div>
-                    <div class="mock-line"><span class="m">  ↳ kubectl rollout undo deployment/checkout-svc</span></div>
-                    <div class="mock-line"><span class="m">  ↳ waiting for ready pods...</span> <span class="ok">3/3 ✓</span></div>
-                    <div class="mock-line"><span class="m">  ↳ verifying SLI recovery...</span> <span class="ok">p99 latency normal ✓</span></div>
-                    <div class="mock-line"><span class="p">sárthi</span> <span class="m">›</span> <span class="ok">incident resolved</span> in <span class="k">2m 14s</span></div>
+                <div class="step-visual">
+                    <div class="step-visual-head"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="vtitle">sarthi onboard</span></div>
+                    <div class="step-visual-body">
+                        <div class="vl"><span class="vk">$</span> <span class="vc">sarthi onboard</span></div>
+                        <div class="vl"><span class="vm">  Team name:</span> <span class="vs">INTL COIM</span></div>
+                        <div class="vl"><span class="vm">  Airflow URL:</span> <span class="vs">https://airflow.prod…</span></div>
+                        <div class="vl"><span class="vm">  BQ project:</span> <span class="vs">wmt-intl-cons-mc-mx</span></div>
+                        <div class="vl"><span class="vm">  GitHub org:</span> <span class="vs">WITDnA</span></div>
+                        <div class="vl"><span class="vp">  ✓ config.yaml written</span></div>
+                        <div class="vl"><span class="vp">  ✓ System understood</span></div>
+                        <div class="vl"><span class="vp">  ✓ sárthí is live →</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step flip reveal-up">
+                <div class="step-text">
+                    <div class="step-num">2</div>
+                    <h3>Monitoring starts automatically</h3>
+                    <p>sárthí schedules a background agent that polls your stack every minute. Health dashboards, SLA tracking, and DAG run summaries are generated automatically — no manual setup.</p>
+                    <ul>
+                        <li>Recurrent polling — always watching, even when you're away</li>
+                        <li>Proactive health summaries and alerts delivered to your chat</li>
+                        <li>Live session starts the moment someone reaches out — no setup needed</li>
+                    </ul>
+                    <span class="step-badge">Auto-scheduled</span>
+                </div>
+                <div class="step-visual">
+                    <div class="step-visual-head"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="vtitle">launchd · every 60s</span></div>
+                    <div class="step-visual-body">
+                        <div class="vl"><span class="vm"># auto-added by install.sh</span></div>
+                        <div class="vl"><span class="vs">StartInterval</span> <span class="vc">60</span></div>
+                        <div class="vl">&nbsp;</div>
+                        <div class="vl"><span class="vm">[09:15] 108 DAGs healthy ✓</span></div>
+                        <div class="vl"><span class="vm">[09:16] New comment from s0t0ezg</span></div>
+                        <div class="vl"><span class="vp">[09:16] Session launched PID 4821</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step reveal-up">
+                <div class="step-text">
+                    <div class="step-num">3</div>
+                    <h3>Patterns detected, issues solved</h3>
+                    <p>sárthí learns what "normal" looks like for your stack. Recurring failures are resolved without human intervention. Novel patterns are escalated with full diagnostic context.</p>
+                    <ul>
+                        <li>Autonomous task clearing, pipeline re-triggering, service restarts</li>
+                        <li>Simulate fixes safely in a dev environment before applying to production</li>
+                        <li>Pattern library grows with every incident — smarter over time</li>
+                        <li>Unknown patterns escalated with full diagnostic context</li>
+                    </ul>
+                    <span class="step-badge">Self-healing</span>
+                    <span class="step-badge" style="margin-left:8px;background:rgba(99,102,241,0.1);color:var(--accent-2);border-color:rgba(99,102,241,0.2);">Simulation</span>
+                </div>
+                <div class="step-visual">
+                    <div class="step-visual-head"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="vtitle">sárthí · pattern engine</span></div>
+                    <div class="step-visual-body">
+                        <div class="vl"><span class="vk">❌</span> <span class="vc">sim.sensor</span> <span class="vm">failed (3rd time this week)</span></div>
+                        <div class="vl"><span class="vm">  Pattern: ES timeout → known fix</span></div>
+                        <div class="vl"><span class="vp">  → Simulating fix in dev… ✓</span></div>
+                        <div class="vl"><span class="vp">  → Applied to prod. Re-queued ✓</span></div>
+                        <div class="vl">&nbsp;</div>
+                        <div class="vl"><span class="vk">❓</span> <span class="vm">Unknown: cosmos OOM → escalating</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step flip reveal-up">
+                <div class="step-text">
+                    <div class="step-num">4</div>
+                    <h3>Chat-native notifications</h3>
+                    <p>sárthí pushes updates through a GitHub issue thread. Comment to ask, reply to act. Works on any BYOD device on your corporate network — no additional apps or dashboards needed.</p>
+                    <ul>
+                        <li>GitHub issue as the chat channel — zero new tooling</li>
+                        <li>Anyone on the team can ask and act from their phone</li>
+                        <li>Full audit trail of every question, answer, and action</li>
+                    </ul>
+                    <span class="step-badge">Chat from anywhere</span>
+                </div>
+                <div class="step-visual">
+                    <div class="icon-strip">
+                        <span class="icon-chip"><span class="ic">💬</span> Comment to ask</span>
+                        <span class="icon-chip"><span class="ic">⚡</span> Instant ack</span>
+                        <span class="icon-chip"><span class="ic">🤖</span> sArthi replies</span>
+                        <span class="icon-chip"><span class="ic">✅</span> Action confirmed</span>
+                        <span class="icon-chip"><span class="ic">📱</span> Works on phone</span>
+                        <span class="icon-chip"><span class="ic">🔒</span> Full audit trail</span>
+                        <span class="icon-chip"><span class="ic">👥</span> Whole team sees it</span>
+                        <span class="icon-chip"><span class="ic">🌐</span> Any browser</span>
+                    </div>
+                    <div class="step-visual-body" style="padding-top:0;">
+                        <div class="vl"><span class="vm">s0t0ezg:</span> <span class="vc">any failures?</span></div>
+                        <div class="vl"><span class="vk">🤖 sArthi:</span> <span class="vp">✅ No failures — 108 DAGs healthy</span></div>
+                        <div class="vl"><span class="vm">u0h000k:</span> <span class="vc">trigger the simulator dag</span></div>
+                        <div class="vl"><span class="vk">🤖 sArthi:</span> <span class="vm">⚠️ Confirm to trigger?</span></div>
+                        <div class="vl"><span class="vm">u0h000k:</span> <span class="vc">confirm</span></div>
+                        <div class="vl"><span class="vk">🤖 sArthi:</span> <span class="vp">✅ Triggered. Run ID: manual__2026…</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step reveal-up">
+                <div class="step-text">
+                    <div class="step-num">5</div>
+                    <h3>Your team operates from a phone</h3>
+                    <p>Your entire ops capability lives in a GitHub comment thread — accessible from any BYOD device on your corporate network. Check health, trigger runs, read logs, and resolve incidents from anywhere.</p>
+                    <ul>
+                        <li>Operational checks, health analysis, root cause — all conversational</li>
+                        <li>Mutating actions protected by confirm gates</li>
+                        <li>Incident resolved before you open your laptop</li>
+                    </ul>
+                    <span class="step-badge">WFP — Work from Phone</span>
+                </div>
+                <div class="step-visual">
+                    <div class="step-visual-head"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="vtitle">gecgithub01 · WITDnA/sarthi · Issue #6</span></div>
+                    <div class="step-visual-body">
+                        <div class="vl"><span class="vm">📱 On the train, 07:42 —</span></div>
+                        <div class="vl"><span class="vc">akiran: show me any failures</span></div>
+                        <div class="vl"><span class="vp">🤖 sArthi: ❌ 1 failure: sim.sensor</span></div>
+                        <div class="vl"><span class="vc">akiran: clear it</span></div>
+                        <div class="vl"><span class="vm">🤖 sArthi: ⚠️ Confirm to clear?</span></div>
+                        <div class="vl"><span class="vc">akiran: confirm</span></div>
+                        <div class="vl"><span class="vp">🤖 sArthi: ✅ Cleared. ETA 8m</span></div>
+                        <div class="vl"><span class="vm">📱 Incident resolved.</span></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<section style="padding-top: 0;">
+<!-- DEMO VIDEO -->
+<section id="demo" class="demo-section">
     <div class="container">
-        <div class="stats">
-            <div class="stat">
-                <div class="stat-num">87%</div>
-                <div class="stat-label">faster MTTR</div>
-            </div>
-            <div class="stat">
-                <div class="stat-num">2.4k</div>
-                <div class="stat-label">incidents auto-resolved</div>
-            </div>
-            <div class="stat">
-                <div class="stat-num">60s</div>
-                <div class="stat-label">install time</div>
-            </div>
-            <div class="stat">
-                <div class="stat-num">24/7</div>
-                <div class="stat-label">always on</div>
+        <span class="eyebrow">Product demo</span>
+        <h2>See sárthí in action.</h2>
+        <p class="section-lead" style="margin:0 auto;">Real queries. Real data. Real phone. Recorded live on Walmart INTL COIM pipelines.</p>
+        <div class="demo-wrap">
+            <div class="demo-frame" id="demoFrame">
+                <video id="demoVideo" src="sarthi-demo.mp4" poster="ad_sarthi.png" preload="metadata" playsinline></video>
+                <div class="demo-overlay" id="demoOverlay">
+                    <div class="demo-play">▶</div>
+                    <p>Watch the full product demo</p>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
+<!-- TESTIMONIALS -->
+<section class="stats-section">
+    <div class="container">
+        <span class="eyebrow">From the team</span>
+        <h2>Built for people who move fast.</h2>
+        <div class="testimonials">
+            <div class="tcard reveal-up">
+                <div class="tquote">"I triggered a DAG re-run and checked the status — all from my phone on a weekend, before I even had my morning coffee. sárthí handled everything."</div>
+                <div class="tauthor">
+                    <div class="tavatar">AK</div>
+                    <div>
+                        <div class="tname">Achallaravi Kiran</div>
+                        <div class="trole">Data Engineering Lead · WITDnA</div>
+                    </div>
+                </div>
+            </div>
+            <div class="tcard reveal-up">
+                <div class="tquote">"I asked sárthí about a pipeline failure while I was travelling. It identified the root cause, cleared the stuck task, and confirmed the fix — within two minutes."</div>
+                <div class="tauthor">
+                    <div class="tavatar">AS</div>
+                    <div>
+                        <div class="tname">Amrit Singh</div>
+                        <div class="trole">Senior Data Engineer · WITDnA</div>
+                    </div>
+                </div>
+            </div>
+            <div class="tcard reveal-up">
+                <div class="tquote">"The on-call experience is completely different now. sárthí monitors 108 DAGs autonomously and only escalates when it genuinely needs a human decision."</div>
+                <div class="tauthor">
+                    <div class="tavatar">SK</div>
+                    <div>
+                        <div class="tname">Sai Kumar</div>
+                        <div class="trole">Data Engineer · WITDnA</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- INSTALL -->
 <section id="install" class="install-section">
     <div class="container">
         <span class="eyebrow">Get started</span>
-        <h2>Install in under 60 seconds.</h2>
-        <p class="section-lead" style="margin: 0 auto;">One command. No Docker. No YAML. Just your terminal.</p>
+        <h2>Up and running in under 60 seconds.</h2>
+        <p class="section-lead" style="margin:0 auto;">One command. No Docker. No manual YAML.</p>
 
         <div class="install-box">
-            <div class="install-head">
-                <span class="install-tag">terminal</span>
-                <button class="copy-btn" onclick="copyCmd(this)">Copy</button>
-            </div>
+            <div class="install-head"><span class="install-tag">Step 1 — clone &amp; install</span><button class="copy-btn" onclick="copyCmd('install',this)">Copy</button></div>
             <pre><span class="p">$</span> <span class="c">git clone https://gecgithub01.walmart.com/WITDnA/sarthi.git ~/sarthi \
     &amp;&amp; bash ~/sarthi/install.sh</span></pre>
         </div>
 
-        <div class="install-steps">
-            <div class="istep">
-                <span class="istep-num">1</span>
-                <h4>Clone & install</h4>
-                <p>One command sets up sárthi in your home directory with all dependencies.</p>
-            </div>
-            <div class="istep">
-                <span class="istep-num">2</span>
-                <h4>Authenticate</h4>
-                <p>Sign in with your @walmart SSO. No tokens, no API keys to manage.</p>
-            </div>
-            <div class="istep">
-                <span class="istep-num">3</span>
-                <h4>Ask anything</h4>
-                <p>Type <code>sarthi</code> in your terminal. Ask about any service, anywhere.</p>
-            </div>
+        <div class="install-box" style="margin-top:16px;">
+            <div class="install-head"><span class="install-tag">Step 2 — onboard your team</span><button class="copy-btn" onclick="copyCmd('onboard',this)">Copy</button></div>
+            <pre><span class="p">$</span> <span class="c">sarthi onboard</span>
+<span class="m"># Guided setup — captures your stack, writes config, starts monitoring.</span>
+<span class="m"># No MCP server yet? sárthí builds a local stdio one in &lt;10 minutes.</span></pre>
         </div>
+
+        <div class="install-steps">
+            <div class="istep"><span class="istep-num">1</span><h4>Clone &amp; install</h4><p>One command sets up sárthí, all MCP servers, and Wibey CLI integration.</p></div>
+            <div class="istep"><span class="istep-num">2</span><h4>Onboard your stack</h4><p>Run <code>sarthi onboard</code> — guided intake, no YAML editing. Done in 5 min.</p></div>
+            <div class="istep"><span class="istep-num">3</span><h4>Chat from anywhere</h4><p>Comment on your GitHub issue. sárthí replies in &lt;60s from anywhere.</p></div>
+        </div>
+
     </div>
 </section>
 
@@ -1068,448 +620,52 @@
     <div class="container">
         <div class="footer-grid">
             <div class="footer-brand">
-                <a href="#" class="brand">
-                    <span class="brand-mark"><img src="sarthi_full.png" alt="sárthi" /></span>
-                </a>
-                <p>Self-healing AI ops assistant built by WITDnA for Walmart engineers.</p>
+                <p style="font-size:20px;font-weight:800;letter-spacing:-0.02em;color:var(--text);margin-bottom:0;">sárthí</p>
+                <p>Work from Phone enablement — built by WITDnA for Walmart engineers.</p>
             </div>
-            <div class="footer-col">
-                <h5>Product</h5>
-                <a href="#product">Why sárthi</a>
-                <a href="#capabilities">Capabilities</a>
-                <a href="#install">Install</a>
-            </div>
-            <div class="footer-col">
-                <h5>Resources</h5>
-                <a href="#">Docs</a>
-                <a href="#">Changelog</a>
-                <a href="#">Roadmap</a>
-            </div>
-            <div class="footer-col">
-                <h5>Community</h5>
-                <a href="#">Slack</a>
-                <a href="#">GitHub</a>
-                <a href="#">Support</a>
-            </div>
-            <div class="footer-col">
-                <h5>Team</h5>
-                <a href="#">WITDnA</a>
-                <a href="#">Contact</a>
-            </div>
+            <div class="footer-col"><h5>Product</h5><a href="#how">How it works</a><a href="#film">Film</a><a href="#demo">Demo</a><a href="#install">Install</a></div>
+            <div class="footer-col"><h5>Resources</h5><a href="https://gecgithub01.walmart.com/WITDnA/sarthi/blob/main/README.md">Docs</a><a href="https://gecgithub01.walmart.com/WITDnA/sarthi/blob/main/FIRST_RUN.md">First run</a><a href="https://gecgithub01.walmart.com/WITDnA/sarthi">GitHub</a></div>
+            <div class="footer-col"><h5>Community</h5><a href="#">Slack</a><a href="#">Support</a></div>
+            <div class="footer-col"><h5>Team</h5><a href="https://gecgithub01.walmart.com/WITDnA">WITDnA</a><a href="#">Contact</a></div>
         </div>
-        <div class="footer-bottom">
-            <span>© 2025 Walmart Inc. · built with ♥ by WITDnA</span>
-            <span>v1.0.0</span>
-        </div>
+        <div class="footer-bottom"><span>© 2026 Walmart Inc. · built with ♥ by WITDnA</span><span>v1.0.0 · WFP</span></div>
     </div>
 </footer>
 
-<script>
-    function copyCmd(btn) {
-      const text = 'git clone https://gecgithub01.walmart.com/WITDnA/sarthi.git ~/sarthi && bash ~/sarthi/install.sh';
-      navigator.clipboard.writeText(text).then(() => {
-        btn.textContent = 'Copied ✓';
-        btn.classList.add('copied');
-        setTimeout(() => {
-          btn.textContent = 'Copy';
-          btn.classList.remove('copied');
-        }, 2000);
-      });
-    }
-</script>
-
-
 <script src="https://unpkg.com/lenis@1/dist/lenis.min.js"></script>
 <script>
-    const hero = document.querySelector(".flashlight-logo");
-    const reveal = document.querySelector(".logo-reveal");
-    const torch = document.getElementById("torch");
-
-    // Lerp the spotlight toward the pointer each frame — smooth, weighty light
-    let targetX = -500, targetY = -500;
-    let lightX = -500, lightY = -500;
-    let rafId = null;
-
-    function tick() {
-        lightX += (targetX - lightX) * 0.16;
-        lightY += (targetY - lightY) * 0.16;
-        const r = hero.getBoundingClientRect();
-        reveal.style.setProperty("--x", (lightX - r.left) + "px");
-        reveal.style.setProperty("--y", (lightY - r.top) + "px");
-        torch.style.left = lightX + "px";
-        torch.style.top = lightY + "px";
-        if (Math.abs(targetX - lightX) > 0.5 || Math.abs(targetY - lightY) > 0.5) {
-            rafId = requestAnimationFrame(tick);
-        } else {
-            rafId = null;
-        }
-    }
-
-    function moveSpot(clientX, clientY) {
-        targetX = clientX;
-        targetY = clientY;
-        if (rafId === null) rafId = requestAnimationFrame(tick);
-    }
-
-    // Fade out in place — moving the target on exit made the orb drift across the page
-    function hideSpot() {
-        torch.style.opacity = 0;
-        reveal.style.opacity = 0;
-    }
-
-    // Mouse/pen only — on touch devices the CSS sweep animation owns the reveal
-    if (window.matchMedia("(hover: hover)").matches) {
-        hero.addEventListener("pointerenter", (e) => {
-            torch.style.opacity = 1;
-            reveal.style.opacity = 1;
-            // Snap to the entry point so the light doesn't fly in from off-screen
-            lightX = e.clientX;
-            lightY = e.clientY;
-            moveSpot(e.clientX, e.clientY);
-        });
-
-        hero.addEventListener("pointermove", (e) => {
-            moveSpot(e.clientX, e.clientY);
-        });
-
-        hero.addEventListener("pointerleave", hideSpot);
-        hero.addEventListener("pointercancel", hideSpot);
-    }
-
-    // --- Scroll reveal: fade sections up as they enter view ---
-    // Cards inside .pillars / .install-steps stagger 90ms apart
-    function markRevealed(el) {
-        el.classList.add("in");
-        const delay = Number(el.dataset.revealDelay || 0);
-        // Drop reveal classes once done so they don't slow the tilt transition
-        setTimeout(() => {
-            el.classList.remove("reveal-up", "in");
-            el.style.transitionDelay = "";
-        }, 800 + delay);
-    }
-    const revealObserver = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-            if (!entry.isIntersecting) return;
-            revealObserver.unobserve(entry.target);
-            if (entry.target.dataset.staggerChildren) {
-                Array.from(entry.target.children).forEach(markRevealed);
-            } else {
-                markRevealed(entry.target);
-            }
-        });
-    }, { threshold: 0.12 });
-
-    document.querySelectorAll(".split, .stats, .film-frame, .install-box, footer").forEach((el) => {
-        el.classList.add("reveal-up");
-        revealObserver.observe(el);
-    });
-    document.querySelectorAll(".pillars, .install-steps").forEach((box) => {
-        box.dataset.staggerChildren = "1";
-        Array.from(box.children).forEach((child, i) => {
-            child.classList.add("reveal-up");
-            child.style.transitionDelay = (i * 90) + "ms";
-            child.dataset.revealDelay = i * 90;
-        });
-        revealObserver.observe(box);
-    });
-
-    // --- Eyebrow underline draws in per section ---
-    const eyebrowObserver = new IntersectionObserver((entries) => {
-        entries.forEach((e) => {
-            if (e.isIntersecting) {
-                e.target.classList.add("drawn");
-                eyebrowObserver.unobserve(e.target);
-            }
-        });
-    }, { threshold: 0.8 });
-    document.querySelectorAll(".eyebrow").forEach((el) => eyebrowObserver.observe(el));
-
-    // --- Film: ambient muted autoplay in view, click for sound ---
-    const film = document.getElementById("filmFrame");
-    const adVideo = document.getElementById("adVideo");
-    const soundBtn = document.getElementById("filmSound");
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let filmEngaged = false;
-
-    if (reduceMotion) soundBtn.textContent = "▶ Play with sound";
-
-    new IntersectionObserver((entries) => {
-        const entry = entries[entries.length - 1];
-        if (entry.isIntersecting) {
-            if (!filmEngaged && !reduceMotion) adVideo.play().catch(() => {});
-        } else {
-            adVideo.pause();
-        }
-    }, { threshold: 0.35 }).observe(film);
-
-    film.addEventListener("click", () => {
-        if (filmEngaged) return;
-        filmEngaged = true;
-        film.classList.add("engaged");
-        adVideo.muted = false;
-        adVideo.loop = false;
-        adVideo.controls = true;
-        adVideo.currentTime = 0;
-        adVideo.play();
-    });
-
-    // --- End card after a sound-on watch ---
-    adVideo.addEventListener("ended", () => {
-        film.classList.add("finished");
-    });
-    document.getElementById("filmReplay").addEventListener("click", () => {
-        film.classList.remove("finished");
-        adVideo.currentTime = 0;
-        adVideo.play();
-    });
-
-    // --- Stats: count up on first view ---
-    function runCountUp() {
-        document.querySelectorAll(".stat-num").forEach((el) => {
-            const m = el.textContent.match(/^([\d.]+)(.*)$/);
-            if (!m) return;
-            const target = parseFloat(m[1]);
-            const suffix = m[2];
-            const decimals = (m[1].split(".")[1] || "").length;
-            const start = performance.now();
-            const dur = 1400;
-            (function frame(now) {
-                const p = Math.min((now - start) / dur, 1);
-                const eased = 1 - Math.pow(1 - p, 3);
-                el.textContent = (target * eased).toFixed(decimals) + suffix;
-                if (p < 1) requestAnimationFrame(frame);
-            })(start);
-        });
-    }
-    new IntersectionObserver((entries, obs) => {
-        if (entries.some((e) => e.isIntersecting)) {
-            obs.disconnect();
-            if (!reduceMotion) runCountUp();
-        }
-    }, { threshold: 0.4 }).observe(document.querySelector(".stats"));
-
-    // --- 3D tilt: cards lean toward the cursor ---
-    if (window.matchMedia("(hover: hover)").matches && !reduceMotion) {
-        document.querySelectorAll(".mock, .film-frame").forEach((card) => {
-            card.addEventListener("pointermove", (e) => {
-                if (card.classList.contains("engaged")) return;
-                const r = card.getBoundingClientRect();
-                const px = (e.clientX - r.left) / r.width - 0.5;
-                const py = (e.clientY - r.top) / r.height - 0.5;
-                card.style.transform =
-                    "perspective(900px) rotateX(" + (-py * 5).toFixed(2) +
-                    "deg) rotateY(" + (px * 7).toFixed(2) + "deg)";
-            });
-            card.addEventListener("pointerleave", () => {
-                card.style.transform = "";
-            });
-        });
-    }
-
-    // --- Terminal typing: mock lines type out on first view ---
-    function prepareMock(body) {
-        const lines = Array.from(body.querySelectorAll(".mock-line"));
-        const lineData = lines.map((line) => {
-            const walker = document.createTreeWalker(line, NodeFilter.SHOW_TEXT);
-            const nodes = [];
-            let n;
-            while ((n = walker.nextNode())) nodes.push({ node: n, text: n.textContent });
-            return nodes;
-        });
-        // Empty the text but keep line boxes so the card height never jumps
-        lineData.forEach((nodes) => nodes.forEach((d) => { d.node.textContent = ""; }));
-        lines.forEach((l) => { l.style.visibility = "hidden"; });
-
-        return function start() {
-            const cursor = document.createElement("span");
-            cursor.className = "type-cursor";
-            let li = 0;
-            (function typeLine() {
-                if (li >= lines.length) { cursor.remove(); return; }
-                const line = lines[li];
-                const nodes = lineData[li];
-                line.style.visibility = "";
-                line.appendChild(cursor);
-                let ni = 0, ci = 0;
-                (function typeChar() {
-                    if (ni >= nodes.length) { li++; setTimeout(typeLine, 380); return; }
-                    const d = nodes[ni];
-                    ci++;
-                    d.node.textContent = d.text.slice(0, ci);
-                    if (ci >= d.text.length) { ni++; ci = 0; }
-                    setTimeout(typeChar, 12 + Math.random() * 26);
-                })();
-            })();
-        };
-    }
-
-    if (!reduceMotion) {
-        document.querySelectorAll(".mock-body").forEach((body) => {
-            const startTyping = prepareMock(body);
-            new IntersectionObserver((entries, obs) => {
-                if (entries.some((e) => e.isIntersecting)) {
-                    obs.disconnect();
-                    startTyping();
-                }
-            }, { threshold: 0.5 }).observe(body);
-        });
-    }
-
-    // --- Cursor spotlight: cards track the pointer ---
-    if (window.matchMedia("(hover: hover)").matches) {
-        document.querySelectorAll(".pillar, .istep").forEach((card) => {
-            card.addEventListener("pointermove", (e) => {
-                const r = card.getBoundingClientRect();
-                card.style.setProperty("--mx", (e.clientX - r.left) + "px");
-                card.style.setProperty("--my", (e.clientY - r.top) + "px");
-            });
-        });
-    }
-
-    // --- Install command self-types in view ---
-    function prepareTyping(el) {
-        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-        const nodes = [];
-        let n;
-        while ((n = walker.nextNode())) nodes.push({ node: n, text: n.textContent });
-        // Lock height so the box doesn't collapse while empty
-        el.style.minHeight = el.offsetHeight + "px";
-        nodes.forEach((d) => { d.node.textContent = ""; });
-        return function start() {
-            const cursor = document.createElement("span");
-            cursor.className = "type-cursor";
-            el.appendChild(cursor);
-            let ni = 0, ci = 0;
-            (function typeChar() {
-                if (ni >= nodes.length) { setTimeout(() => cursor.remove(), 1500); return; }
-                const d = nodes[ni];
-                ci++;
-                d.node.textContent = d.text.slice(0, ci);
-                if (ci >= d.text.length) { ni++; ci = 0; }
-                setTimeout(typeChar, 10 + Math.random() * 22);
-            })();
-        };
-    }
-    if (!reduceMotion) {
-        const installPre = document.querySelector(".install-box pre");
-        const startInstallTyping = prepareTyping(installPre);
-        new IntersectionObserver((entries, obs) => {
-            if (entries.some((e) => e.isIntersecting)) {
-                obs.disconnect();
-                startInstallTyping();
-            }
-        }, { threshold: 0.6 }).observe(installPre);
-    }
-
-    // --- Scroll progress under nav ---
-    const scrollProgress = document.getElementById("scrollProgress");
-    function updateProgress() {
-        const max = document.documentElement.scrollHeight - window.innerHeight;
-        scrollProgress.style.transform = "scaleX(" + (max > 0 ? window.scrollY / max : 0) + ")";
-    }
-
-    // --- Nav indicator: underline slides to the active section's link ---
-    const navLinksWrap = document.querySelector(".nav-links");
-    const navIndicator = document.createElement("span");
-    navIndicator.className = "nav-indicator";
-    navLinksWrap.appendChild(navIndicator);
-    const sectionLinks = Array.from(navLinksWrap.querySelectorAll('a[href^="#"]'))
-        .filter((a) => a.getAttribute("href").length > 1);
-    const navSections = sectionLinks.map((a) => document.querySelector(a.getAttribute("href")));
-
-    function updateNavIndicator() {
-        const y = window.scrollY + 160;
-        let active = -1;
-        navSections.forEach((sec, i) => { if (sec && sec.offsetTop <= y) active = i; });
-        const link = sectionLinks[active];
-        if (active === -1 || !link || link.offsetWidth === 0) {
-            navIndicator.style.opacity = 0;
-            return;
-        }
-        navIndicator.style.opacity = 1;
-        navIndicator.style.width = link.offsetWidth + "px";
-        navIndicator.style.transform = "translateX(" + link.offsetLeft + "px)";
-    }
-
-    function onScroll() { updateProgress(); updateNavIndicator(); }
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
-    onScroll();
-
-    // --- Hero parallax: backdrop drifts against the pointer ---
-    if (window.matchMedia("(hover: hover)").matches && !reduceMotion) {
-        const heroSection = document.querySelector(".hero");
-        const heroGrid = document.querySelector(".hero-grid");
-        const heroMesh = document.querySelector(".hero-mesh");
-        heroSection.addEventListener("pointermove", (e) => {
-            const r = heroSection.getBoundingClientRect();
-            const dx = (e.clientX - r.left) / r.width - 0.5;
-            const dy = (e.clientY - r.top) / r.height - 0.5;
-            heroGrid.style.transform =
-                "scale(1.04) translate(" + (-dx * 14).toFixed(1) + "px," + (-dy * 10).toFixed(1) + "px)";
-            heroMesh.style.transform =
-                "scale(1.04) translate(" + (-dx * 8).toFixed(1) + "px," + (-dy * 6).toFixed(1) + "px)";
-        });
-        heroSection.addEventListener("pointerleave", () => {
-            heroGrid.style.transform = "";
-            heroMesh.style.transform = "";
-        });
-    }
-
-    // --- Ambilight: the film's own colors glow behind the frame ---
-    const ambi = document.getElementById("ambilight");
-    if (ambi) {
-        const actx = ambi.getContext("2d");
-        ambi.width = 32;
-        ambi.height = 18;
-        let ambiRaf = null;
-        let ambiSkip = 0;
-        function ambiLoop() {
-            if (adVideo.paused || adVideo.ended) { ambiRaf = null; return; }
-            ambiSkip = (ambiSkip + 1) % 3;
-            if (ambiSkip === 0) actx.drawImage(adVideo, 0, 0, ambi.width, ambi.height);
-            ambiRaf = requestAnimationFrame(ambiLoop);
-        }
-        adVideo.addEventListener("play", () => {
-            ambi.style.opacity = 0.6;
-            if (ambiRaf === null) ambiRaf = requestAnimationFrame(ambiLoop);
-        });
-        adVideo.addEventListener("pause", () => { ambi.style.opacity = 0; });
-        adVideo.addEventListener("ended", () => { ambi.style.opacity = 0; });
-    }
-
-    // --- Magnetic CTAs: buttons lean toward the cursor, spring back ---
-    if (window.matchMedia("(hover: hover)").matches && !reduceMotion) {
-        const clamp = (v, lim) => Math.max(-lim, Math.min(lim, v));
-        document.querySelectorAll(".btn-primary, .btn-ghost, .btn-film, .nav-cta").forEach((btn) => {
-            btn.addEventListener("pointermove", (e) => {
-                const r = btn.getBoundingClientRect();
-                const dx = clamp((e.clientX - (r.left + r.width / 2)) * 0.18, 7);
-                const dy = clamp((e.clientY - (r.top + r.height / 2)) * 0.3, 5);
-                btn.style.transform = "translate(" + dx.toFixed(1) + "px," + (dy - 1).toFixed(1) + "px)";
-            });
-            btn.addEventListener("pointerleave", () => { btn.style.transform = ""; });
-        });
-    }
-
-    // --- Lenis smooth scroll (no-op if the CDN is unreachable) ---
-    if (window.Lenis && !reduceMotion && window.matchMedia("(hover: hover)").matches) {
-        document.documentElement.style.scrollBehavior = "auto";
-        const lenis = new Lenis({ duration: 1.15 });
-        requestAnimationFrame(function raf(t) { lenis.raf(t); requestAnimationFrame(raf); });
-        // Route anchors through Lenis so they ease with the same inertia
-        document.querySelectorAll('a[href^="#"]').forEach((a) => {
-            a.addEventListener("click", (e) => {
-                const id = a.getAttribute("href");
-                if (id.length > 1 && document.querySelector(id)) {
-                    e.preventDefault();
-                    history.pushState(null, "", id);
-                    // No extra offset — Lenis already honors scroll-margin-top
-                    lenis.scrollTo(id);
-                }
-            });
-        });
-    }
+const heroEl=document.querySelector(".flashlight-logo"),reveal=document.querySelector(".logo-reveal"),torch=document.getElementById("torch");
+let targetX=-500,targetY=-500,lightX=-500,lightY=-500,rafId=null;
+function tick(){lightX+=(targetX-lightX)*0.16;lightY+=(targetY-lightY)*0.16;const r=heroEl.getBoundingClientRect();reveal.style.setProperty("--x",(lightX-r.left)+"px");reveal.style.setProperty("--y",(lightY-r.top)+"px");torch.style.left=lightX+"px";torch.style.top=lightY+"px";if(Math.abs(targetX-lightX)>0.5||Math.abs(targetY-lightY)>0.5)rafId=requestAnimationFrame(tick);else rafId=null;}
+function moveSpot(cx,cy){targetX=cx;targetY=cy;if(!rafId)rafId=requestAnimationFrame(tick);}
+function hideSpot(){torch.style.opacity=0;reveal.style.opacity=0;}
+if(window.matchMedia("(hover:hover)").matches){heroEl.addEventListener("pointerenter",e=>{torch.style.opacity=1;reveal.style.opacity=1;lightX=e.clientX;lightY=e.clientY;moveSpot(e.clientX,e.clientY);});heroEl.addEventListener("pointermove",e=>moveSpot(e.clientX,e.clientY));heroEl.addEventListener("pointerleave",hideSpot);heroEl.addEventListener("pointercancel",hideSpot);}
+const adFrame=document.getElementById("adFrame"),adVideo=document.getElementById("adVideo");
+let adEngaged=false;
+const reduceMotion=window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+adFrame.addEventListener("click",()=>{if(adEngaged)return;adEngaged=true;adFrame.classList.add("engaged");adVideo.muted=false;adVideo.loop=false;adVideo.controls=true;adVideo.currentTime=0;adVideo.play();});
+const demoFrame=document.getElementById("demoFrame"),demoVideo=document.getElementById("demoVideo"),demoOverlay=document.getElementById("demoOverlay");
+function startDemo(){demoFrame.classList.add("playing");demoVideo.controls=true;demoVideo.play().catch(()=>{});}
+demoOverlay.addEventListener("click",startDemo);
+demoFrame.addEventListener("click",startDemo);
+function markRevealed(el){el.classList.add("in");const d=Number(el.dataset.revealDelay||0);setTimeout(()=>{el.classList.remove("reveal-up","in");el.style.transitionDelay="";},800+d);}
+const revealObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(!e.isIntersecting)return;revealObs.unobserve(e.target);if(e.target.dataset.staggerChildren)Array.from(e.target.children).forEach(markRevealed);else markRevealed(e.target);});},{threshold:0.1});
+document.querySelectorAll(".step,.tcard,.install-box,footer").forEach(el=>{if(!el.classList.contains("reveal-up"))el.classList.add("reveal-up");revealObs.observe(el);});
+document.querySelectorAll(".install-steps").forEach(box=>{box.dataset.staggerChildren="1";Array.from(box.children).forEach((c,i)=>{c.classList.add("reveal-up");c.style.transitionDelay=(i*90)+"ms";c.dataset.revealDelay=i*90;});revealObs.observe(box);});
+const eyeObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add("drawn");eyeObs.unobserve(e.target);}});},{threshold:0.8});
+document.querySelectorAll(".eyebrow").forEach(el=>eyeObs.observe(el));
+if(window.matchMedia("(hover:hover)").matches&&!reduceMotion){document.querySelectorAll(".step-visual,.demo-frame").forEach(card=>{card.addEventListener("pointermove",e=>{if(card.classList.contains("playing"))return;const r=card.getBoundingClientRect(),px=(e.clientX-r.left)/r.width-0.5,py=(e.clientY-r.top)/r.height-0.5;card.style.transform="perspective(900px) rotateX("+(-py*4).toFixed(2)+"deg) rotateY("+(px*6).toFixed(2)+"deg)";});card.addEventListener("pointerleave",()=>{card.style.transform="";});});}
+if(window.matchMedia("(hover:hover)").matches){document.querySelectorAll(".istep").forEach(card=>{card.addEventListener("pointermove",e=>{const r=card.getBoundingClientRect();card.style.setProperty("--mx",(e.clientX-r.left)+"px");card.style.setProperty("--my",(e.clientY-r.top)+"px");});});}
+const CMDS={install:'git clone https://gecgithub01.walmart.com/WITDnA/sarthi.git ~/sarthi && bash ~/sarthi/install.sh',onboard:'sarthi onboard',cron:'* * * * *  python3 ~/sarthi/agents/sarthi/github_listener.py >> /tmp/sarthi-listener.log 2>&1'};
+function copyCmd(key,btn){navigator.clipboard.writeText(CMDS[key]||'').then(()=>{btn.textContent='Copied ✓';btn.classList.add('copied');setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},2000);});}
+const scrollProgress=document.getElementById("scrollProgress");
+function updateProgress(){const max=document.documentElement.scrollHeight-window.innerHeight;scrollProgress.style.transform="scaleX("+(max>0?window.scrollY/max:0)+")";}
+if(window.matchMedia("(hover:hover)").matches&&!reduceMotion){const heroSection=document.querySelector(".hero"),heroGrid=document.querySelector(".hero-grid"),heroMesh=document.querySelector(".hero-mesh");heroSection.addEventListener("pointermove",e=>{const r=heroSection.getBoundingClientRect(),dx=(e.clientX-r.left)/r.width-0.5,dy=(e.clientY-r.top)/r.height-0.5;heroGrid.style.transform="scale(1.04) translate("+(-dx*14).toFixed(1)+"px,"+(-dy*10).toFixed(1)+"px)";heroMesh.style.transform="scale(1.04) translate("+(-dx*8).toFixed(1)+"px,"+(-dy*6).toFixed(1)+"px)";});heroSection.addEventListener("pointerleave",()=>{heroGrid.style.transform="";heroMesh.style.transform="";});}
+if(window.matchMedia("(hover:hover)").matches&&!reduceMotion){const clamp=(v,lim)=>Math.max(-lim,Math.min(lim,v));document.querySelectorAll(".btn-primary,.btn-ghost,.nav-cta").forEach(btn=>{btn.addEventListener("pointermove",e=>{const r=btn.getBoundingClientRect(),dx=clamp((e.clientX-(r.left+r.width/2))*0.18,7),dy=clamp((e.clientY-(r.top+r.height/2))*0.3,5);btn.style.transform="translate("+dx.toFixed(1)+"px,"+(dy-1).toFixed(1)+"px)";});btn.addEventListener("pointerleave",()=>{btn.style.transform="";});});}
+if(window.Lenis&&!reduceMotion&&window.matchMedia("(hover:hover)").matches){document.documentElement.style.scrollBehavior="auto";const lenis=new Lenis({duration:1.15});requestAnimationFrame(function raf(t){lenis.raf(t);requestAnimationFrame(raf);});document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener("click",e=>{const id=a.getAttribute("href");if(id.length>1&&document.querySelector(id)){e.preventDefault();history.pushState(null,"",id);lenis.scrollTo(id);}});});}
+window.addEventListener("scroll",updateProgress,{passive:true});
+window.addEventListener("resize",updateProgress,{passive:true});
+updateProgress();
 </script>
 </body>
 </html>
