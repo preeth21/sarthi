@@ -1,3 +1,4 @@
 *.mp4 filter=lfs diff=lfs merge=lfs -text
+sarthi-ad.mp4 filter=lfs diff=lfs merge=lfs -text
 *.mp4 !text !filter !merge !diff
 *.mov !text !filter !merge !diff
